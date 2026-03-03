@@ -2,6 +2,11 @@ import express, { NextFunction, Request, Response, Application } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
+import paymentRoutes from "./routes/payment.routes";
+import serviceRequestRoutes from "./routes/serviceRequest.routes";
+import platformConfigRoutes from "./routes/platformConfig.routes";
+import promotionRoutes from "./routes/promotion.routes";
+// import "./jobs/autoSettlement.job";
 
 const app: Application = express();
 
@@ -22,7 +27,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Xử lý lỗi parse JSON (ví dụ: Body đặt JSON nhưng nội dung rỗng/không hợp lệ)
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof SyntaxError && 'body' in err) {
     return res.status(400).json({ message: 'JSON không hợp lệ', error: err.message });
@@ -31,6 +35,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/payments", paymentRoutes);
+app.use("/service-requests", serviceRequestRoutes);
+app.use("/platform-config", platformConfigRoutes);
+app.use("/promotions", promotionRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
