@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export type RequestStatus =
   | "PENDING"
   | "ACCEPTED"
+  | "REJECTED"
   | "IN_PROGRESS"
   | "COMPLETED"
   | "CANCELLED";
@@ -63,6 +64,7 @@ const serviceRequestSchema = new Schema<IServiceRequest>(
       enum: [
         "PENDING",
         "ACCEPTED",
+        "REJECTED",
         "IN_PROGRESS",
         "COMPLETED",
         "CANCELLED",
