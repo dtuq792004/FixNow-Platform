@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response, Application } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
-
+import feedbackRoutes from "./routes/feedback.routes";
 const app: Application = express();
 
 const allowedOrigins = [
@@ -31,6 +31,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/feedback", feedbackRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
