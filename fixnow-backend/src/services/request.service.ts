@@ -1,10 +1,10 @@
-import ServiceRequest, { IServiceRequest, RequestStatus } from "../models/serviceRequest.model";
+import ServiceRequest, { IRequest, RequestStatus } from "../models/request.model";
 import mongoose from "mongoose";
 //Customer
 export const getRequestByCustomer = async (
     customerId: string, 
     status?: RequestStatus
-): Promise<IServiceRequest[]> => {
+): Promise<IRequest[]> => {
     const filter: any = { customerId: new mongoose.Types.ObjectId(customerId) };
     if (status) {
         filter.status = status;
@@ -18,7 +18,7 @@ export const getRequestByCustomer = async (
 export const getRequestByDetail = async (
     requestId: string,
     customerId: string
-): Promise<IServiceRequest> => {
+): Promise<IRequest> => {
     const request = await ServiceRequest.findById(requestId)
         if (!request) {
             throw new Error("Service request not found");
@@ -32,7 +32,7 @@ export const getRequestByDetail = async (
 export const cancelServiceRequest = async (
     requestId: string,
     customerId: string
-): Promise<IServiceRequest> => {
+): Promise<IRequest> => {
     const request = await ServiceRequest.findById(requestId);
     if (!request) {
         throw new Error("Service request not found");
@@ -56,7 +56,7 @@ export const cancelServiceRequest = async (
 export const getRequestForProvider = async (
     providerId: string,
     status?: RequestStatus
-): Promise<IServiceRequest[]> => {
+): Promise<IRequest[]> => {
     const filter: any = { providerId: new mongoose.Types.ObjectId(providerId) };
     if (status) {
         filter.status = status;
@@ -77,7 +77,7 @@ export const respondToRequest = async (
     requestId: string,
     providerId: string,
     action: "ACCEPT" | "REJECT"
-): Promise<IServiceRequest> => {
+): Promise<IRequest> => {
     const request = await ServiceRequest.findById(requestId);
     if (!request) {
         throw new Error("Service request not found");

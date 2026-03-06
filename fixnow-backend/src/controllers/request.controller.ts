@@ -1,6 +1,6 @@
-import { getRequestByCustomer, respondToRequest } from './../services/serviceRequest.service';
+import { getRequestByCustomer, respondToRequest } from '../services/request.service';
 import { Request, Response } from 'express';
-import * as serviceRequestService from "../services/serviceRequest.service";
+import * as serviceRequestService from "../services/request.service";
 
 export const getMyRequests = async (
     req: Request,

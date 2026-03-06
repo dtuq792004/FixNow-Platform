@@ -10,7 +10,7 @@ export type RequestStatus =
 
 export type RequestType = "NORMAL" | "URGENT" | "RECURRING";
 
-export interface IServiceRequest extends Document {
+export interface IRequest extends Document {
   customerId: mongoose.Types.ObjectId;
   providerId?: mongoose.Types.ObjectId;
   serviceId: mongoose.Types.ObjectId;
@@ -24,7 +24,7 @@ export interface IServiceRequest extends Document {
   updatedAt: Date;
 }
 
-const serviceRequestSchema = new Schema<IServiceRequest>(
+const serviceRequestSchema = new Schema<IRequest>(
   {
     customerId: {
       type: Schema.Types.ObjectId,
@@ -75,7 +75,7 @@ const serviceRequestSchema = new Schema<IServiceRequest>(
   { timestamps: true }
 );
 
-export default mongoose.model<IServiceRequest>(
-  "ServiceRequest",
+export default mongoose.model<IRequest>(
+  "Request",
   serviceRequestSchema
 );

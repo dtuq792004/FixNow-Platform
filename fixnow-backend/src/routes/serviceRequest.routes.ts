@@ -5,7 +5,7 @@ import {
     cancelRequest,
     getProviderRequests,
     respondRequest
- } from '../controllers/serviceRequest.controller';
+ } from '../controllers/request.controller';
 const router = express.Router();
 
 router.get('/my-requests', authMiddleware, getMyRequests);
