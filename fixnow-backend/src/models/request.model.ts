@@ -1,46 +1,33 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export type RequestStatus =
   | "PENDING"
   | "ACCEPTED"
   | "REJECTED"
   | "IN_PROGRESS"
+  | "WAITING_CUSTOMER_CONFIRM"
   | "COMPLETED"
   | "CANCELLED";
 
 export type RequestType = "NORMAL" | "URGENT" | "RECURRING";
 
-export interface IRequest extends Document {
-  customerId: mongoose.Types.ObjectId;
-  providerId?: mongoose.Types.ObjectId;
-  serviceId: mongoose.Types.ObjectId;
-  addressId: mongoose.Types.ObjectId;
-  requestType: RequestType;
-  scheduledTime: Date;
-  description?: string;
-  media: string[];
-  status: RequestStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const serviceRequestSchema = new Schema<IRequest>(
+const requestSchema = new mongoose.Schema(
   {
-    customerId: {
+    customer: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    providerId: {
+    provider: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    serviceId: {
+    service: {
       type: Schema.Types.ObjectId,
       ref: "Service",
       required: true,
     },
-    addressId: {
+    address: {
       type: Schema.Types.ObjectId,
       ref: "Address",
       required: true,
@@ -50,15 +37,7 @@ const serviceRequestSchema = new Schema<IRequest>(
       enum: ["NORMAL", "URGENT", "RECURRING"],
       default: "NORMAL",
     },
-    scheduledTime: {
-      type: Date,
-      required: true,
-    },
-    description: String,
-    media: {
-      type: [String],
-      default: [],
-    },
+    
     status: {
       type: String,
       enum: [
@@ -66,16 +45,29 @@ const serviceRequestSchema = new Schema<IRequest>(
         "ACCEPTED",
         "REJECTED",
         "IN_PROGRESS",
+        "WAITING_CUSTOMER_CONFIRM",
         "COMPLETED",
         "CANCELLED",
       ],
       default: "PENDING",
     },
+
+    completionMedia: [
+      {
+        type: String,
+      },
+    ],
+
+    completionNote: {
+      type: String,
+    },
+
+    startAt: Date,
+    providerCompletedAt: Date,
+    customerConfirmedAt: Date,
+
   },
   { timestamps: true }
 );
 
-export default mongoose.model<IRequest>(
-  "Request",
-  serviceRequestSchema
-);
+export default mongoose.model("Request", requestSchema);

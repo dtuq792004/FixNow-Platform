@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response, Application } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
-import serviceResquestRoutes from "./routes/serviceRequest.routes";
+import requestRoutes from "./routes/request.routes";
 
 const app: Application = express();
 
@@ -32,7 +32,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/service-requests", serviceResquestRoutes);
+app.use("/service-requests", requestRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
