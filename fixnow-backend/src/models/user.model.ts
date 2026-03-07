@@ -11,8 +11,8 @@ export interface IUser extends Document {
   role: UserRole;
   status: "ACTIVE" | "INACTIVE" | "BANNED";
 
-  passwordResetToken?: string;
-  passwordResetExpires?: Date;
+  resetPasswordTokenHash?: string;
+  resetPasswordExpire?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -48,8 +48,8 @@ const UserSchema = new Schema<IUser>(
       default: "ACTIVE"
     },
 
-    passwordResetToken: String,
-    passwordResetExpires: Date
+    resetPasswordTokenHash: String,
+    resetPasswordExpire: Date
   },
   { timestamps: true }
 );

@@ -1,12 +1,12 @@
 import crypto from "crypto";
 
-export const generatePasswordResetToken = () => {
-  const resetToken = crypto.randomBytes(32).toString("hex");
+export const generateResetToken = () => {
+  const token = crypto.randomBytes(32).toString("hex");
 
-  const hashedToken = crypto
+  const tokenHash = crypto
     .createHash("sha256")
-    .update(resetToken)
+    .update(token)
     .digest("hex");
 
-  return { resetToken, hashedToken };
+  return { token, tokenHash };
 };
