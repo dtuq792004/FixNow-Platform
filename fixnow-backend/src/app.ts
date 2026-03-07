@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
 import serviceResquestRoutes from "./routes/serviceRequest.routes";
+import userRoutes from "./routes/user.routes";
 
 const app: Application = express();
 
@@ -32,6 +33,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 app.use("/service-requests", serviceResquestRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

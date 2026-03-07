@@ -1,16 +1,12 @@
-import { Router } from 'express';
-import { register, login, logout, refreshToken, forgotPassword, verifyOtp, resetPassword, changePassword} from '../controllers/auth.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import express from "express";
+import { register } from "../controllers/auth.controller";
+import { login } from "../controllers/auth.controller";
+import { logoutController } from "../controllers/auth.controller";
 
-const router = Router();
+const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.post('/refresh', refreshToken);
-router.post('/logout', logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-otp", verifyOtp);
-router.post("/reset-password", resetPassword);
-router.post("/change-password/:id",authMiddleware, changePassword);
+router.post("/register", register);
+router.post("/login", login);
+router.post("/logout", logoutController);
 
 export default router;
