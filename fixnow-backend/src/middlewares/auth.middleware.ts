@@ -9,6 +9,11 @@ export interface AuthRequest extends Request {
   };
 }
 
+interface JwtPayload {
+  userId: string;
+  role: string;
+}
+
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
@@ -23,12 +28,15 @@ export const authMiddleware = (
       });
     }
 
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Invalid token format"
+      });
+    }
+
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, jwtConfig.secret) as {
-      userId: string;
-      role: string;
-    };
+    const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;
 
     req.user = decoded;
 
@@ -38,4 +46,22 @@ export const authMiddleware = (
       message: "Invalid or expired token"
     });
   }
+};
+
+export const requireRole = (role: string) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    if (req.user.role !== role) {
+      return res.status(403).json({
+        message: "Forbidden"
+      });
+    }
+
+    next();
+  };
 };
