@@ -1,108 +1,57 @@
-import mongoose, {
-  Schema,
-  InferSchemaType,
-  HydratedDocument,
-} from "mongoose";
-import bcrypt from "bcrypt";
+import mongoose, { Document, Schema } from "mongoose";
 
-const userSchema = new Schema(
+export type UserRole = "CUSTOMER" | "PROVIDER" | "ADMIN";
+
+export interface IUser extends Document {
+  email: string;
+  passwordHash: string;
+  fullName: string;
+  phone?: string;
+  avatar?: string;
+  role: UserRole;
+  status: "ACTIVE" | "INACTIVE" | "BANNED";
+
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+}
+
+const UserSchema = new Schema<IUser>(
   {
-    username: {
+    email: {
       type: String,
-      required: [true, "Username is required"],
-      unique: true,
-      trim: true,
-      minlength: 4,
+      required: true,
+      unique: true
     },
 
-    password: {
+    passwordHash: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
-      select: false,
+      required: true
     },
 
     fullName: {
       type: String,
-      required: [true, "Full name is required"],
-      trim: true,
+      required: true
     },
 
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
-    },
-
-    phone: {
-      type: String,
-      required: [true, "Phone number is required"],
-      unique: true,
-      match: [/^(0[3|5|7|8|9])[0-9]{8}$/, "Invalid phone number"],
-    },
+    phone: String,
+    avatar: String,
 
     role: {
       type: String,
-      enum: ["Customer", "Provider", "Admin"],
-      default: "Customer",
+      enum: ["CUSTOMER", "PROVIDER", "ADMIN"],
+      default: "CUSTOMER"
     },
 
     status: {
       type: String,
-      enum: ["Active", "Inactive", "Banned"],
-      default: "Active",
+      enum: ["ACTIVE", "INACTIVE", "BANNED"],
+      default: "ACTIVE"
     },
 
-    avatarUrl: {
-      type: String,
-      default: null,
-    },
-    otp: {
-      type: String,
-      default: null,
-    },
-
-    otpExpires: {
-      type: Date,
-      default: null,
-    },
+    passwordResetToken: String,
+    passwordResetExpires: Date
   },
   { timestamps: true }
 );
 
-/* ================= TYPES ================= */
-export type User = InferSchemaType<typeof userSchema>;
-
-export type UserDocument = HydratedDocument<User> & {
-  comparePassword(candidatePassword: string): Promise<boolean>;
-};
-
-/* ================= MIDDLEWARE ================= */
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
-
-/* ================= METHODS ================= */
-userSchema.methods.comparePassword = async function (
-  this: UserDocument,
-  candidatePassword: string
-) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-/* ---------------- HIDE SENSITIVE FIELDS ---------------- */
-userSchema.set("toJSON", {
-  transform: (_doc, ret) => {
-    delete ret.otp;
-    delete ret.otpExpires;
-    return ret;
-  },
-});
-
-export const User = mongoose.model("User", userSchema, "users");
+export default mongoose.model<IUser>("User", UserSchema);

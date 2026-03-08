@@ -1,48 +1,41 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { jwtConfig } from "../configs/jwt.config";
 
-// Kiểm tra nhiều tên biến có thể có
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 
-                       process.env.JWT_SECRET || 
-                       process.env.JWT_ACCESS_SECRET ||
-                       process.env.TOKEN_SECRET;
-
-if (!ACCESS_SECRET) {
-  throw new Error("ACCESS_TOKEN_SECRET (hoặc JWT_SECRET/JWT_ACCESS_SECRET/TOKEN_SECRET) chưa được định nghĩa trong biến môi trường.");
+export interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+    role: string;
+  };
 }
 
-interface DecodedToken extends jwt.JwtPayload {
-  id: string;
-  username: string;
-  role: string;
-  warehouseId: string;
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: DecodedToken;
-    }
-  }
-}
-
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  let token: string | undefined;
-
-  // Lấy token từ header Authorization
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-    token = req.headers.authorization.split(" ")[1];
-  }
-
-  if (!token) {
-    return res.status(401).json({ message: "Không được phép truy cập, thiếu token" });
-  }
-
+export const authMiddleware = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const decoded = jwt.verify(token, ACCESS_SECRET) as DecodedToken;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
+        message: "Token not provided"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, jwtConfig.secret) as {
+      userId: string;
+      role: string;
+    };
+
     req.user = decoded;
+
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn" });
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    });
   }
 };
