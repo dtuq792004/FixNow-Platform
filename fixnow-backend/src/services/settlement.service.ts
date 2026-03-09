@@ -1,5 +1,5 @@
 import { Payment } from "../models/payment.model";
-import { ProviderWallet } from "../models/providerWallet.model";
+import { ProviderWallet } from "../models/wallet.model";
 
 export async function settlePayment(payment: any) {
 

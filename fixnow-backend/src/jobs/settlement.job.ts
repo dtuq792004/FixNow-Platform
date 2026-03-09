@@ -1,7 +1,7 @@
 import cron from "node-cron";
-import { ServiceRequest } from "../models/serviceRequest.model";
+import { ServiceRequest } from "../models/request.model";
 import { Payment } from "../models/payment.model";
-import { ProviderWallet } from "../models/providerWallet.model";
+import { ProviderWallet } from "../models/wallet.model";
 
 cron.schedule("0 * * * *", async () => {
 

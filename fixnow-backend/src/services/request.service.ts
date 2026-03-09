@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import { ServiceRequest } from "../models/serviceRequest.model";
+import { Request } from "../models/request.model";
 import { Payment } from "../models/payment.model";
 import { settlePayment } from "./settlement.service";
 
-export class ServiceRequestService {
+export class RequestService {
 
   static async providerComplete(id: string) {
-    const sr = await ServiceRequest.findById(id);
+    const sr = await Request.findById(id);
     sr!.status = "COMPLETED";
     sr!.completedAt = new Date();
     await sr!.save();
@@ -19,7 +19,7 @@ export class ServiceRequestService {
 
     try {
 
-      const sr = await ServiceRequest.findById(id).session(session);
+      const sr = await Request.findById(id).session(session);
       sr!.customerConfirmedAt = new Date();
       await sr!.save({ session });
 

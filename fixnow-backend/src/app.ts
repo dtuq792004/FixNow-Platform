@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
 import paymentRoutes from "./routes/payment.routes";
-import serviceRequestRoutes from "./routes/serviceRequest.routes";
+import requestRoutes from "./routes/request.routes";
 import platformConfigRoutes from "./routes/platformConfig.routes";
 import promotionRoutes from "./routes/promotion.routes";
 // import "./jobs/autoSettlement.job";
@@ -36,7 +36,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 app.use("/auth", authRoutes);
 app.use("/payments", paymentRoutes);
-app.use("/service-requests", serviceRequestRoutes);
+app.use("/requests", requestRoutes);
 app.use("/platform-config", platformConfigRoutes);
 app.use("/promotions", promotionRoutes);
 

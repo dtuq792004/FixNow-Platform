@@ -19,5 +19,5 @@ const schema = new mongoose.Schema({
   customerConfirmedAt: Date
 }, { timestamps: true });
 
-export const ServiceRequest =
-  mongoose.model("ServiceRequest", schema);
+export const Request =
+  mongoose.model("Request", schema);

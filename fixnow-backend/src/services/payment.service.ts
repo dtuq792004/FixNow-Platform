@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { payos } from "../configs/payos.config";
 import { Payment } from "../models/payment.model";
-import { ProviderWallet } from "../models/providerWallet.model";
+import { ProviderWallet } from "../models/wallet.model";
 import { calculatePayment } from "../utils/calculate.util";
 
 export class PaymentService {

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PaymentService } from "../services/payment.service";
-import { ServiceRequest } from "../models/serviceRequest.model";
+import { ServiceRequest } from "../models/request.model";
 import { Payment } from "../models/payment.model";
 
 export class PaymentController {

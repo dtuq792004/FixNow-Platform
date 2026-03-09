@@ -1,11 +1,14 @@
-import { Router } from "express";
-import { PromotionController } from "../controllers/promotion.controller";
+import express from "express";
+import * as promotionController from "../controllers/promotion.controller";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/", PromotionController.create);
-router.get("/", PromotionController.getAll);
-router.put("/:id", PromotionController.update);
-router.delete("/:id", PromotionController.delete);
+router.post("/", promotionController.createPromotion);
+router.get("/", promotionController.getAllPromotions);
+router.get("/:id", promotionController.getPromotionById);
+router.put("/:id", promotionController.updatePromotion);
+router.delete("/:id", promotionController.deletePromotion);
+/* validate promotion */
+router.post("/validate", promotionController.validatePromotion);
 
 export default router;
