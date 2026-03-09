@@ -52,6 +52,8 @@ interface AuthState {
   signOut: () => Promise<{ error?: AuthError }>;
   verifyOtp: (email: string, token: string) => Promise<{ error?: AuthError }>;
   resendConfirmation: (email: string) => Promise<{ error?: AuthError }>;
+  requestPasswordReset: (email: string) => Promise<{ error?: AuthError }>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<{ error?: AuthError }>;
 
   // Internal actions
   setUser: (user: User | null) => void;
@@ -199,6 +201,56 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      requestPasswordReset: async (email: string) => {
+        try {
+          set({ loading: true });
+
+          // Mock password reset request - simulate async delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // Check if user exists (but don't use it for security)
+          // Always return success for security reasons (don't leak user existence)
+          console.log(`Mock: Password reset email sent to ${email}`);
+          console.log(`Mock: Reset code is 123456`);
+          
+          return { error: undefined };
+        } catch (error) {
+          return { error: error as AuthError };
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      resetPassword: async (email: string, code: string, newPassword: string) => {
+        try {
+          set({ loading: true });
+
+          // Mock password reset - simulate async delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // Mock: accept code 123456
+          if (code !== "123456") {
+            return { error: { message: "Invalid or expired reset code" } as AuthError };
+          }
+
+          // Check if user exists
+          const userIndex = MOCK_USERS.findIndex((u) => u.email === email);
+          if (userIndex === -1) {
+            return { error: { message: "User not found" } as AuthError };
+          }
+
+          // Update password in mock users
+          MOCK_USERS[userIndex].password = newPassword;
+          
+          console.log(`Mock: Password reset successfully for ${email}`);
+          return { error: undefined };
+        } catch (error) {
+          return { error: error as AuthError };
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       // Internal actions
       setUser: (user: User | null) => set({ user }),
       setSession: (session: Session | null) =>
@@ -231,6 +283,10 @@ export const useVerifyOtp = () =>
   useAuthStore((state: AuthState) => state.verifyOtp);
 export const useResendConfirmation = () =>
   useAuthStore((state: AuthState) => state.resendConfirmation);
+export const useRequestPasswordReset = () =>
+  useAuthStore((state: AuthState) => state.requestPasswordReset);
+export const useResetPassword = () =>
+  useAuthStore((state: AuthState) => state.resetPassword);
 
 // Initialize auth state automatically
 const initializeAuth = () => {
