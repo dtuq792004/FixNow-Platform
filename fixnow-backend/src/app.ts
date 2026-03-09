@@ -30,6 +30,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   next(err);
 });
 
+//app routes
 app.use("/auth", authRoutes);
 app.use("/feedback", feedbackRoutes);
 

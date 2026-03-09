@@ -1,13 +1,23 @@
-import mongoose from "mongoose";
+import mongoose, { Document, PaginateModel } from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { PaginateModel } from "mongoose";
 
-const ServiceFeedbackSchema = new mongoose.Schema({
-  requestId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Request",
-    required: true
-  },
+export interface IServiceFeedback extends Document {
+  serviceId: mongoose.Types.ObjectId;
+  rating: number;
+  comment?: string;
+}
+
+export interface IRequestFeedback extends Document {
+  requestId: mongoose.Types.ObjectId;
+  customerId: mongoose.Types.ObjectId;
+  providerId: mongoose.Types.ObjectId;
+  providerReply?: string;
+  status: "VISIBLE" | "HIDDEN";
+  servicesFeedbacks: IServiceFeedback[];
+  createdAt?: Date;
+}
+
+const ServiceFeedbackSchema = new mongoose.Schema<IServiceFeedback>({
   serviceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Service",
@@ -25,7 +35,7 @@ const ServiceFeedbackSchema = new mongoose.Schema({
   }
 });
 
-const RequestFeedbackSchema = new mongoose.Schema(
+const RequestFeedbackSchema = new mongoose.Schema<IRequestFeedback>(
 {
   requestId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -67,7 +77,10 @@ const RequestFeedbackSchema = new mongoose.Schema(
 
 RequestFeedbackSchema.plugin(mongoosePaginate);
 
-const FeedbackModel = mongoose.model<any, PaginateModel<any>>(
+const FeedbackModel = mongoose.model<
+  IRequestFeedback,
+  PaginateModel<IRequestFeedback>
+>(
   "Feedback",
   RequestFeedbackSchema,
   "feedbacks"

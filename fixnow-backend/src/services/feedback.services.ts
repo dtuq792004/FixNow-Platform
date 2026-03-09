@@ -1,15 +1,28 @@
-import { Types } from "mongoose";
-import FeedbackModel from "../models/feedback.model";
+import mongoose from "mongoose";
+import FeedbackModel, { IRequestFeedback } from "../models/feedback.model";
 
 export const getFeedbacks = async (page: number, limit: number, filter: any) => {
     try {
         const feedbacks = await FeedbackModel.paginate(
             filter,
             {page: page, limit: limit, sort: {createdAt: -1},
-            populate: [{path: "requestId", select: "name description"},
-            {path: "customerId", select: "fullName email phone"},
-            {path: "providerId", select: "fullName email phone"}]
-        }
+            populate: [
+            { path: "requestId",
+              select: "name description"},
+            { path: "customerId",
+              select: "fullName email phone role avatar socialLogin",
+            populate: {
+              path: "socialLogin",
+              select: "socialId provider"
+            }},
+            { path: "providerId",
+              select: "fullName email phone role avatar socialLogin experienceYears activeStatus verified serviceCatagories workingAreas",
+            populate: {
+              path: "socialLogin",
+              select: "socialId provider"
+            }}
+            ]
+            }
         );
         return feedbacks;
     } catch (error: any) {
@@ -58,16 +71,36 @@ export const searchFeedbacks = async (keyword: string) => {
     return feedbacks;
   };
 
-  export const createFeedback = async (feedback: any) => {
+export const createFeedback = async (data: Partial<IRequestFeedback>) => {
     try {
-        const newFeedback = await FeedbackModel.create(feedback);
-        return newFeedback;
+        return await FeedbackModel.create(data);
     } catch (error) {
         console.error("Lỗi không tạo được feedback:", error);
         throw error;
     }
 };
 
-export const updateFeedback = async (feedbackId : Types.ObjectId) => {
-    
-}
+export const updateFeedback = async (
+  feedbackId: mongoose.Types.ObjectId,
+  data: Partial<IRequestFeedback>
+) => {
+    try {
+        const updatedFeedback = await FeedbackModel.findByIdAndUpdate(
+            feedbackId,
+            { $set: data },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!updatedFeedback) {
+            throw new Error("Feedback không tồn tại");
+        }
+
+        return updatedFeedback;
+    } catch (error) {
+        console.error("Lỗi không cập nhật được feedback:", error);
+        throw error;
+    }
+};
