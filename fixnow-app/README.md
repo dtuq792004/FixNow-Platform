@@ -1,8 +1,8 @@
-# Expo Base
+# FixNow App
 
-This is a comprehensive starter kit for building cross-platform mobile applications using Expo and React Native. It's designed to provide a solid foundation with a modern tech stack and a scalable project structure, allowing you to start developing features right away.
+FixNow is a cross-platform mobile application focused on repair/maintenance request workflows, built with Expo and React Native.
 
-This boilerplate comes pre-configured with essential tools for routing, state management, styling, and data fetching, saving you from the initial setup hassle.
+The app currently includes core authentication and note/request management flows, and is structured to scale with additional service features.
 
 ## ✨ Features
 
@@ -22,7 +22,13 @@ This boilerplate comes pre-configured with essential tools for routing, state ma
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) via [NativeWind](https://www.nativewind.dev/)
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Server State/Data Fetching**: [TanStack React Query](https://tanstack.com/query/latest) + [Axios](https://axios-http.com/)
 - **Forms**: [React Hook Form](https://react-hook-form.com/)
+- **Validation**: [Zod](https://zod.dev/) + [@hookform/resolvers](https://github.com/react-hook-form/resolvers)
+- **UI Utilities**: class-variance-authority, clsx, tailwind-merge, tailwindcss-animate
+- **Primitives**: @rn-primitives/label, @rn-primitives/slot, @radix-ui/react-slot
+- **Storage**: @react-native-async-storage/async-storage, expo-secure-store
+- **Media & Device**: expo-image, expo-image-picker, expo-haptics, expo-blur
 - **Linting**: [ESLint](https://eslint.org/)
 - **Formatting**: [Prettier](https://prettier.io/)
 
