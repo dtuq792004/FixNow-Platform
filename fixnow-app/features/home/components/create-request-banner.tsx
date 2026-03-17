@@ -14,7 +14,7 @@ export const CreateRequestBanner = () => {
   return (
     <Pressable
       style={{ backgroundColor: CARD_BG, borderRadius: 20, padding: 20, marginBottom: 24, overflow: 'hidden' }}
-      onPress={() => router.push('/requests/create' as never)}
+      onPress={() => router.push('/requests' as never)}
       accessibilityRole="button"
       accessibilityLabel="Tạo yêu cầu sửa chữa mới"
     >
@@ -55,7 +55,7 @@ export const CreateRequestBanner = () => {
       <Button
         variant="brand"
         className="rounded-xl native:h-12"
-        onPress={() => router.push('/requests/create' as never)}
+        onPress={() => router.push('/requests' as never)}
       >
         <Feather name="plus-circle" size={16} color="#ffffff" />
         <Text className="ml-2 font-semibold">Tạo yêu cầu ngay</Text>

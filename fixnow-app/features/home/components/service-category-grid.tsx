@@ -29,7 +29,7 @@ export const ServiceCategoryGrid = () => {
 
   const handleCategoryPress = (type: string) => {
     // TODO: navigate to create request with pre-selected category
-    router.push(`/requests/create?category=${type}` as never);
+    router.push(`/requests?category=${type}` as never);
   };
 
   return (
