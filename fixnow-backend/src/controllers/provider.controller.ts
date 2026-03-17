@@ -24,3 +24,26 @@ export const updateProviderStatus = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const updateWorkingArea = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { workingAreas } = req.body;
+
+    const provider = await providerService.updateWorkingArea(
+      userId as string,
+      workingAreas
+    );
+
+    return res.json({
+      success: true,
+      data: provider,
+      message: "Working area updated",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

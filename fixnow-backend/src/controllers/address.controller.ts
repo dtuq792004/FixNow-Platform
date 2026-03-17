@@ -1,8 +1,7 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import * as addressService from "../services/address.service";
-import { AuthRequest } from "../middlewares/auth.middleware";
 
-export const createAddress = async (req: AuthRequest, res: Response) => {
+export const createAddress = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -11,7 +10,7 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const userId = req.user.userId;
+    const userId = (req as any).user.id;
     const address = await addressService.createAddress(userId, req.body);
 
     return res.json({
@@ -27,7 +26,7 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateAddress = async (req: AuthRequest, res: Response) => {
+export const updateAddress = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -36,7 +35,7 @@ export const updateAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const userId = req.user.userId;
+    const userId = (req as any).user.id;
     const { id } = req.params;
 
     const address = await addressService.updateAddress(id as string, userId, req.body);
@@ -54,7 +53,7 @@ export const updateAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteAddress = async (req: AuthRequest, res: Response) => {
+export const deleteAddress = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -63,7 +62,7 @@ export const deleteAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const userId = req.user.userId;
+    const userId = (req as any).user.id;
     const { id } = req.params;
 
     await addressService.deleteAddress(id as string, userId);
@@ -81,7 +80,7 @@ export const deleteAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUserAddresses = async (req: AuthRequest, res: Response) => {
+export const getUserAddresses = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -90,7 +89,7 @@ export const getUserAddresses = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const userId = req.user.userId;
+    const userId = (req as any).user.id;
     const addresses = await addressService.getUserAddresses(userId);
 
     return res.json({
@@ -106,7 +105,7 @@ export const getUserAddresses = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const setDefaultAddress = async (req: AuthRequest, res: Response) => {
+export const setDefaultAddress = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -115,10 +114,10 @@ export const setDefaultAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const userId = req.user.userId;
+    const userId = (req as any).user.id;
     const { id } = req.params;
 
-    const address = await addressService.setDefaultAddress(userId,id as string);
+    const address = await addressService.setDefaultAddress(userId, id as string);
 
     return res.json({
       success: true,
@@ -133,16 +132,11 @@ export const setDefaultAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getServiceHistory = async (
-  req: AuthRequest,
-  res: Response
-) => {
+export const getServiceHistory = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.id;
 
-    const history = await addressService.getServiceHistory(
-      userId as string
-    );
+    const history = await addressService.getServiceHistory(userId as string);
 
     return res.json({
       success: true,

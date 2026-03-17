@@ -64,6 +64,13 @@ export default function SignInScreen() {
     setTimeout(() => setIsNavigating(false), 1000);
   };
 
+  const handleForgotPasswordNavigation = () => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+    router.push({ pathname: "/(auth)/forgot-password" });
+    setTimeout(() => setIsNavigating(false), 1000);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
@@ -134,6 +141,17 @@ export default function SignInScreen() {
                     {errors.root.message}
                   </Text>
                 )}
+
+                <View className="flex-row justify-end mb-3">
+                  <Text
+                    className="text-primary text-sm"
+                    onPress={handleForgotPasswordNavigation}
+                    suppressHighlighting={true}
+                  >
+                    Forgot Password?
+                  </Text>
+                </View>
+
                 <Button
                   onPress={handleSubmit(onSignInPress)}
                   disabled={loading || isSubmitting}
