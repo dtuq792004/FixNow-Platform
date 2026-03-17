@@ -9,4 +9,3 @@ export const roleMiddleware = (...allowedRoles: string[]) => {
     next();
   };
 };
-
