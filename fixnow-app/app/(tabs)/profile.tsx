@@ -23,13 +23,11 @@ const ProfileScreen = () => {
         <View className="items-center">
           <View className="w-20 h-20 bg-primary rounded-full items-center justify-center mb-4">
             <Text className="text-primary-foreground font-bold text-2xl">
-              {getAvatarInitial(user?.email)}
+              {getAvatarInitial(user?.fullName ?? user?.email)}
             </Text>
           </View>
           <Text className="text-2xl font-bold mb-1">
-            {user?.user_metadata?.full_name ||
-              user?.user_metadata?.firstName ||
-              "User"}
+            {user?.fullName || "User"}
           </Text>
           <Text className="text-base text-muted-foreground mb-2">
             {user?.email}

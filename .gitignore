@@ -1,3 +1,4 @@
-# Ignore ClaudeKit engineer workspace folder
-/claudekit-engineer/
-**/claudekit-engineer/
+/*
+!/.gitignore
+!/fixnow-app/
+!/fixnow-backend/
