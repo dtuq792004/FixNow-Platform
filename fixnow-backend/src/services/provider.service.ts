@@ -16,3 +16,17 @@ export const updateProviderStatus = async (
 
   return provider;
 };
+
+export const updateWorkingArea = async (userId: string, workingAreas: string[]) => {
+  const provider = await Provider.findOneAndUpdate(
+    { userId },
+    { workingAreas },
+    { new: true }
+  );
+
+  if (!provider) {
+    throw new Error("Provider not found");
+  }
+
+  return provider;
+};

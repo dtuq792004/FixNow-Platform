@@ -38,4 +38,11 @@ router.patch(
   approveProviderRequest
 );
 
+// router.patch(
+//   "/:id/reject",
+//   authMiddleware,
+//   requireRole("ADMIN"),
+//   rejectProviderRequest
+// );
+
 export default router;

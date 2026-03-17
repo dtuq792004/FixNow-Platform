@@ -54,6 +54,7 @@ interface AuthState {
   resendConfirmation: (email: string) => Promise<{ error?: AuthError }>;
   requestPasswordReset: (email: string) => Promise<{ error?: AuthError }>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<{ error?: AuthError }>;
+  refreshAccessToken: () => Promise<{ error?: AuthError }>;
 
   // Internal actions
   setUser: (user: User | null) => void;
@@ -251,6 +252,36 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      refreshAccessToken: async () => {
+        try {
+          set({ loading: true });
+
+          const currentSession = useAuthStore.getState().session;
+          
+          if (!currentSession?.refresh_token) {
+            return { error: { message: "No refresh token available" } as AuthError };
+          }
+
+          // Mock refresh token - simulate async delay
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          const newSession: Session = {
+            access_token: `mock-token-${Date.now()}`,
+            refresh_token: `mock-refresh-${Date.now()}`,
+            expires_in: 3600,
+            user: currentSession.user,
+          };
+
+          set({ session: newSession, user: newSession.user });
+
+          return { error: undefined };
+        } catch (error) {
+          return { error: error as AuthError };
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       // Internal actions
       setUser: (user: User | null) => set({ user }),
       setSession: (session: Session | null) =>
@@ -287,6 +318,8 @@ export const useRequestPasswordReset = () =>
   useAuthStore((state: AuthState) => state.requestPasswordReset);
 export const useResetPassword = () =>
   useAuthStore((state: AuthState) => state.resetPassword);
+export const useRefreshAccessToken = () =>
+  useAuthStore((state: AuthState) => state.refreshAccessToken);
 
 // Initialize auth state automatically
 const initializeAuth = () => {

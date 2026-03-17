@@ -4,7 +4,10 @@ import { login } from "../controllers/auth.controller";
 import { logoutController } from "../controllers/auth.controller";
 import {
   forgotPassword,
-  resetPassword
+  resetPassword,
+  resetPasswordWithOtp,
+  sendOtp,
+  refreshToken
 } from "../controllers/auth.controller";
 
 
@@ -14,7 +17,10 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logoutController);
 router.post("/forgot-password", forgotPassword);
+router.post("/send-otp", sendOtp);
 router.post("/reset-password/:token", resetPassword);
+router.post("/reset-password-otp", resetPasswordWithOtp);
+router.post("/refresh-token", refreshToken);
 
 
 export default router;
