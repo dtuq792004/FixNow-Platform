@@ -42,7 +42,7 @@ const EmptyState = () => {
       </Text>
       <Pressable
         className="bg-primary rounded-xl px-5 py-2.5 active:opacity-80"
-        onPress={() => router.push('/requests/create' as never)}
+        onPress={() => router.push('/requests' as never)}
       >
         <Text className="text-primary-foreground text-xs font-semibold">Tạo yêu cầu ngay</Text>
       </Pressable>

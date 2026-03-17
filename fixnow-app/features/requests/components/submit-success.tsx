@@ -85,7 +85,7 @@ export const SubmitSuccess = ({ requestId }: SubmitSuccessProps) => {
       <Button
         variant="outline"
         className="w-full rounded-xl native:h-12"
-        onPress={() => router.replace('/(tabs)' as never)}
+        onPress={() => router.replace('/(tabs)/requests' as never)}
       >
         <Text className="font-medium">Xem yêu cầu của tôi</Text>
       </Button>

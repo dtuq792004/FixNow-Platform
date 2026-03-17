@@ -41,11 +41,11 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="notes"
+        name="requests"
         options={{
           title: "",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="file-text" size={size} color={color} />
+            <Feather name="clipboard" size={size} color={color} />
           ),
         }}
       />

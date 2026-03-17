@@ -1,0 +1,96 @@
+import type { ServiceRequestDetail } from '../types';
+
+const now = Date.now();
+const mins = (m: number) => new Date(now - m * 60_000).toISOString();
+const hours = (h: number) => new Date(now - h * 3_600_000).toISOString();
+const days = (d: number) => new Date(now - d * 86_400_000).toISOString();
+
+export const MOCK_ALL_REQUESTS: ServiceRequestDetail[] = [
+  {
+    id: 'REQ-001',
+    title: 'Sửa điện phòng khách',
+    description:
+      'Đèn phòng khách đột ngột tắt, có mùi khét nhẹ khi bật công tắc. Nghi bị chập dây hoặc hỏng bóng. Cần kiểm tra toàn bộ hệ thống điện phòng khách.',
+    category: 'electrical',
+    status: 'in_progress',
+    address: '123 Nguyễn Trãi, P.2, Q.5, TP.HCM',
+    note: 'Ưu tiên sửa buổi sáng, gọi trước 15 phút.',
+    created_at: days(1),
+    updated_at: hours(5),
+    provider: { id: 'p1', name: 'Nguyễn Văn Thắng', rating: 4.8, phone: '0901234567' },
+  },
+  {
+    id: 'REQ-002',
+    title: 'Thông tắc ống nước nhà tắm',
+    description: 'Ống thoát nước nhà tắm bị tắc hoàn toàn, nước đứng không thoát. Đã thử thông thủ công nhưng không được.',
+    category: 'plumbing',
+    status: 'pending',
+    address: '45 Lê Lợi, P.1, Q.1, TP.HCM',
+    note: 'Vui lòng liên hệ trước khi đến.',
+    created_at: hours(2),
+  },
+  {
+    id: 'REQ-003',
+    title: 'Vệ sinh máy lạnh 2 cục',
+    description: 'Máy lạnh phòng ngủ chạy yếu, hơi lạnh ít dù đặt nhiệt độ thấp. Cần vệ sinh định kỳ cả dàn lạnh và dàn nóng.',
+    category: 'hvac',
+    status: 'completed',
+    address: '78 Đinh Tiên Hoàng, P.3, Q.Bình Thạnh, TP.HCM',
+    created_at: days(7),
+    updated_at: days(6),
+    provider: { id: 'p2', name: 'Trần Minh Tuấn', rating: 4.9, phone: '0912345678' },
+  },
+  {
+    id: 'REQ-004',
+    title: 'Thay khóa cửa chính',
+    description: 'Khóa cửa chính bị hỏng, chìa khóa khó xoay và đôi khi không mở được. Muốn thay khóa mới chất lượng tốt hơn.',
+    category: 'security',
+    status: 'assigned',
+    address: '12 Phan Xích Long, P.2, Q.Phú Nhuận, TP.HCM',
+    created_at: hours(8),
+    updated_at: hours(3),
+    provider: { id: 'p3', name: 'Lê Hoàng Nam', rating: 4.7, phone: '0923456789' },
+  },
+  {
+    id: 'REQ-005',
+    title: 'Sơn lại phòng ngủ',
+    description: 'Tường phòng ngủ bị ẩm mốc, sơn bong tróc nhiều chỗ. Diện tích khoảng 20m², cần cạo sơn cũ và sơn lại 2 lớp.',
+    category: 'painting',
+    status: 'cancelled',
+    address: '56 Cách Mạng Tháng 8, P.10, Q.3, TP.HCM',
+    note: 'Khách hủy do đổi kế hoạch.',
+    created_at: days(3),
+    updated_at: days(2),
+  },
+  {
+    id: 'REQ-006',
+    title: 'Sửa tủ lạnh không làm lạnh',
+    description: 'Tủ lạnh Samsung 300L không làm lạnh được, đèn bên trong vẫn sáng nhưng không có hơi lạnh. Thức ăn bị hỏng.',
+    category: 'appliance',
+    status: 'completed',
+    address: '34 Võ Văn Tần, P.5, Q.3, TP.HCM',
+    created_at: days(14),
+    updated_at: days(13),
+    provider: { id: 'p4', name: 'Phạm Quốc Bảo', rating: 4.6, phone: '0934567890' },
+  },
+  {
+    id: 'REQ-007',
+    title: 'Sửa vòi nước bếp bị rỉ',
+    description: 'Vòi nước bếp bị rỉ nước liên tục dù đã tắt, chảy nhỏ giọt từng phút. Cần thay ron hoặc vòi mới.',
+    category: 'plumbing',
+    status: 'pending',
+    address: '89 Trần Hưng Đạo, P.2, Q.1, TP.HCM',
+    created_at: mins(45),
+  },
+  {
+    id: 'REQ-008',
+    title: 'Lắp đặt máy nước nóng',
+    description: 'Cần lắp mới máy nước nóng năng lượng mặt trời, đã có sẵn thiết bị, chỉ cần thợ lắp đặt và đấu nối.',
+    category: 'electrical',
+    status: 'completed',
+    address: '15 Nguyễn Đình Chiểu, P.1, Q.1, TP.HCM',
+    created_at: days(10),
+    updated_at: days(9),
+    provider: { id: 'p1', name: 'Nguyễn Văn Thắng', rating: 4.8, phone: '0901234567' },
+  },
+];
