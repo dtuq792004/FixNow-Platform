@@ -16,7 +16,6 @@ export const RequestCard = ({ request }: RequestCardProps) => {
   const category = getCategoryConfig(request.category);
 
   const handlePress = () => {
-    // TODO: navigate to request detail
     router.push(`/requests/${request.id}` as never);
   };
 

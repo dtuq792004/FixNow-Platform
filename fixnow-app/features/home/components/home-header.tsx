@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { View, Pressable } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { useUser } from '~/features/auth/stores/auth.store';
@@ -18,6 +19,7 @@ const getInitials = (user: AuthUser): string => {
 
 export const HomeHeader = () => {
   const user = useUser();
+  const router = useRouter();
   const greeting = getGreeting();
   const displayName = user?.fullName?.split(' ').pop() ?? user?.email ?? '';
   const initials = user ? getInitials(user) : '?';
@@ -41,9 +43,14 @@ export const HomeHeader = () => {
           <Feather name="bell" size={20} color="#374151" />
         </Pressable>
 
-        <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+        <Pressable
+          className="w-10 h-10 rounded-full bg-primary items-center justify-center"
+          onPress={() => router.push('/(tabs)/profile')}
+          accessibilityLabel="Tài khoản của tôi"
+          accessibilityRole="button"
+        >
           <Text className="text-primary-foreground text-sm font-bold">{initials}</Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

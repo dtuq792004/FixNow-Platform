@@ -34,7 +34,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "",
+          title: "Trang chủ",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
@@ -43,7 +43,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="requests"
         options={{
-          title: "",
+          title: "Yêu cầu",
           tabBarIcon: ({ color, size }) => (
             <Feather name="clipboard" size={size} color={color} />
           ),
@@ -52,7 +52,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="search"
         options={{
-          title: "",
+          title: "Tìm kiếm",
           tabBarIcon: ({ color, size }) => (
             <Feather name="search" size={size} color={color} />
           ),
@@ -61,12 +61,13 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "",
+          title: "Tài khoản",
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),
         }}
       />
+      <Tabs.Screen name="notes" options={{ href: null }} />
     </Tabs>
   );
 };
