@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Alert, Pressable, ScrollView, Text as RNText, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSignOut, useUser } from '~/features/auth/stores/auth.store';
 import { BecomeProviderBanner } from '~/features/profile/components/become-provider-banner';
 import { ProfileAvatar } from '~/features/profile/components/profile-avatar';
@@ -12,6 +13,7 @@ import { ACTIVE_STATUSES } from '~/features/requests/types';
 
 const ProfileScreen = () => {
   const user = useUser();
+  const router = useRouter();
   const signOut = useSignOut();
 
   const stats = useMemo(() => ({
@@ -47,6 +49,7 @@ const ProfileScreen = () => {
       <View className="pt-safe px-5 pb-2 flex-row items-center justify-between border-b border-border">
         <RNText style={{ fontSize: 20, fontWeight: '700', color: '#18181b' }}>Tài khoản</RNText>
         <Pressable
+          onPress={() => router.push('/profile/personal-info')}
           style={{
             width: 36, height: 36, borderRadius: 10,
             backgroundColor: '#f4f4f5', alignItems: 'center', justifyContent: 'center',
@@ -71,7 +74,10 @@ const ProfileScreen = () => {
       <ProfileRecentRequests />
 
       {/* ── Settings ──────────────────────────────────────────────────────── */}
-      <SettingsMenu />
+      <SettingsMenu onPress={(id) => {
+        if (id === 'personal') router.push('/profile/personal-info');
+        else if (id === 'address') router.push('/profile/addresses');
+      }} />
 
       {/* ── Become provider CTA ───────────────────────────────────────────── */}
       {user.role === 'CUSTOMER' && <BecomeProviderBanner />}
