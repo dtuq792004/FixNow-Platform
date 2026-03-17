@@ -11,23 +11,41 @@ export type RequestStatus =
 
 export type RequestType = "NORMAL" | "URGENT" | "RECURRING";
 
-const requestSchema = new mongoose.Schema(
+export interface IRequest extends Document {
+  customerId: mongoose.Types.ObjectId;
+  providerId?: mongoose.Types.ObjectId;
+  serviceId: mongoose.Types.ObjectId;
+  addressId: mongoose.Types.ObjectId;
+  requestType: RequestType;
+  description?: string;
+  media: string[];
+  status: RequestStatus;
+  customerConfirmedAt?: Date;
+  providerCompletedAt?: Date;
+  startAt: Date;
+  completionMedia?: string[];
+  completionNote?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const requestSchema = new Schema<IRequest>(
   {
-    customer: {
+    customerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    provider: {
+    providerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    service: {
+    serviceId: {
       type: Schema.Types.ObjectId,
       ref: "Service",
       required: true,
     },
-    address: {
+    addressId: {
       type: Schema.Types.ObjectId,
       ref: "Address",
       required: true,
@@ -37,6 +55,16 @@ const requestSchema = new mongoose.Schema(
       enum: ["NORMAL", "URGENT", "RECURRING"],
       default: "NORMAL",
     },
+
+    description: {
+      type: String,
+    },
+
+    media: [
+      {
+        type: String,
+      },
+    ],
     
     status: {
       type: String,
@@ -70,4 +98,5 @@ const requestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Request", requestSchema);
+const Request =  mongoose.model<IRequest>("Request", requestSchema);
+export default Request;
