@@ -1,9 +1,9 @@
 import { Payment } from "../models/payment.model";
-import { ProviderWallet } from "../models/wallet.model";
+import { Wallet } from "../models/wallet.model";
 
 export async function settlePayment(payment: any) {
 
-  await ProviderWallet.updateOne(
+  await Wallet.updateOne(
     { providerId: payment.providerId },
     {
       $inc: {

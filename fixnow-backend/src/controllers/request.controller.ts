@@ -5,7 +5,8 @@ export class RequestController {
 
   static async providerComplete(req: Request, res: Response) {
     try {
-      await RequestService.providerComplete(req.params.id);
+      const id = req.params.id as string;
+      await RequestService.providerComplete(id);
       res.json({ message: "Service marked as completed" });
     } catch (err: any) {
       res.status(400).json({ message: err.message });
@@ -14,7 +15,8 @@ export class RequestController {
 
   static async customerConfirm(req: Request, res: Response) {
     try {
-      await RequestService.customerConfirm(req.params.id);
+      const id = req.params.id as string;
+      await RequestService.customerConfirm(id);
       res.json({ message: "Payment settled to provider" });
     } catch (err: any) {
       res.status(400).json({ message: err.message });

@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-import { Request } from "../models/request.model";
+import Request from "../models/request.model";
 import { Payment } from "../models/payment.model";
 import { settlePayment } from "./settlement.service";
 
 export class RequestService {
 
   static async providerComplete(id: string) {
-    const sr = await Request.findById(id);
-    sr!.status = "COMPLETED";
-    sr!.completedAt = new Date();
-    await sr!.save();
+    const request = await Request.findById(id);
+    request!.status = "COMPLETED";
+    request!.providerCompletedAt = new Date();
+    await request!.save();
   }
 
   static async customerConfirm(id: string) {
@@ -24,7 +24,7 @@ export class RequestService {
       await sr!.save({ session });
 
       const payment = await Payment.findOne({
-        serviceRequestId: sr!._id,
+        requestId: sr!._id,
         status: "SUCCESS"
       }).session(session);
 

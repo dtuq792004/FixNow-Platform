@@ -1,16 +1,18 @@
 import { Promotion } from "../models/promotion.model";
-import { PlatformConfig } from "../models/platformConfig.model";
+import { PlatformSetting } from "../models/platformSetting.model";
 
 export async function calculatePayment(
   baseAmount: number,
   promoCode?: string
 ) {
+
   if (baseAmount <= 0) {
     throw new Error("Invalid base amount");
   }
 
-  const config = await PlatformConfig.findOne();
-  const platformFeePercent = config?.platformFeePercent ?? 0.1;
+  // Lấy platform fee config
+  const config = await PlatformSetting.findOne();
+  const platformFeePercent = config?.platformFeePercent ?? 20;
 
   let discountAmount = 0;
   let discountCode: string | undefined;
@@ -49,22 +51,24 @@ export async function calculatePayment(
       discountAmount = promo.discountValue;
     }
 
-    // Không cho giảm quá số tiền gốc
+    // Không cho giảm quá tiền gốc
     if (discountAmount > baseAmount) {
       discountAmount = baseAmount;
     }
 
-    // Tăng usedCount
-    promo.usedCount += 1;
-    await promo.save();
+    // // ⚠️ NOTE: production nên tăng usedCount khi tạo Payment
+    // promo.usedCount += 1;
+    // await promo.save();
   }
 
   const afterDiscount = baseAmount - discountAmount;
 
-  const platformFee = afterDiscount * platformFeePercent;
+  // tính platform fee từ percent
+  const platformFee = afterDiscount * (platformFeePercent / 100);
+
   const providerAmount = afterDiscount - platformFee;
 
-  // Làm tròn tiền (2 chữ số)
+  // Làm tròn tiền
   const round = (num: number) => Math.round(num * 100) / 100;
 
   return {

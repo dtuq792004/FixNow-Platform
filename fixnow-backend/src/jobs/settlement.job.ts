@@ -1,7 +1,7 @@
 import cron from "node-cron";
-import { ServiceRequest } from "../models/request.model";
+import Request from "../models/request.model";
 import { Payment } from "../models/payment.model";
-import { ProviderWallet } from "../models/wallet.model";
+import { Wallet } from "../models/wallet.model";
 
 cron.schedule("0 * * * *", async () => {
 
@@ -9,22 +9,22 @@ cron.schedule("0 * * * *", async () => {
     Date.now() - 24 * 60 * 60 * 1000
   );
 
-  const requests = await ServiceRequest.find({
+  const requests = await Request.find({
     status: "COMPLETED",
     customerConfirmedAt: null,
     completedAt: { $lte: threshold }
   });
 
-  for (const sr of requests) {
+  for (const request of requests) {
 
     const payment = await Payment.findOne({
-      serviceRequestId: sr._id,
+      requestId: request._id,
       status: "SUCCESS"
     });
 
     if (!payment) continue;
 
-    await ProviderWallet.updateOne(
+    await Wallet.updateOne(
       { providerId: payment.providerId },
       {
         $inc: {
@@ -34,8 +34,8 @@ cron.schedule("0 * * * *", async () => {
       }
     );
 
-    sr.customerConfirmedAt = new Date();
-    await sr.save();
+    request.customerConfirmedAt = new Date();
+    await request.save();
   }
 
 });

@@ -4,8 +4,9 @@ import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes";
 import paymentRoutes from "./routes/payment.routes";
 import requestRoutes from "./routes/request.routes";
-import platformConfigRoutes from "./routes/platformConfig.routes";
+import platformSettingRoutes from "./routes/platformSetting.routes";
 import promotionRoutes from "./routes/promotion.routes";
+import analyticsRoutes from "./routes/analytics.route";
 // import "./jobs/autoSettlement.job";
 
 const app: Application = express();
@@ -37,8 +38,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 app.use("/auth", authRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/requests", requestRoutes);
-app.use("/platform-config", platformConfigRoutes);
+app.use("/platform-settings", platformSettingRoutes);
 app.use("/promotions", promotionRoutes);
+app.use("/admin/analytics", analyticsRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
