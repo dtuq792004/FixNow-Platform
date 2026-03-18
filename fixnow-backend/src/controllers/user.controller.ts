@@ -1,17 +1,16 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../middlewares/auth.middleware";
 import { updateProfileService } from "../services/user.service";
 
-export const getProfile = async (req: AuthRequest, res: Response) => {
+export const getProfile = async (req: Request, res: Response) => {
   return res.json({
     message: "User profile",
-    user: req.user
+    user: (req as any).user
   });
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response) => {
+export const updateProfile = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.id;
 
     const user = await updateProfileService(userId!, req.body);
 
