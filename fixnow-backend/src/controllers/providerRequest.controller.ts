@@ -1,16 +1,15 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import * as providerRequestService from "../services/providerRequest.service";
-import { AuthRequest } from "../middlewares/auth.middleware";
 
 /**
  * Customer create provider request
  */
 export const createProviderRequest = async (
-  req: AuthRequest,
+  req: Request,
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.id;
 
     const request = await providerRequestService.createProviderRequest(
       userId as string,
@@ -34,7 +33,7 @@ export const createProviderRequest = async (
  * Admin get provider requests
  */
 export const getProviderRequests = async (
-  req: AuthRequest,
+  req: Request,
   res: Response
 ) => {
   try {
@@ -60,11 +59,11 @@ export const getProviderRequests = async (
  * Admin approve provider request
  */
 export const approveProviderRequest = async (
-  req: AuthRequest,
+  req: Request,
   res: Response
 ) => {
   try {
-    const adminId = req.user?.userId;
+    const adminId = (req as any).user?.id;
     const { id } = req.params;
 
     const result = await providerRequestService.approveProviderRequest(
