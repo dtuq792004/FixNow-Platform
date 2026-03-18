@@ -49,6 +49,5 @@ router.get(
   getServiceHistory
 );
 
-console.log("Address routes loaded");
 
 export default router;
