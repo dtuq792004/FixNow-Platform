@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   View,
 } from "react-native";
 import { Button } from "~/components/ui/button";
@@ -19,7 +20,7 @@ import {
 import { FormFieldWrapper, FormGroup } from "~/components/ui/form-control";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { useSignUp, useAuthLoading } from "~/features/auth/stores/auth.store";
+import { useAuthLoading, useSignUp } from "~/features/auth/stores/auth.store";
 import { mapAuthError } from "~/features/auth/utils/auth-errors";
 import { signUpSchema, type SignUpFormData } from "~/lib/validations";
 
@@ -31,37 +32,32 @@ export default function SignUpScreen() {
   const [userEmail, setUserEmail] = React.useState<string>("");
   const [isNavigating, setIsNavigating] = React.useState(false);
 
-  // Sign-up form
   const {
-    control: signUpControl,
-    handleSubmit: handleSignUpSubmit,
-    formState: { isSubmitting: isSignUpSubmitting, errors: signUpErrors },
-    setError: setSignUpError,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+    setError,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
+      fullName: "",
       emailAddress: "",
       password: "",
     },
   });
 
-  // Handle submission of sign-up form
   const onSignUpPress = async (data: SignUpFormData) => {
-    const { error } = await signUp(data.emailAddress, data.password);
+    const { error } = await signUp(data.emailAddress, data.password, data.fullName);
 
     if (error) {
       const errorInfo = mapAuthError(error);
-      setSignUpError("root", {
-        message: errorInfo.message,
-      });
+      setError("root", { message: errorInfo.message });
     } else {
-      // Store email and show success message
       setUserEmail(data.emailAddress);
       setPendingVerification(true);
     }
   };
 
-  // Handle back to signup form
   const onBackToSignUp = () => {
     setPendingVerification(false);
     setUserEmail("");
@@ -71,10 +67,10 @@ export default function SignUpScreen() {
     if (isNavigating) return;
     setIsNavigating(true);
     router.replace("/sign-in");
-    // Reset after navigation
     setTimeout(() => setIsNavigating(false), 1000);
   };
 
+  // ── Success / Pending Verification screen ───────────────────────────────────
   if (pendingVerification) {
     return (
       <SafeAreaView className="flex-1 bg-background">
@@ -85,10 +81,10 @@ export default function SignUpScreen() {
           <View className="flex-1 px-4 pt-16 pb-6 justify-center">
             <Card className="mx-4">
               <CardHeader className="text-center">
-                <CardTitle>Check Your Email</CardTitle>
+                <CardTitle>Account Created! 🎉</CardTitle>
                 <CardDescription>
-                  We&apos;ve sent a confirmation link to {userEmail}. Please
-                  check your email and click the link to verify your account.
+                  Your account has been created successfully with {userEmail}.
+                  You can now sign in.
                 </CardDescription>
               </CardHeader>
 
@@ -96,29 +92,26 @@ export default function SignUpScreen() {
                 <View className="space-y-4">
                   <View className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <Text className="text-green-800 text-center font-medium mb-2">
-                      Account Created Successfully! ✅
+                      Registration Successful ✅
                     </Text>
                     <Text className="text-green-700 text-center text-sm">
-                      • Check your email inbox for the confirmation link{"\n"}•
-                      Don&apos;t forget to check your spam folder{"\n"}• Click
-                      the link to activate your account
+                      You can now sign in with your email and password.
                     </Text>
                   </View>
 
                   <Button
-                    variant="outline"
-                    onPress={onBackToSignUp}
-                    className="mt-6"
+                    onPress={() => router.replace("/sign-in")}
+                    className="mt-4"
                   >
-                    <Text>Back to Sign Up</Text>
+                    <Text>Go to Sign In</Text>
                   </Button>
 
                   <Button
-                    variant="secondary"
-                    onPress={() => router.replace("/sign-in")}
+                    variant="outline"
+                    onPress={onBackToSignUp}
                     className="mt-2"
                   >
-                    <Text>Go to Sign In</Text>
+                    <Text>Back to Sign Up</Text>
                   </Button>
                 </View>
               </CardContent>
@@ -129,13 +122,17 @@ export default function SignUpScreen() {
     );
   }
 
+  // ── Sign Up form ────────────────────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className="flex-1 px-4 pt-16 pb-6 justify-center">
+        <ScrollView
+          contentContainerClassName="flex-1 px-4 pt-16 pb-6 justify-center"
+          keyboardShouldPersistTaps="handled"
+        >
           <Card className="mx-4">
             <CardHeader className="text-center">
               <CardTitle>Create Account</CardTitle>
@@ -144,8 +141,35 @@ export default function SignUpScreen() {
 
             <CardContent>
               <FormGroup>
+                {/* Full Name */}
                 <Controller
-                  control={signUpControl}
+                  control={control}
+                  name="fullName"
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <FormFieldWrapper
+                      label="Full Name"
+                      error={error?.message}
+                      required
+                      className="mb-4"
+                    >
+                      <Input
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        placeholder="Enter your full name"
+                        autoCapitalize="words"
+                        className={error ? "border-destructive" : undefined}
+                      />
+                    </FormFieldWrapper>
+                  )}
+                />
+
+                {/* Email */}
+                <Controller
+                  control={control}
                   name="emailAddress"
                   render={({
                     field: { onChange, onBlur, value },
@@ -164,14 +188,15 @@ export default function SignUpScreen() {
                         placeholder="Enter your email"
                         keyboardType="email-address"
                         autoCapitalize="none"
-                        className={error && "border-destructive"}
+                        className={error ? "border-destructive" : undefined}
                       />
                     </FormFieldWrapper>
                   )}
                 />
 
+                {/* Password */}
                 <Controller
-                  control={signUpControl}
+                  control={control}
                   name="password"
                   render={({
                     field: { onChange, onBlur, value },
@@ -180,7 +205,7 @@ export default function SignUpScreen() {
                     <FormFieldWrapper
                       label="Password"
                       error={error?.message}
-                      description="Must be at least 8 characters with uppercase, lowercase, and number"
+                      description="Min 8 characters · uppercase · lowercase · number"
                       required
                       className="mb-4"
                     >
@@ -190,24 +215,24 @@ export default function SignUpScreen() {
                         onBlur={onBlur}
                         placeholder="Enter your password"
                         secureTextEntry={true}
-                        className={error && "border-destructive"}
+                        className={error ? "border-destructive" : undefined}
                       />
                     </FormFieldWrapper>
                   )}
                 />
 
-                {signUpErrors?.root && (
+                {errors?.root && (
                   <Text className="text-destructive mb-4 text-center">
-                    {signUpErrors.root.message}
+                    {errors.root.message}
                   </Text>
                 )}
 
                 <Button
-                  onPress={handleSignUpSubmit(onSignUpPress)}
-                  disabled={loading || isSignUpSubmitting}
+                  onPress={handleSubmit(onSignUpPress)}
+                  disabled={loading || isSubmitting}
                 >
                   <Text>
-                    {isSignUpSubmitting || loading
+                    {isSubmitting || loading
                       ? "Creating Account..."
                       : "Create Account"}
                   </Text>
@@ -228,7 +253,7 @@ export default function SignUpScreen() {
               Sign in
             </Text>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

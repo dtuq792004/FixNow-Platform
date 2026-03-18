@@ -20,7 +20,6 @@ import {
 import { FormFieldWrapper, FormGroup } from "~/components/ui/form-control";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { Badge } from "~/components/ui/badge";
 import {
   useAuthLoading,
   useRequestPasswordReset,
@@ -41,11 +40,12 @@ export default function ForgotPasswordScreen() {
   const resetPassword = useResetPassword();
   const loading = useAuthLoading();
   const router = useRouter();
+
   const [step, setStep] = React.useState<ForgotPasswordStep>("request");
   const [userEmail, setUserEmail] = React.useState<string>("");
   const [isNavigating, setIsNavigating] = React.useState(false);
 
-  // Request reset form
+  // ── Request reset form ──────────────────────────────────────────────────────
   const {
     control: requestControl,
     handleSubmit: handleRequestSubmit,
@@ -53,12 +53,10 @@ export default function ForgotPasswordScreen() {
     setError: setRequestError,
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      emailAddress: "",
-    },
+    defaultValues: { emailAddress: "" },
   });
 
-  // Reset password form
+  // ── Reset password form ─────────────────────────────────────────────────────
   const {
     control: resetControl,
     handleSubmit: handleResetSubmit,
@@ -66,21 +64,17 @@ export default function ForgotPasswordScreen() {
     setError: setResetError,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: {
-      code: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { resetToken: "", password: "", confirmPassword: "" },
   });
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
 
   const onRequestReset = async (data: ForgotPasswordFormData) => {
     const { error } = await requestPasswordReset(data.emailAddress);
 
     if (error) {
       const errorInfo = mapAuthError(error);
-      setRequestError("root", {
-        message: errorInfo.message,
-      });
+      setRequestError("root", { message: errorInfo.message });
     } else {
       setUserEmail(data.emailAddress);
       setStep("reset");
@@ -88,13 +82,12 @@ export default function ForgotPasswordScreen() {
   };
 
   const onResetPassword = async (data: ResetPasswordFormData) => {
-    const { error } = await resetPassword(userEmail, data.code, data.password);
+    // Signature mới: resetPassword(resetToken, newPassword)
+    const { error } = await resetPassword(data.resetToken, data.password);
 
     if (error) {
       const errorInfo = mapAuthError(error);
-      setResetError("root", {
-        message: errorInfo.message,
-      });
+      setResetError("root", { message: errorInfo.message });
     } else {
       setStep("success");
     }
@@ -112,7 +105,7 @@ export default function ForgotPasswordScreen() {
     setUserEmail("");
   };
 
-  // Request Reset Step
+  // ── Step 1: Request reset ───────────────────────────────────────────────────
   if (step === "request") {
     return (
       <SafeAreaView className="flex-1 bg-background">
@@ -128,7 +121,7 @@ export default function ForgotPasswordScreen() {
               <CardHeader className="text-center">
                 <CardTitle>Forgot Password?</CardTitle>
                 <CardDescription>
-                  Enter your email address and we&apos;ll send you a code to
+                  Enter your email address and we&apos;ll send you a link to
                   reset your password
                 </CardDescription>
               </CardHeader>
@@ -155,7 +148,7 @@ export default function ForgotPasswordScreen() {
                           placeholder="Enter your email"
                           keyboardType="email-address"
                           autoCapitalize="none"
-                          className={error && "border-destructive"}
+                          className={error ? "border-destructive" : undefined}
                         />
                       </FormFieldWrapper>
                     )}
@@ -175,7 +168,7 @@ export default function ForgotPasswordScreen() {
                     <Text>
                       {isRequestSubmitting || loading
                         ? "Sending..."
-                        : "Send Reset Code"}
+                        : "Send Reset Link"}
                     </Text>
                   </Button>
 
@@ -195,7 +188,7 @@ export default function ForgotPasswordScreen() {
     );
   }
 
-  // Reset Password Step
+  // ── Step 2: Enter token + new password ─────────────────────────────────────
   if (step === "reset") {
     return (
       <SafeAreaView className="flex-1 bg-background">
@@ -211,36 +204,32 @@ export default function ForgotPasswordScreen() {
               <CardHeader className="text-center">
                 <CardTitle>Reset Your Password</CardTitle>
                 <CardDescription>
-                  Enter the 6-digit code sent to {userEmail}
+                  Check your email ({userEmail}) for the password reset link,
+                  then copy the token here
                 </CardDescription>
               </CardHeader>
 
               <CardContent>
                 <View className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-                  <Text className="text-blue-800 text-center text-sm mb-1">
-                    📧 Check your email inbox
+                  <Text className="text-blue-800 text-center text-sm">
+                    📧 A reset link has been sent to your email.{"\n"}
+                    Open the link and copy the token from the URL.
                   </Text>
-                  <View className="flex-row justify-center items-center gap-2">
-                    <Text className="text-blue-700 text-xs">
-                      Demo code:
-                    </Text>
-                    <Badge variant="secondary">
-                      <Text className="font-mono font-bold">123456</Text>
-                    </Badge>
-                  </View>
                 </View>
 
                 <FormGroup>
+                  {/* Reset Token */}
                   <Controller
                     control={resetControl}
-                    name="code"
+                    name="resetToken"
                     render={({
                       field: { onChange, onBlur, value },
                       fieldState: { error },
                     }) => (
                       <FormFieldWrapper
-                        label="Reset Code"
+                        label="Reset Token"
                         error={error?.message}
+                        description="Paste the token from the reset link in your email"
                         required
                         className="mb-4"
                       >
@@ -248,15 +237,16 @@ export default function ForgotPasswordScreen() {
                           value={value}
                           onChangeText={onChange}
                           onBlur={onBlur}
-                          placeholder="Enter 6-digit code"
-                          keyboardType="number-pad"
-                          maxLength={6}
-                          className={error && "border-destructive"}
+                          placeholder="Paste reset token here"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          className={error ? "border-destructive" : undefined}
                         />
                       </FormFieldWrapper>
                     )}
                   />
 
+                  {/* New Password */}
                   <Controller
                     control={resetControl}
                     name="password"
@@ -276,12 +266,13 @@ export default function ForgotPasswordScreen() {
                           onBlur={onBlur}
                           placeholder="Enter new password"
                           secureTextEntry={true}
-                          className={error && "border-destructive"}
+                          className={error ? "border-destructive" : undefined}
                         />
                       </FormFieldWrapper>
                     )}
                   />
 
+                  {/* Confirm Password */}
                   <Controller
                     control={resetControl}
                     name="confirmPassword"
@@ -301,7 +292,7 @@ export default function ForgotPasswordScreen() {
                           onBlur={onBlur}
                           placeholder="Confirm new password"
                           secureTextEntry={true}
-                          className={error && "border-destructive"}
+                          className={error ? "border-destructive" : undefined}
                         />
                       </FormFieldWrapper>
                     )}
@@ -337,7 +328,7 @@ export default function ForgotPasswordScreen() {
     );
   }
 
-  // Success Step
+  // ── Step 3: Success ─────────────────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
