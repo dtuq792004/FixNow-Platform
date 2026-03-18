@@ -2,7 +2,7 @@ import { ProviderRequest } from "../models/providerRequest.model";
 import { Provider } from "../models/provider.model";
 import { Types } from "mongoose";
 import { ProviderRequestStatus } from "../models/providerRequest.model";
-
+import User from "../models/user.model";
 
 export const createProviderRequest = async (userId: string, data: any) => {
   const existing = await ProviderRequest.findOne({
@@ -44,6 +44,10 @@ export const approveProviderRequest = async (
     throw new Error("Provider request not found");
   }
 
+  if (request.status !== ProviderRequestStatus.PENDING) {
+  throw new Error("Request already processed");
+}
+
   request.status = ProviderRequestStatus.APPROVED;
   request.reviewedBy = new Types.ObjectId(adminId);
   request.reviewedAt = new Date();
@@ -57,6 +61,10 @@ export const approveProviderRequest = async (
     serviceCategories: request.serviceCategories,
     workingAreas: request.workingAreas,
     verified: true,
+  });
+
+   await User.findByIdAndUpdate(request.userId, {
+    role: "PROVIDER",
   });
 
   return { request, provider };

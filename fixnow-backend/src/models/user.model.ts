@@ -13,6 +13,9 @@ export interface IUser extends Document {
 
   resetPasswordTokenHash?: string;
   resetPasswordExpire?: Date;
+  
+  resetPasswordOtp?: string;
+  resetPasswordOtpExpire?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -40,6 +43,8 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ["CUSTOMER", "PROVIDER", "ADMIN"],
       default: "CUSTOMER"
+
+      
     },
 
     status: {
@@ -49,7 +54,10 @@ const UserSchema = new Schema<IUser>(
     },
 
     resetPasswordTokenHash: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+    
+    resetPasswordOtp: String,
+    resetPasswordOtpExpire: Date
   },
   { timestamps: true }
 );

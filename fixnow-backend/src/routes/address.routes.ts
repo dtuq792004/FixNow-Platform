@@ -7,7 +7,7 @@ import {
   getServiceHistory
 } from "../controllers/address.controller";
 
-import { authMiddleware, requireRole } from "../middlewares/auth.middleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -18,28 +18,24 @@ const router = Router();
 router.get(
   "/",
   authMiddleware,
-  requireRole("CUSTOMER"),
   getUserAddresses
 );
 
 router.post(
   "/",
-  authMiddleware,
-  requireRole("CUSTOMER"),
+  authMiddleware,      
   createAddress
 );
 
 router.put(
   "/:id",
   authMiddleware,
-  requireRole("CUSTOMER"),
   updateAddress
 );
 
 router.delete(
   "/:id",
   authMiddleware,
-  requireRole("CUSTOMER"),
   deleteAddress
 );
 
@@ -50,10 +46,7 @@ router.delete(
 router.get(
   "/service-history",
   authMiddleware,
-  requireRole("CUSTOMER"),
   getServiceHistory
 );
-
-console.log("Address routes loaded");
 
 export default router;

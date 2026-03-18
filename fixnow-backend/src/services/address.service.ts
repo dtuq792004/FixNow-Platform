@@ -1,6 +1,6 @@
 import { Address } from "../models/address.model";
 import { Types } from "mongoose";
-import ServiceRequest from "../models/serviceRequest.model";
+import ServiceRequest from "../models/request.model";
 
 export const createAddress = async (userId: string, data: any) => {
   if (data.isDefault) {
