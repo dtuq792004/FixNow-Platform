@@ -24,7 +24,7 @@ export interface IRequest extends Document {
   providerCompletedAt?: Date;
   startAt: Date;
   completionMedia?: string[];
-  completionNote?: string[];
+  completionNote?: string;
   createdAt: Date;
   updatedAt: Date;
 }

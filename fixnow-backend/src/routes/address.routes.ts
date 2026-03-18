@@ -49,5 +49,4 @@ router.get(
   getServiceHistory
 );
 
-
 export default router;
