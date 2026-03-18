@@ -5,7 +5,7 @@ import {
   approveProviderRequest
 } from "../controllers/providerRequest.controller";
 
-import { authMiddleware, requireRole } from "../middlewares/auth.middleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -16,7 +16,6 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
-  requireRole("CUSTOMER"),
   createProviderRequest
 );
 
@@ -27,15 +26,19 @@ router.post(
 router.get(
   "/",
   authMiddleware,
-  requireRole("ADMIN"),
   getProviderRequests
 );
 
 router.patch(
   "/:id",
   authMiddleware,
-  requireRole("ADMIN"),
   approveProviderRequest
 );
+
+// router.patch(
+//   "/:id/reject",
+//   authMiddleware,
+//   rejectProviderRequest
+// );
 
 export default router;

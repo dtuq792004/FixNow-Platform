@@ -2,13 +2,16 @@ import express, { NextFunction, Request, Response, Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
-import feedbackRoutes from "./routes/feedback.routes";
-import serviceResquestRoutes from "./routes/serviceRequest.routes";
+
+// import serviceResquestRoutes from "./routes/request.routes";
 import userRoutes from "./routes/user.routes";
-import addressRoutes from "./routes/address.routes";
-import providerRequestRoutes from "./routes/providerRequest.routes";
-import providerRoutes from "./routes/provider.routes";
-import adminRoutes from "./routes/admin.routes";
+import addressRoutes from './routes/address.routes';
+import providerRequestRoutes from './routes/providerRequest.routes';
+import providerRoutes from './routes/provider.routes';
+import adminRoutes from './routes/admin.routes';
+import serviceRoutes from "./routes/service.routes";
+import categoryRoutes from "./routes/category.routes"
+import feedbackRoutes from "./routes/feedback.routes";
 
 const app: Application = express();
 
@@ -41,7 +44,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 app.use("/auth", authRoutes);
 app.use("/feedback", feedbackRoutes);
 app.use("/users", userRoutes);
-app.use("/service-requests", serviceResquestRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/services", serviceRoutes);
+// app.use("/service-requests", serviceResquestRoutes);
 app.use("/addresses", addressRoutes);
 app.use("/provider-requests", providerRequestRoutes);
 app.use("/providers", providerRoutes);
