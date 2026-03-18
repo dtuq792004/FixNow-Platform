@@ -25,7 +25,7 @@ export interface IRequest extends Document {
   providerCompletedAt?: Date;
   startAt: Date;
   completionMedia?: string[];
-  completionNote?: string[];
+  completionNote?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,6 +60,7 @@ const requestSchema = new Schema<IRequest>(
       type: Number,
       required: true,
     },
+
     description: {
       type: String,
     },

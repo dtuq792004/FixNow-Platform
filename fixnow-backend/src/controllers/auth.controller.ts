@@ -1,65 +1,37 @@
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { User, UserDocument } from "../models/user.model";
+import {
+  registerService,
+  loginService,
+  refreshTokenService,
+  logoutService,
+  forgotPasswordService,
+  resetPasswordService,
+  verifyOtpService,
+  changePasswordService,
+} from "../services/auth.service";
 import Session from "../models/session.model";
-import { generateOtp } from "../utils/generateOtp";
-import PasswordResetToken from "../models/passwordResetToken.model";
-import { hashToken } from "../utils/hashToken";
-import { sendResetPasswordEmail } from "../utils/sendEmail";
 
-const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 ngày
-
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 
-                       process.env.JWT_ACCESS_SECRET ||
-                       process.env.TOKEN_SECRET;
-if (!ACCESS_SECRET) {
-  throw new Error("ACCESS_TOKEN_SECRET (hoặc JWT_SECRET/JWT_ACCESS_SECRET/TOKEN_SECRET) chưa được định nghĩa trong biến môi trường.");
-};
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { username, password, fullName, email, phone, role } = req.body;
-    if (!username || !password || !fullName || !email || !phone) {
+    const { password, fullName, email, phone, role } = req.body;
+    if (!password || !fullName || !email || !phone) {
       return res.status(400).json({
         message: "Vui lòng cung cấp đầy đủ thông tin",
       });
     }
 
-    const existedUser = await User.findOne({
-      $or: [{ username }, { email }, { phone }],
-    });
-
-    if (existedUser) {
-      return res.status(400).json({
-        message: "Username, email hoặc số điện thoại đã tồn tại",
-      });
-    }
-
-    const newUser = await User.create({
-      username,
-      password, 
-      fullName,
-      email,
-      phone,
-      role: role || "Customer",
-    });
+    const user = await registerService(password, fullName, email, phone, role);
 
     return res.status(201).json({
       message: "Đăng ký thành công",
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        role: newUser.role,
-      },
+      user,
     });
   } catch (error: any) {
     console.error("Register error:", error);
-    return res.status(500).json({
-      message: "Lỗi máy chủ nội bộ",
+    return res.status(400).json({
+      message: error.message || "Lỗi máy chủ nội bộ",
     });
   }
 };
@@ -67,45 +39,17 @@ export const register = async (req: Request, res: Response) => {
 /* -------------------------- LOGIN -------------------------- */
 export const login = async (req: Request, res: Response) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
+    if (!email || !password) {
       return res
         .status(400)
-        .json({ message: "Tên đăng nhập và mật khẩu là bắt buộc" });
+        .json({ message: "Email và mật khẩu là bắt buộc" });
     }
 
-    const user = (await User.findOne({ username })
-      .select("+password")) as UserDocument | null;
+    const result = await loginService(email, password);
 
-    if (!user || user.status !== "Active") {
-      return res
-        .status(401)
-        .json({ message: "Thông tin đăng nhập không hợp lệ" });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res
-        .status(401)
-        .json({ message: "Thông tin đăng nhập không hợp lệ" });
-    }
-
-    const accessToken = jwt.sign(
-      { id: user._id, role: user.role },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
-    );
-
-    const refreshToken = crypto.randomBytes(64).toString("hex");
-
-    await Session.create({
-      userId: user._id,
-      refreshToken,
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
-    });
-
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -114,18 +58,12 @@ export const login = async (req: Request, res: Response) => {
 
     return res.json({
       message: "Đăng nhập thành công",
-      accessToken,
-      user: {
-        id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-      },
+      accessToken: result.accessToken,
+      user: result.user,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+    return res.status(401).json({ message: error.message || "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -137,29 +75,12 @@ export const refreshToken = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Thiếu refresh token" });
     }
 
-    const session = await Session.findOne({ refreshToken });
-    if (!session || session.expiresAt < new Date()) {
-      return res.status(403).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn" });
-    }
+    const result = await refreshTokenService(refreshToken);
 
-    const user = await User.findById(session.userId);
-    if (!user) {
-      return res.status(404).json({ message: "Không tìm thấy người dùng" });
-    }
-
-    const newAccessToken = jwt.sign(
-      { id: user._id, username: user.username, role: user.role},
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
-    );
-
-    return res.status(200).json({
-      message: "Cấp lại access token thành công",
-      accessToken: newAccessToken,
-    });
+    return res.status(200).json(result);
   } catch (error: any) {
     console.error("Lỗi làm mới token:", error.message);
-    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+    res.status(403).json({ message: error.message || "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -171,7 +92,7 @@ export const logout = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Thiếu refresh token" });
     }
 
-    await Session.deleteOne({ refreshToken });
+    await logoutService(refreshToken);
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -182,7 +103,7 @@ export const logout = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "Đăng xuất thành công" });
   } catch (error: any) {
     console.error("Lỗi đăng xuất:", error.message);
-    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+    res.status(500).json({ message: error.message || "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -197,43 +118,16 @@ export const forgotPassword = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(200).json({
-        message: "Nếu email tồn tại, hệ thống sẽ gửi link đặt lại mật khẩu",
-      });
-    }
-
-    const resetToken = jwt.sign(
-      {
-        userId: user._id,
-        type: "RESET_PASSWORD",
-      },
-      process.env.RESET_PASSWORD_SECRET as string,
-      { expiresIn: "5m" }
-    );
-
-    const tokenHash = hashToken(resetToken);
-
-    await PasswordResetToken.create({
-      userId: user._id,
-      tokenHash,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-      used: false,
-    });
-
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-    await sendResetPasswordEmail(user.email, resetLink);
+    const result = await forgotPasswordService(email);
 
     return res.status(200).json({
-      message: "Nếu email tồn tại, hệ thống sẽ gửi link đặt lại mật khẩu",
+      message: "OTP đã được gửi đến email của bạn",
+      otp: process.env.NODE_ENV === 'development' ? (result as any).otp : undefined // Chỉ hiện OTP trong development
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Forgot password error:", error);
-    return res.status(500).json({
-      message: "Có lỗi xảy ra, vui lòng thử lại sau",
+    return res.status(400).json({
+      message: error.message || "Có lỗi xảy ra, vui lòng thử lại sau",
     });
   }
 };
@@ -241,105 +135,63 @@ export const forgotPassword = async (req: Request, res: Response) => {
 // Xác thực OTP
 export const verifyOtp = async (req: Request, res: Response) => {
   try {
-    const { email, otp } = req.body;
-    const user = await User.findOne({ email });
-    if (!user || !user.otp || !user.otpExpires)
-      return res.status(400).json({ message: "OTP không hợp lệ" });
-
-    if (user.otp !== otp) return res.status(400).json({ message: "OTP sai" });
-
-    if (user.otpExpires < new Date())
-      return res.status(400).json({ message: "OTP đã hết hạn" });
-
-    user.otp = undefined;
-    user.otpExpires = undefined;
-    await user.save();
-
-    return res.json({ message: "Xác thực OTP thành công" });
-  } catch (error) {
-    return res.status(500).json({ message: "Lỗi server", error });
+    const { otp } = req.body;
+    const result = await verifyOtpService(otp);
+    return res.json(result);
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message || "Lỗi server" });
   }
 };
 
-// Đổi mật khẩu mới
+// Đặt lại mật khẩu mới (sau khi đã verify OTP)
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    const { email, newPassword, confirmPassword } = req.body;
-
-    if (!newPassword || !confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
-    }
-
-    if (newPassword !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: "Mật khẩu xác nhận không khớp" });
-    }
-
-    const user = (await User.findOne({ email })
-      .select("+password")) as UserDocument | null;
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy người dùng" });
-    }
-
-    user.password = newPassword;
-    user.otp = undefined;
-    user.otpExpires = undefined;
-
-    await user.save();
-
-    return res.json({ message: "Đặt lại mật khẩu thành công" });
-  } catch (error) {
+    const { resetToken, newPassword, confirmPassword } = req.body;
+    const result = await resetPasswordService(resetToken, newPassword, confirmPassword);
+    return res.json(result);
+  } catch (error: any) {
     console.error("Reset password error:", error);
-    return res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+    return res.status(400).json({
+      message: error.message || "Lỗi máy chủ nội bộ",
+    });
   }
 };
+
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
-    const userId = req.params.id;
+    const userId = (req as any).user?.id;
+    const refreshToken = req.cookies.refreshToken;
     const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
+    
+    if (!userId) {
+      return res.status(401).json({
+        message: "Không xác thực được người dùng",
+      });
     }
 
-    if (newPassword !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: "Mật khẩu xác nhận không khớp" });
+    if (!refreshToken) {
+      return res.status(401).json({
+        message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+      });
     }
 
-    const user = (await User.findById(userId)
-      .select("+password")) as UserDocument | null;
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy người dùng" });
+    // Verify refresh token still exists and is valid
+    const session = await Session.findOne({ refreshToken });
+    if (!session || session.expiresAt < new Date()) {
+      return res.status(401).json({
+        message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+      });
     }
-
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res
-        .status(401)
-        .json({ message: "Mật khẩu hiện tại không đúng" });
-    }
-
-    user.password = newPassword;
-    await user.save();
-
-    return res.json({ message: "Đổi mật khẩu thành công" });
-  } catch (error) {
+    
+    const result = await changePasswordService(userId, currentPassword, newPassword, confirmPassword);
+    return res.json(result);
+  } catch (error: any) {
     console.error("Change password error:", error);
-    return res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+    const statusCode = error.message.includes("Không tìm thấy") ? 404 : 
+                       error.message.includes("không đúng") ? 401 : 400;
+    return res.status(statusCode).json({
+      message: error.message || "Lỗi máy chủ nội bộ",
+    });
   }
 };
-
