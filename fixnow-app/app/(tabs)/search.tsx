@@ -1,159 +1,133 @@
-import { Feather } from "@expo/vector-icons";
-import { format } from "date-fns";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Text } from "~/components/ui/text";
-import { useUser } from "~/features/auth/stores/auth.store";
-import { NoteCard } from "~/features/notes/components/NoteCard";
-import { useNotesQuery } from "~/features/notes/hooks/useNotesQuery";
-import type { Note } from "~/features/notes/types";
-import { getCategoryColor, getCategoryLabel } from "~/utils/categories";
+import { Feather } from '@expo/vector-icons';
+import { FlatList, Pressable, Text as RNText, View } from 'react-native';
+import { ProviderCard } from '~/features/search/components/provider-card';
+import { SearchBrowse } from '~/features/search/components/search-browse';
+import { SearchInput } from '~/features/search/components/search-input';
+import { ServiceResultCard } from '~/features/search/components/service-result-card';
+import { useSearch } from '~/features/search/hooks/use-search';
+import type { SearchResult, SearchSegment } from '~/features/search/types';
 
+// ── Segment switcher ──────────────────────────────────────────────────────────
+interface SegmentBarProps {
+  active: SearchSegment;
+  serviceCnt: number;
+  providerCnt: number;
+  onChange: (s: SearchSegment) => void;
+}
+
+const SegmentBar = ({ active, serviceCnt, providerCnt, onChange }: SegmentBarProps) => (
+  <View style={{
+    flexDirection: 'row', height: 44,
+    borderBottomWidth: 1, borderBottomColor: '#f4f4f5',
+    paddingHorizontal: 16,
+  }}>
+    {(
+      [
+        { key: 'service' as SearchSegment, label: 'Dịch vụ', count: serviceCnt },
+        { key: 'provider' as SearchSegment, label: 'Thợ kỹ thuật', count: providerCnt },
+      ]
+    ).map((seg) => {
+      const isActive = seg.key === active;
+      return (
+        <Pressable
+          key={seg.key}
+          onPress={() => onChange(seg.key)}
+          style={{
+            marginRight: 20, justifyContent: 'center', alignItems: 'center',
+            flexDirection: 'row', borderBottomWidth: 2,
+            borderBottomColor: isActive ? '#18181b' : 'transparent',
+            paddingBottom: 2,
+          }}
+        >
+          <RNText style={{ fontSize: 14, fontWeight: isActive ? '700' : '400', color: isActive ? '#18181b' : '#a1a1aa' }}>
+            {seg.label}
+          </RNText>
+          {seg.count > 0 && (
+            <View style={{
+              marginLeft: 6, minWidth: 18, height: 18, borderRadius: 9,
+              backgroundColor: isActive ? '#18181b' : '#e4e4e7',
+              alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
+            }}>
+              <RNText style={{ fontSize: 10, fontWeight: '700', color: isActive ? '#fff' : '#71717a' }}>
+                {seg.count}
+              </RNText>
+            </View>
+          )}
+        </Pressable>
+      );
+    })}
+  </View>
+);
+
+// ── No results ────────────────────────────────────────────────────────────────
+const NoResults = ({ query }: { query: string }) => (
+  <View style={{ flex: 1, alignItems: 'center', paddingTop: 60, padding: 32 }}>
+    <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#f4f4f5', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+      <Feather name="search" size={26} color="#a1a1aa" />
+    </View>
+    <RNText style={{ fontSize: 15, fontWeight: '700', color: '#18181b', marginBottom: 6, textAlign: 'center' }}>
+      Không tìm thấy kết quả
+    </RNText>
+    <RNText style={{ fontSize: 13, color: '#71717a', textAlign: 'center', lineHeight: 20 }}>
+      {'Không có kết quả phù hợp với\n'}
+      <RNText style={{ fontWeight: '600', color: '#18181b' }}>&quot;{query}&quot;</RNText>
+    </RNText>
+  </View>
+);
+
+// ── Main screen ───────────────────────────────────────────────────────────────
 const SearchScreen = () => {
-  const user = useUser();
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const {
+    query, setQuery, clearQuery,
+    segment, setSegment,
+    serviceResults, providerResults,
+    hasResults, isSearching,
+  } = useSearch();
 
-  // Search filters for notes
-  const searchFilters = searchQuery.trim() ? { search: searchQuery } : {};
-  const categoryFilters =
-    selectedCategory !== "all" ? { category: selectedCategory } : {};
-
-  const { data: notes = [], isLoading } = useNotesQuery({
-    ...searchFilters,
-    ...categoryFilters,
-    limit: 50,
-  });
-
-  // Get unique categories from notes
-  const { data: allNotes = [] } = useNotesQuery({ limit: 1000 });
-  const categories = ["all", ...new Set(allNotes.map((note) => note.category))];
-
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-  };
-
-  const handleCategoryFilter = (category: string) => {
-    setSelectedCategory(category);
-  };
-
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "MMM d, yyyy");
-  };
-
-  const renderNoteItem = ({ item }: { item: Note }) => <NoteCard note={item} />;
+  const currentResults = segment === 'service' ? serviceResults : providerResults;
 
   return (
-    <View className="flex-1">
-      {/* Header */}
-      <View className="bg-background px-4 pt-safe pb-4 shadow-sm">
-        <View className="flex-row justify-between items-center mb-4">
-          <View>
-            <Text className="text-2xl font-bold">Search Notes</Text>
-            <Text className="text-muted-foreground mt-1">
-              Find your notes quickly
-            </Text>
-          </View>
-          <Button
-            onPress={() => router.push("/notes/create")}
-            size="sm"
-            className="px-4 flex flex-row items-center"
-          >
-            <Feather name="plus" size={16} color="white" />
-            <Text className="ml-2 text-white">New</Text>
-          </Button>
-        </View>
-
-        {/* Search Input */}
-        <View className="relative mb-4">
-          <Input
-            placeholder="Search by title, content, or tags..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-            className="pr-10"
-          />
-          <View className="absolute right-3 top-3">
-            <Feather name="search" size={20} color="#6b7280" />
-          </View>
-        </View>
-
-        {/* Filters */}
-        <View className="flex-row items-center justify-between">
-          {/* Categories */}
-          <View className="flex-1">
-            <Text className="text-sm font-medium mb-2">Category</Text>
-            <View className="flex-row flex-wrap">
-              {categories.slice(0, 6).map((category) => {
-                const isActive = selectedCategory === category;
-                const categoryColor =
-                  category === "all" ? "#3b82f6" : getCategoryColor(category);
-
-                return (
-                  <TouchableOpacity
-                    key={category}
-                    onPress={() => handleCategoryFilter(category)}
-                    style={{
-                      backgroundColor: isActive ? categoryColor : "#f3f4f6",
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      borderRadius: 16,
-                      marginRight: 8,
-                      marginBottom: 8,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: isActive ? "white" : "#374151",
-                        fontSize: 12,
-                        fontWeight: isActive ? "600" : "400",
-                      }}
-                    >
-                      {category === "all" ? "All" : getCategoryLabel(category)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        </View>
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      {/* Header + search input */}
+      <View className="pt-safe px-4 pb-3 border-b border-border">
+        <RNText style={{ fontSize: 20, fontWeight: '700', color: '#18181b', marginBottom: 12 }}>
+          Tìm kiếm
+        </RNText>
+        <SearchInput value={query} onChangeText={setQuery} onClear={clearQuery} />
       </View>
 
-      {/* Results */}
-      <View className="flex-1 px-4">
-        {isLoading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color="#6b7280" />
-            <Text className="text-muted-foreground mt-4">Searching...</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={notes}
-            renderItem={renderNoteItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingTop: 16, paddingBottom: 20 }}
-            ListEmptyComponent={
-              <View className="flex-1 justify-center items-center py-12">
-                <Feather name="search" size={48} color="#d1d5db" />
-                <Text className="text-muted-foreground text-center mt-4">
-                  {searchQuery || selectedCategory !== "all"
-                    ? "No notes found matching your search"
-                    : "Start typing to search your notes"}
-                </Text>
-              </View>
-            }
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
+      {/* Segment bar — only when searching */}
+      {isSearching && (
+        <SegmentBar
+          active={segment}
+          serviceCnt={serviceResults.length}
+          providerCnt={providerResults.length}
+          onChange={setSegment}
+        />
+      )}
+
+      {/* Content */}
+      {!isSearching ? (
+        <SearchBrowse />
+      ) : !hasResults ? (
+        <NoResults query={query} />
+      ) : (
+        <FlatList<SearchResult>
+          key={segment}
+          data={currentResults as SearchResult[]}
+          keyExtractor={(_, i) => `${segment}-${i}`}
+          renderItem={({ item }) =>
+            item.type === 'service' ? (
+              <ServiceResultCard item={item} />
+            ) : (
+              <ProviderCard provider={item.provider} />
+            )
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 24, flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={<NoResults query={query} />}
+        />
+      )}
     </View>
   );
 };
