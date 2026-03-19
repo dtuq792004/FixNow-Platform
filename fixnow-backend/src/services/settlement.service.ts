@@ -4,7 +4,7 @@ import { Wallet } from "../models/wallet.model";
 export async function settlePayment(payment: any) {
 
   await Wallet.updateOne(
-    { providerId: payment.providerId },
+    { userId: payment.providerId },
     {
       $inc: {
         pending: -payment.providerAmount,

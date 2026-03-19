@@ -3,7 +3,7 @@ import { WithdrawRequest } from "../models/withdrawRequest.model";
 import { Wallet } from "../models/wallet.model";
 
 export const createWithdrawRequestService = async (
-  providerId: string,
+  userId: string,
   amount: number,
   bankName: string,
   accountNumber: string,
@@ -14,7 +14,7 @@ export const createWithdrawRequestService = async (
     throw new Error("Amount must be greater than 0");
   }
 
-  const wallet = await Wallet.findOne({ providerId });
+  const wallet = await Wallet.findOne({ userId });
 
   if (!wallet) {
     throw new Error("Wallet not found");
@@ -25,7 +25,7 @@ export const createWithdrawRequestService = async (
   }
 
   const existingPending = await WithdrawRequest.findOne({
-    providerId,
+    userId,
     status: "PENDING"
   });
 
@@ -39,7 +39,7 @@ export const createWithdrawRequestService = async (
   await wallet.save();
 
   const withdrawRequest = await WithdrawRequest.create({
-    providerId,
+    userId,
     amount,
     bankName,
     accountNumber,
@@ -65,7 +65,7 @@ export const approveWithdrawRequestService = async (
     throw new Error("Request already processed");
   }
 
-  const wallet = await Wallet.findOne({ providerId: request.providerId });
+  const wallet = await Wallet.findOne({ userId: request.userId });
 
   if (!wallet) {
     throw new Error("Wallet not found");
@@ -101,7 +101,7 @@ export const rejectWithdrawRequestService = async (
     throw new Error("Request already processed");
   }
 
-  const wallet = await Wallet.findOne({ providerId: request.providerId });
+  const wallet = await Wallet.findOne({ userId: request.userId });
 
   if (!wallet) {
     throw new Error("Wallet not found");
@@ -122,8 +122,8 @@ export const rejectWithdrawRequestService = async (
   return request;
 };
 
-export const getProviderWithdrawRequestsService = async (providerId: string) => {
-  return WithdrawRequest.find({ providerId }).sort({ createdAt: -1 });
+export const getUserWithdrawRequestsService = async (userId: string) => {
+  return WithdrawRequest.find({ userId }).sort({ createdAt: -1 });
 };
 
 export const getAllWithdrawRequestsService = async (status?: string) => {
@@ -135,6 +135,6 @@ export const getAllWithdrawRequestsService = async (status?: string) => {
   }
 
   return WithdrawRequest.find(filter)
-    .populate("providerId", "fullName email")
+    .populate("userId", "fullName email")
     .sort({ createdAt: -1 });
 };

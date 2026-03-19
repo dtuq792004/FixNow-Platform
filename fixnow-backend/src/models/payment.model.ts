@@ -3,13 +3,9 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IPayment extends Document {
   requestId: mongoose.Types.ObjectId;
   customerId: mongoose.Types.ObjectId;
-  providerId: mongoose.Types.ObjectId;
+  providerId?: mongoose.Types.ObjectId;
 
   orderCode: number;
-
-  originalAmount: number;
-  discountCode?: string;
-  discountAmount: number;
 
   amount: number;
   platformFee: number;
@@ -39,28 +35,13 @@ const paymentSchema = new Schema<IPayment>(
 
     providerId: {
       type: Schema.Types.ObjectId,
-      ref: "User", 
-      required: true,
+      ref: "User",
     },
 
     orderCode: {
       type: Number,
       required: true,
       unique: true,
-    },
-
-    originalAmount: {
-      type: Number,
-      required: true,
-    },
-
-    discountCode: {
-      type: String,
-    },
-
-    discountAmount: {
-      type: Number,
-      default: 0,
     },
 
     amount: {

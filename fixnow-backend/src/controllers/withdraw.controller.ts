@@ -3,7 +3,7 @@ import {
   createWithdrawRequestService,
   approveWithdrawRequestService,
   rejectWithdrawRequestService,
-  getProviderWithdrawRequestsService,
+  getUserWithdrawRequestsService,
   getAllWithdrawRequestsService
 } from "../services/withdraw.service";
 
@@ -13,12 +13,12 @@ export const createWithdrawRequestController = async (req: Request, res: Respons
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const providerId = req.user.id;
+    const userId = req.user.id;
 
     const { amount, bankName, accountNumber, accountHolder } = req.body;
 
     const result = await createWithdrawRequestService(
-      providerId,
+      userId,
       amount,
       bankName,
       accountNumber,
@@ -39,16 +39,16 @@ export const createWithdrawRequestController = async (req: Request, res: Respons
   }
 };
 
-export const getProviderWithdrawRequestsController = async (req: Request, res: Response) => {
+export const getUserWithdrawRequestsController = async (req: Request, res: Response) => {
   try {
 
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const providerId = req.user.id;
+    const userId = req.user.id;
 
-    const result = await getProviderWithdrawRequestsService(providerId);
+    const result = await getUserWithdrawRequestsService(userId);
 
     res.json(result);
 

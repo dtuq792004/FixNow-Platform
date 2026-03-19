@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createWithdrawRequestController,
-  getProviderWithdrawRequestsController,
+  getUserWithdrawRequestsController,
   getAllWithdrawRequestsController,
   approveWithdrawRequestController,
   rejectWithdrawRequestController
@@ -10,7 +10,21 @@ import {
 const router = express.Router();
 
 /*
-Provider
+User (Provider/Customer)
+*/
+
+router.post(
+  "/withdraw",
+  createWithdrawRequestController
+);
+
+router.get(
+  "/withdraws",
+  getUserWithdrawRequestsController
+);
+
+/*
+Backward compatibility or specific prefixes
 */
 
 router.post(
@@ -20,7 +34,17 @@ router.post(
 
 router.get(
   "/provider/withdraws",
-  getProviderWithdrawRequestsController
+  getUserWithdrawRequestsController
+);
+
+router.post(
+  "/customer/withdraw",
+  createWithdrawRequestController
+);
+
+router.get(
+  "/customer/withdraws",
+  getUserWithdrawRequestsController
 );
 
 /*

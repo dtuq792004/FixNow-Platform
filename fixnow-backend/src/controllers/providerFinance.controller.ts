@@ -28,7 +28,25 @@ export const getProviderWallet = async (req: Request, res: Response) => {
   try {
     const providerId = req.params.providerId as string;
 
-    const wallet = await walletService.getWalletByProvider(providerId);
+    const wallet = await walletService.getWalletByUser(providerId);
+
+    res.json({
+      success: true,
+      data: wallet
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getCustomerWallet = async (req: Request, res: Response) => {
+  try {
+    const customerId = req.params.customerId as string;
+
+    const wallet = await walletService.getWalletByUser(customerId);
 
     res.json({
       success: true,

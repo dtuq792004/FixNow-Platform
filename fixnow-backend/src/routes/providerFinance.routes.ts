@@ -13,4 +13,9 @@ router.get(
   financeController.getProviderWallet
 );
 
+router.get(
+  "/customers/:customerId/wallet",
+  financeController.getCustomerWallet
+);
+
 export default router;

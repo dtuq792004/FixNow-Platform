@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWithdrawRequest extends Document {
-  providerId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
 
   amount: number;
 
@@ -22,7 +22,7 @@ export interface IWithdrawRequest extends Document {
 
 const withdrawRequestSchema = new Schema<IWithdrawRequest>(
   {
-    providerId: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,

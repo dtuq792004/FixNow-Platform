@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWallet extends Document {
-  providerId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
 
   balance: number;     
   pending: number;     
@@ -15,8 +15,9 @@ export interface IWallet extends Document {
 
 const walletSchema = new Schema<IWallet>(
   {
-    providerId: {
+    userId: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       unique: true,
       index: true

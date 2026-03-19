@@ -9,6 +9,7 @@ import {
     startServiceController,
     completeServiceController,
     confirmCompletionController,
+    providerCancelRequestController,
     RequestController
 } from '../controllers/request.controller';
 
@@ -30,4 +31,5 @@ router.get('/provider', authMiddleware, getAvailableRequestsController);
 router.patch('/:id/respond', authMiddleware, respondRequestController);
 router.patch('/:id/start', authMiddleware, startServiceController);
 router.patch('/:id/complete', authMiddleware, completeServiceController);
-export default router;  
+router.patch('/:id/provider-cancel', authMiddleware, providerCancelRequestController);
+export default router;

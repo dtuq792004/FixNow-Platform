@@ -25,7 +25,7 @@ cron.schedule("0 * * * *", async () => {
     if (!payment) continue;
 
     await Wallet.updateOne(
-      { providerId: payment.providerId },
+      { userId: payment.providerId },
       {
         $inc: {
           pending: -payment.providerAmount,
