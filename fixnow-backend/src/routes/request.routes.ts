@@ -1,3 +1,4 @@
+import { Router } from "express";
 import express from 'express';
 import { 
     createRequestController,
@@ -7,12 +8,17 @@ import {
     respondRequestController,
     startServiceController,
     completeServiceController,
-    confirmCompletionController
+    confirmCompletionController,
+    providerCancelRequestController,
+    RequestController
 } from '../controllers/request.controller';
 
  import { authMiddleware } from '../middlewares/auth.middleware'
 
-const router = express.Router();
+const router = Router();
+
+router.post("/:id/complete", RequestController.providerComplete);
+router.post("/:id/confirm", RequestController.customerConfirm);
 
 // //Customer routes
 router.post('/', authMiddleware, createRequestController);
@@ -25,4 +31,5 @@ router.get('/provider', authMiddleware, getAvailableRequestsController);
 router.patch('/:id/respond', authMiddleware, respondRequestController);
 router.patch('/:id/start', authMiddleware, startServiceController);
 router.patch('/:id/complete', authMiddleware, completeServiceController);
-export default router;  
+router.patch('/:id/provider-cancel', authMiddleware, providerCancelRequestController);
+export default router;

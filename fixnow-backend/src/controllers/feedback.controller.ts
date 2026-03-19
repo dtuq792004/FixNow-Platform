@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User, UserDocument } from "../models/user.model";
+import User, {IUser } from "../models/user.model";
 import * as FeedbackService from "../services/feedback.services";
 import { IRequestFeedback } from "../models/feedback.model";
 import mongoose from "mongoose";

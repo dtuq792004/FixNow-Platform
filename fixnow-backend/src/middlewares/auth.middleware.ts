@@ -2,10 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 // Kiểm tra nhiều tên biến có thể có
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 
-                       process.env.JWT_SECRET || 
-                       process.env.JWT_ACCESS_SECRET ||
-                       process.env.TOKEN_SECRET;
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 if (!ACCESS_SECRET) {
   throw new Error("ACCESS_TOKEN_SECRET (hoặc JWT_SECRET/JWT_ACCESS_SECRET/TOKEN_SECRET) chưa được định nghĩa trong biến môi trường.");
@@ -15,7 +12,6 @@ interface DecodedToken extends jwt.JwtPayload {
   id: string;
   username: string;
   role: string;
-  warehouseId: string;
 }
 
 declare global {
