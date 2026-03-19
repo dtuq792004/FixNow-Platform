@@ -18,8 +18,8 @@ export interface IRequest extends Document {
   requestType: RequestType;
 
   // Pricing fields cho tính minh bạch và tin cậy
-  price: number; // Đây là giá cơ sở (originalPrice)
-  originalPrice: number;
+  totalPrice: number;
+  discountPrice: number; // tien giam gia tu promo code
   discountAmount: number;
   finalPrice: number;
   promoCode?: string;
@@ -27,7 +27,6 @@ export interface IRequest extends Document {
   description?: string;
   media?: string[];
   status: RequestStatus;
-  customerConfirmedAt?: Date;
   providerCompletedAt?: Date;
   startAt: Date;
   completionMedia?: string[];
@@ -62,11 +61,11 @@ const requestSchema = new Schema<IRequest>(
       enum: ["NORMAL", "URGENT", "RECURRING"],
       default: "NORMAL",
     },
-    price: {
+    totalPrice: {
       type: Number,
       required: true,
     },
-    originalPrice: {
+    discountPrice: {
       type: Number,
       required: true,
     },
@@ -116,7 +115,6 @@ const requestSchema = new Schema<IRequest>(
 
     startAt: Date,
     providerCompletedAt: Date,
-    customerConfirmedAt: Date,
 
   },
   { timestamps: true }
