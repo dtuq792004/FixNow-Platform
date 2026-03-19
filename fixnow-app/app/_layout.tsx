@@ -54,8 +54,10 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(provider-tabs)" />
           <Stack.Screen name="requests/index" />
           <Stack.Screen name="requests/[id]" />
+          <Stack.Screen name="jobs/[id]" />
         </Stack>
       </SafeAreaProvider>
       <StatusBar style="dark" />
