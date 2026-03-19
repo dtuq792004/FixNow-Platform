@@ -15,7 +15,7 @@ export type AuthSession = {
   user: AuthUser;
 };
 
-// Generic auth error shape (không phụ thuộc Supabase)
+// Generic auth error shape
 export type AuthError = {
   message: string;
   status?: number;
@@ -23,20 +23,26 @@ export type AuthError = {
 
 // ─── Backend Response Shapes ─────────────────────────────────────────────────
 
+// POST /auth/login → { message, accessToken, user }
 export type LoginResponseData = {
   message: string;
-  data: {
-    token: string;
-    user: AuthUser;
-  };
+  accessToken: string;
+  user: AuthUser;
 };
 
+// POST /auth/register → { message, user }
 export type RegisterResponseData = {
   message: string;
   user: AuthUser;
 };
 
+// POST /auth/forgot-password → { message, otp? (dev only) }
 export type ForgotPasswordResponseData = {
   message: string;
-  resetUrl: string;
+  otp?: string;
+};
+
+// POST /auth/reset-password → { message }
+export type ResetPasswordResponseData = {
+  message: string;
 };
