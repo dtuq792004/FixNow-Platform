@@ -12,17 +12,6 @@ export class RequestController {
       res.status(400).json({ message: err.message });
     }
   }
-
-  static async customerConfirm(req: Request, res: Response) {
-    try {
-      const id = req.params.id as string;
-      await RequestService.customerConfirm(id);
-      res.json({ message: "Payment settled to provider" });
-    } catch (err: any) {
-      res.status(400).json({ message: err.message });
-    }
-  }
-
 }
 import * as requestService from "../services/request.service";
 //customer
@@ -155,43 +144,4 @@ export const completeServiceController = async (req: Request, res: Response) => 
   }
 };
 
-export const confirmCompletionController = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
 
-    const customerId = req.user._id;
-    const  id  = req.params.id as string;
-
-    const request = await requestService.confirmCompletion(id, customerId);
-
-    return res.json({
-      message: "Service confirmed completed",
-      data: request,
-    });
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
-  }
-};
-
-export const providerCancelRequestController = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const providerId = req.user._id;
-    const id = req.params.id as string;
-    const { reason } = req.body;
-
-    const request = await requestService.providerCancelRequest(id, providerId, reason);
-
-    return res.json({
-      message: "Service cancelled and refund processed if applicable",
-      data: request,
-    });
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
-  }
-};
