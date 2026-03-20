@@ -1,18 +1,4 @@
 import { Request, Response } from "express";
-import { RequestService } from "../services/request.service";
-
-export class RequestController {
-
-  static async providerComplete(req: Request, res: Response) {
-    try {
-      const id = req.params.id as string;
-      await RequestService.providerComplete(id);
-      res.json({ message: "Service marked as completed" });
-    } catch (err: any) {
-      res.status(400).json({ message: err.message });
-    }
-  }
-}
 import * as requestService from "../services/request.service";
 //customer
 export const createRequestController = async (req: Request, res: Response) => {
