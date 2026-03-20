@@ -1,11 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 
 export type RequestStatus =
+  | "AWAITING_PAYMENT" // Đang chờ thanh toán trước khi hiện lên chợ việc
   | "PENDING"
   | "ACCEPTED"
-  | "REJECTED"
   | "IN_PROGRESS"
-  | "WAITING_CUSTOMER_CONFIRM"
   | "COMPLETED"
   | "CANCELLED";
 
@@ -17,10 +16,17 @@ export interface IRequest extends Document {
   serviceId: mongoose.Types.ObjectId;
   addressId: mongoose.Types.ObjectId;
   requestType: RequestType;
+
+  // Pricing fields cho tính minh bạch và tin cậy
+  totalPrice: number;
+  discountPrice: number; // tien giam gia tu promo code
+  discountAmount: number;
+  finalPrice: number;
+  promoCode?: string;
+
   description?: string;
-  media: string[];
+  media?: string[];
   status: RequestStatus;
-  customerConfirmedAt?: Date;
   providerCompletedAt?: Date;
   startAt: Date;
   completionMedia?: string[];
@@ -55,7 +61,25 @@ const requestSchema = new Schema<IRequest>(
       enum: ["NORMAL", "URGENT", "RECURRING"],
       default: "NORMAL",
     },
-
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    discountPrice: {
+      type: Number,
+      required: true,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+    finalPrice: {
+      type: Number,
+      required: true,
+    },
+    promoCode: {
+      type: String,
+    },
     description: {
       type: String,
     },
@@ -69,15 +93,14 @@ const requestSchema = new Schema<IRequest>(
     status: {
       type: String,
       enum: [
+        "AWAITING_PAYMENT",
         "PENDING",
         "ACCEPTED",
-        "REJECTED",
         "IN_PROGRESS",
-        "WAITING_CUSTOMER_CONFIRM",
         "COMPLETED",
         "CANCELLED",
       ],
-      default: "PENDING",
+      default: "AWAITING_PAYMENT",
     },
 
     completionMedia: [
@@ -92,7 +115,6 @@ const requestSchema = new Schema<IRequest>(
 
     startAt: Date,
     providerCompletedAt: Date,
-    customerConfirmedAt: Date,
 
   },
   { timestamps: true }
