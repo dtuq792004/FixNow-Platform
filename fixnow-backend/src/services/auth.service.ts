@@ -134,7 +134,6 @@ export const verifyOtpService = async (otp: string) => {
   const resetToken = crypto.randomBytes(32).toString("hex");
   
   // Store token temporarily (could use Redis, but for now use user document)
-  user.resetPasswordTokenHash = resetToken;
   await user.save();
 
   return { 
@@ -171,8 +170,6 @@ export const resetPasswordService = async (
   const passwordHash = await bcrypt.hash(newPassword, 10);
   user.passwordHash = passwordHash;
   user.resetPasswordOtp = undefined;
-  user.resetPasswordOtpExpire = undefined;
-  user.resetPasswordTokenHash = undefined; // Clear reset token
 
   await user.save();
 
