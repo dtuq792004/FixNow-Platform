@@ -13,18 +13,13 @@ const categorySchema = new mongoose.Schema(
       default: "",
     },
 
-    icon: {
-      type: String,
-      default: "",
-    },
-
     isActive: {
       type: Boolean,
       default: true,
     },
   },
   {
-    timestamps: true, // tạo createdAt, updatedAt
+    timestamps: true, 
   }
 );
 

@@ -1,11 +1,10 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export type RequestStatus =
+  | "AWAITING_PAYMENT"
   | "PENDING"
   | "ACCEPTED"
-  | "REJECTED"
   | "IN_PROGRESS"
-  | "WAITING_CUSTOMER_CONFIRM"
   | "COMPLETED"
   | "CANCELLED";
 
@@ -14,17 +13,28 @@ export type RequestType = "NORMAL" | "URGENT" | "RECURRING";
 export interface IRequest extends Document {
   customerId: mongoose.Types.ObjectId;
   providerId?: mongoose.Types.ObjectId;
-  serviceId: mongoose.Types.ObjectId;
+
+  services: mongoose.Types.ObjectId[];
+
   addressId: mongoose.Types.ObjectId;
   requestType: RequestType;
+
+  totalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
+  promoCode?: string;
+
   description?: string;
-  media: string[];
+  media?: string[];
+
   status: RequestStatus;
-  customerConfirmedAt?: Date;
+
   providerCompletedAt?: Date;
   startAt: Date;
+
   completionMedia?: string[];
   completionNote?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,67 +46,82 @@ const requestSchema = new Schema<IRequest>(
       ref: "User",
       required: true,
     },
+
     providerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    serviceId: {
-      type: Schema.Types.ObjectId,
-      ref: "Service",
-      required: true,
-    },
+
+    services: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Service",
+        required: true,
+      },
+    ],
+
     addressId: {
       type: Schema.Types.ObjectId,
       ref: "Address",
       required: true,
     },
+
     requestType: {
       type: String,
       enum: ["NORMAL", "URGENT", "RECURRING"],
       default: "NORMAL",
     },
 
-    description: {
-      type: String,
+    totalPrice: {
+      type: Number,
+      required: true,
     },
 
-    media: [
-      {
-        type: String,
-      },
-    ],
-    
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    finalPrice: {
+      type: Number,
+      required: true,
+    },
+
+    promoCode: String,
+
+    description: String,
+
+    media: [String],
+
     status: {
       type: String,
       enum: [
+        "AWAITING_PAYMENT",
         "PENDING",
         "ACCEPTED",
-        "REJECTED",
         "IN_PROGRESS",
-        "WAITING_CUSTOMER_CONFIRM",
         "COMPLETED",
         "CANCELLED",
       ],
-      default: "PENDING",
+      default: "AWAITING_PAYMENT",
     },
 
-    completionMedia: [
-      {
-        type: String,
-      },
-    ],
-
-    completionNote: {
-      type: String,
+    startAt: {
+      type: Date,
+      default: Date.now,
     },
 
-    startAt: Date,
     providerCompletedAt: Date,
-    customerConfirmedAt: Date,
 
+    completionMedia: [String],
+
+    completionNote: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Request =  mongoose.model<IRequest>("Request", requestSchema);
+const Request =
+  mongoose.models.Request ||
+  mongoose.model<IRequest>("Request", requestSchema, "requests");
+
 export default Request;
