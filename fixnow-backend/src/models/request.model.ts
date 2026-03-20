@@ -113,7 +113,11 @@ const requestSchema = new Schema<IRequest>(
       type: String,
     },
 
-    startAt: Date,
+    startAt: {
+      type: Date,
+      default: Date.now,
+    },
+    
     providerCompletedAt: Date,
 
   },
