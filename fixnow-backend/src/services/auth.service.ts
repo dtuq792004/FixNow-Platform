@@ -134,8 +134,10 @@ export const verifyOtpService = async (otp: string) => {
   const resetToken = crypto.randomBytes(32).toString("hex");
   
   // Store token temporarily (could use Redis, but for now use user document)
+  user.resetPasswordTokenHash = resetToken;
   await user.save();
 
+  console.log("RESET TOKEN GENERATED:", resetToken);
   return { 
     message: "Xác thực OTP thành công",
     resetToken // Client should store this for reset password
@@ -157,7 +159,7 @@ export const resetPasswordService = async (
 
   // Find user by reset token
   const user = await User.findOne({ resetPasswordTokenHash: resetToken });
-
+console.log("RESET TOKEN RECEIVED:", resetToken);
   if (!user) {
     throw new Error("Token không hợp lệ hoặc đã hết hạn");
   }
@@ -170,6 +172,8 @@ export const resetPasswordService = async (
   const passwordHash = await bcrypt.hash(newPassword, 10);
   user.passwordHash = passwordHash;
   user.resetPasswordOtp = undefined;
+  user.resetPasswordOtpExpire = undefined;
+  user.resetPasswordTokenHash = undefined; // Clear reset token
 
   await user.save();
 
@@ -244,6 +248,5 @@ export const logoutService = async (refreshToken: string) => {
 
   return { message: "Đăng xuất thành công" };
 };
-
 
 
