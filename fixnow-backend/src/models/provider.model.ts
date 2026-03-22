@@ -45,7 +45,7 @@ const providerSchema = new Schema<IProvider>(
     serviceCategories: [
       {
         type: Schema.Types.ObjectId,
-        ref: "ServiceCategory",
+        ref: "Category",
       },
     ],
     workingAreas: [
