@@ -21,6 +21,7 @@ router.post("/", authMiddleware, createRequestController);
 router.get("/customer", authMiddleware, getMyRequestsController);
 router.patch("/:id/cancel", authMiddleware, cancelRequestController);
 // router.patch('/:id/confirm', authMiddleware, confirmCompletionController);
+
 // //Provider routes
 router.get("/provider", authMiddleware, getAvailableRequestsController);
 router.patch("/:id/respond", authMiddleware, respondRequestController);

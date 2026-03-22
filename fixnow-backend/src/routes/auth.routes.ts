@@ -20,7 +20,7 @@ router.post("/logout", logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/reset-password", resetPassword);
-router.post("/refresh-token", refreshToken);
+router.post("/refresh", refreshToken);
 router.patch("/change-password", authMiddleware, changePassword);
 
 

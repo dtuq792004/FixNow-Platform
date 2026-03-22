@@ -18,6 +18,7 @@ import categoryRoutes from "./routes/category.routes"
 import feedbackRoutes from "./routes/feedback.routes";
 import withdrawRoutes from "./routes/withdraw.routes";
 import financeRoutes from "./routes/providerFinance.routes";
+import chatRoutes from "./routes/chat.routes";
 
 const app: Application = express();
 
@@ -63,6 +64,7 @@ app.use("/providers", providerRoutes);
 app.use("/admin", adminRoutes);
 app.use("/withdraw", withdrawRoutes);
 app.use("/finance", financeRoutes);
+app.use("/chat", chatRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
