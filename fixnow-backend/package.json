@@ -4,6 +4,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node dist/server.js",
     "build": "tsc && tsc-alias",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,6 +28,8 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.0",
     "socket.io": "^4.8.3",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
