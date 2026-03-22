@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 
 let io: Server;
 
@@ -7,8 +7,28 @@ export const setIO = (instance: Server) => {
 };
 
 export const getIO = () => {
-    return io;
-}
+  return io;
+};
+
+export const registerNotificationHandlers = (socket: Socket) => {
+  const user = (socket as any).user;
+
+  socket.on("notification:join", () => {
+    if (!user?.id) {
+      socket.emit("notification:error", { message: "Unauthorized" });
+      return;
+    }
+
+    socket.join(user.id);
+    socket.emit("notification:joined", { room: user.id });
+  });
+
+  socket.on("notification:leave", () => {
+    if (!user?.id) return;
+    socket.leave(user.id);
+    socket.emit("notification:left", { room: user.id });
+  });
+};
 
 export const sendNotificationRealtime = (userId: string, notification: any) => {
   if (!io) {

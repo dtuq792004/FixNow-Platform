@@ -1,9 +1,10 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { registerChatHandlers } from "./chat.socket";
-import { setIO } from "./notification.socket";
+import { registerLocationHandlers } from "./location.socket";
+import { registerNotificationHandlers, setIO } from "./notification.socket";
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || "";
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 let io: Server;
 
@@ -11,8 +12,8 @@ export const initSocket = (server: any) => {
   io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"]
-    }
+      methods: ["GET", "POST"],
+    },
   });
 
   // Gán cho notification
@@ -24,6 +25,9 @@ export const initSocket = (server: any) => {
     if (!token) return next(new Error("Authentication error"));
 
     try {
+      if (!ACCESS_SECRET) {
+        throw new Error("ACCESS_TOKEN_SECRET not defined");
+      }
       const decoded = jwt.verify(token, ACCESS_SECRET) as any;
       (socket as any).user = decoded;
       next();
@@ -34,7 +38,7 @@ export const initSocket = (server: any) => {
 
   io.on("connection", (socket: Socket) => {
     const user = (socket as any).user;
-    
+
     // Tham gia phòng cá nhân
     if (user?.id) {
       socket.join(user.id);
@@ -42,16 +46,14 @@ export const initSocket = (server: any) => {
 
     // Đăng ký chat handlers
     registerChatHandlers(io, socket);
-
-    socket.on("disconnect", () => {
-      // console.log(`User ${user?.id} disconnected`);
-    });
+    registerLocationHandlers(io, socket);
+    registerNotificationHandlers(socket);
   });
 
   return io;
 };
 
 export const getIO = () => {
-    if(!io) throw new Error("Socket not initialized");
-    return io;
-}
+  if (!io) throw new Error("Socket not initialized");
+  return io;
+};
