@@ -1,6 +1,5 @@
 import User, { IUser } from "../models/user.model";
 import Session from "../models/session.model";
-import PasswordResetToken from "../models/passwordResetToken.model";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -8,7 +7,7 @@ import { generateOtp } from "../utils/generateOtp";
 import { hashToken } from "../utils/hashToken";
 import { sendOtpEmail } from "../utils/sendEmail";
 
-const ACCESS_TOKEN_TTL = "15m";
+const ACCESS_TOKEN_TTL = "60m";
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 ngày
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 

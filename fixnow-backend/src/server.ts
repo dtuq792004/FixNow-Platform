@@ -5,6 +5,7 @@ dotenv.config();
 
 import app from "./app";
 import { connectDB } from "./configs/db";
+import { initSocket } from "./sockets/index";
 
 const PORT = process.env.PORT;
 
@@ -13,6 +14,7 @@ const startServer = async () => {
     await connectDB();
 
     const server = http.createServer(app);
+    initSocket(server);
 
     server.listen(PORT, () => {
       console.log(`Server đang chạy trên cổng ${PORT}`);

@@ -10,7 +10,6 @@ export async function calculatePayment(
     throw new Error("Invalid base amount");
   }
 
-  // Lấy platform fee config
   const config = await PlatformSetting.findOne();
   const platformFeePercent = config?.platformFeePercent ?? 20;
 
@@ -28,12 +27,10 @@ export async function calculatePayment(
       throw new Error("Invalid promo code");
     }
 
-    // Check expiration
     if (promo.expiredAt && promo.expiredAt < new Date()) {
       throw new Error("Promo expired");
     }
 
-    // Check usage limit
     if (
       promo.usageLimit !== null &&
       promo.usageLimit !== undefined &&
@@ -44,14 +41,12 @@ export async function calculatePayment(
 
     discountCode = promo.code;
 
-    // Calculate discount
     if (promo.discountType === "PERCENT") {
       discountAmount = baseAmount * (promo.discountValue / 100);
     } else {
       discountAmount = promo.discountValue;
     }
 
-    // Không cho giảm quá tiền gốc
     if (discountAmount > baseAmount) {
       discountAmount = baseAmount;
     }
