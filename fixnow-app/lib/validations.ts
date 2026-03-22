@@ -50,26 +50,31 @@ export const forgotPasswordSchema = z.object({
     .email("Please enter a valid email address"),
 });
 
+// ─── OTP Verification ─────────────────────────────────────────────────────────
+export const otpSchema = z.object({
+  otp: z
+    .string()
+    .min(1, "Vui lòng nhập mã OTP")
+    .length(6, "Mã OTP phải có đúng 6 chữ số")
+    .regex(/^\d+$/, "Mã OTP chỉ gồm chữ số"),
+});
+
 // ─── Reset Password ───────────────────────────────────────────────────────────
-// resetToken là chuỗi hex từ email link (không phải 6 số như OTP)
+// resetToken nhận tự động từ bước verify-otp, user chỉ nhập mật khẩu mới
 export const resetPasswordSchema = z
   .object({
-    resetToken: z
-      .string()
-      .min(1, "Reset token is required")
-      .min(10, "Reset token appears to be invalid"),
     password: z
       .string()
-      .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters")
+      .min(1, "Vui lòng nhập mật khẩu mới")
+      .min(8, "Mật khẩu tối thiểu 8 ký tự")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+        "Mật khẩu phải có chữ hoa, chữ thường và số"
       ),
-    confirmPassword: z.string().min(1, "Confirm password is required"),
+    confirmPassword: z.string().min(1, "Vui lòng xác nhận mật khẩu"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "Mật khẩu xác nhận không khớp",
     path: ["confirmPassword"],
   });
 
@@ -78,4 +83,5 @@ export type SignInFormData = z.infer<typeof signInSchema>;
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 export type EmailVerificationFormData = z.infer<typeof emailVerificationSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type OtpFormData = z.infer<typeof otpSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
