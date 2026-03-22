@@ -5,7 +5,7 @@ dotenv.config();
 
 import app from "./app";
 import { connectDB } from "./configs/db";
-import { initSocket } from "./sockets/index";
+import { initSocket } from "./sockets/initSocket";
 
 const PORT = process.env.PORT;
 
