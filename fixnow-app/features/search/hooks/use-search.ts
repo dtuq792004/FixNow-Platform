@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// project imports
 import { SERVICE_CATEGORIES } from '~/features/home/data/service-categories';
-import { MOCK_PROVIDERS } from '../data/mock-providers';
+import { searchProvidersApi } from '../services/search.service';
 import type { ProviderSearchResult, SearchSegment, ServiceSearchResult } from '../types';
 
 const SPECIALTY_KEYWORDS: Record<string, string[]> = {
@@ -16,6 +18,8 @@ export const useSearch = () => {
   const [query, setQuery] = useState('');
   const [segment, setSegment] = useState<SearchSegment>('service');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [providerResults, setProviderResults] = useState<ProviderSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce 300ms
@@ -24,6 +28,28 @@ export const useSearch = () => {
     timerRef.current = setTimeout(() => setDebouncedQuery(query.trim()), 300);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [query]);
+
+  // Fetch providers from API
+  useEffect(() => {
+    const fetchProviders = async () => {
+      if (!debouncedQuery) {
+        setProviderResults([]);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        const results = await searchProvidersApi(debouncedQuery);
+        setProviderResults(results);
+      } catch (err) {
+        console.error('Search providers failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, [debouncedQuery]);
 
   const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -49,17 +75,6 @@ export const useSearch = () => {
       bgClass: cat.bgClass,
       iconColor: cat.iconColor,
     }));
-  }, [debouncedQuery, matchesQuery]);
-
-  const providerResults = useMemo((): ProviderSearchResult[] => {
-    if (!debouncedQuery) return [];
-    return MOCK_PROVIDERS.filter((p) => {
-      const specialtyLabels = p.specialties.map(
-        (s) => SERVICE_CATEGORIES.find((c) => c.type === s)?.label ?? s
-      );
-      const keywords = p.specialties.flatMap((s) => SPECIALTY_KEYWORDS[s] ?? []);
-      return matchesQuery([p.name, p.location, ...specialtyLabels, ...keywords]);
-    }).map((p) => ({ type: 'provider' as const, provider: p }));
   }, [debouncedQuery, matchesQuery]);
 
   const hasResults = serviceResults.length > 0 || providerResults.length > 0;

@@ -1,13 +1,31 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text as RNText, View, Pressable } from 'react-native';
 import { SERVICE_CATEGORIES } from '~/features/home/data/service-categories';
-import { MOCK_PROVIDERS } from '~/features/search/data/mock-providers';
+import { getTopRatedProvidersApi } from '../services/search.service';
+import type { ProviderSearchResult } from '../types';
 import { ProviderCard } from './provider-card';
 
 /** Shown when search query is empty — browse categories + top providers */
 export const SearchBrowse = () => {
   const router = useRouter();
+  const [topProviders, setTopProviders] = useState<ProviderSearchResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTopProviders = async () => {
+      try {
+        setError(null);
+        const results = await getTopRatedProvidersApi();
+        setTopProviders(results);
+      } catch (err: any) {
+        console.error('Fetch top providers failed:', err);
+        setError(err.message || 'Lỗi kết nối server');
+      }
+    };
+    fetchTopProviders();
+  }, []);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -48,9 +66,19 @@ export const SearchBrowse = () => {
         <RNText style={{ fontSize: 15, fontWeight: '700', color: '#18181b', marginBottom: 12 }}>
           Thợ nổi bật
         </RNText>
-        {MOCK_PROVIDERS.slice(0, 4).map((p) => (
-          <ProviderCard key={p.id} provider={p} />
+        {topProviders.map((item, index) => (
+          <ProviderCard key={`${item.provider.id}-${index}`} provider={item.provider} />
         ))}
+        {topProviders.length === 0 && !error && (
+          <RNText style={{ fontSize: 13, color: '#a1a1aa', textAlign: 'center', marginTop: 10 }}>
+            Chưa có thợ nào có đánh giá nổi bật.
+          </RNText>
+        )}
+        {error && (
+          <RNText style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', marginTop: 10 }}>
+            Lỗi: {error}
+          </RNText>
+        )}
       </View>
     </ScrollView>
   );
