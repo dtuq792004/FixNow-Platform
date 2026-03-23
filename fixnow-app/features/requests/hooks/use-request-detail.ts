@@ -12,8 +12,8 @@ const TIMELINE_STEPS: { status: RequestStatus | 'created'; label: string; descri
 
 const STATUS_ORDER: Record<string, number> = {
   created: 0,
-  pending: 0,
-  assigned: 1,
+  pending: 0,   // PENDING / AWAITING_PAYMENT
+  assigned: 1,  // ACCEPTED
   in_progress: 2,
   completed: 3,
   cancelled: -1,

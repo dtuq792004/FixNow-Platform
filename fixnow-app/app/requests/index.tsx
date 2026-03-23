@@ -3,14 +3,13 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Pressable, Text as RNText, View } from 'react-native';
+import { Alert, Pressable, Text as RNText, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryPicker } from '~/features/requests/components/category-picker';
 import { ConfirmSummary } from '~/features/requests/components/confirm-summary';
 import { DetailsForm } from '~/features/requests/components/details-form';
 import { StepIndicator } from '~/features/requests/components/step-indicator';
 import { SubmitSuccess } from '~/features/requests/components/submit-success';
-import { MOCK_CREATE_REQUEST } from '~/features/requests/data/mock-request-data';
 import { createRequestApi } from '~/features/requests/services/request.service';
 import type { CreateRequestStep, ServiceCategoryType } from '~/features/requests/types';
 import {
@@ -38,10 +37,7 @@ const CreateRequestScreen = () => {
   } = useForm<CreateRequestSchema>({
     resolver: zodResolver(createRequestSchema),
     mode: 'onTouched',
-    // ── Mock defaults: pre-fills the form for UI testing ──
-    // TODO: replace with empty defaults when backend integration is ready:
-    // defaultValues: { category: undefined, title: '', description: '', address: '', note: '' }
-    defaultValues: MOCK_CREATE_REQUEST,
+    defaultValues: { category: undefined as any, title: '', description: '', address: '', note: '' },
   });
 
   // Pre-select category when navigating from the service grid (e.g. ?category=electrical)
@@ -73,8 +69,12 @@ const CreateRequestScreen = () => {
       setIsSubmitting(true);
       const response = await createRequestApi(data);
       setSubmittedId(response.id);
-    } catch {
-      // TODO: show error toast/alert when error handling is in place
+    } catch (err: any) {
+      Alert.alert(
+        'Gửi yêu cầu thất bại',
+        err?.message ?? 'Vui lòng kiểm tra kết nối mạng và thử lại.',
+        [{ text: 'OK' }],
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -128,7 +128,7 @@ const CreateRequestScreen = () => {
             error={errors.category?.message}
           />
         )}
-        {step === 2 && <DetailsForm control={control} errors={errors} />}
+        {step === 2 && <DetailsForm control={control} errors={errors} setValue={setValue} />}
         {step === 3 && (
           <ConfirmSummary
             data={formData as CreateRequestSchema}
@@ -174,3 +174,4 @@ const CreateRequestScreen = () => {
 };
 
 export default CreateRequestScreen;
+

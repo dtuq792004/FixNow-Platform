@@ -16,6 +16,7 @@ export interface CreateRequestResponse {
   id: string;
   status: RequestStatus;
   created_at: string;
+  checkoutUrl?: string;
 }
 
 // ── Request Detail ────────────────────────────────────────────────────────────
