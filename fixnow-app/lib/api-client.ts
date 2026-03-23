@@ -7,7 +7,7 @@ import { useAuthStore } from "~/features/auth/stores/auth.store";
  * Axios instance dùng chung cho toàn app.
  * - baseURL lấy từ EXPO_PUBLIC_API_URL (env)
  * - Request interceptor: tự động đính kèm Bearer token
- * - Response interceptor: chuẩn hoá lỗi về { message, status }
+ * - Response interceptor: chuẩn hoá lỗi về { message, status }, tự refresh token khi 401
  */
 const isLocalAddress = (value: string) =>
   value.includes("localhost") || value.includes("127.0.0.1");
@@ -47,6 +47,7 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 10_000,
+  withCredentials: true, // send httpOnly refreshToken cookie
 });
 
 // ─── Request Interceptor ──────────────────────────────────────────────────────
@@ -59,18 +60,73 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 // ─── Response Interceptor ─────────────────────────────────────────────────────
+let isRefreshing = false;
+let pendingQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+
+const processPendingQueue = (error: unknown, token: string | null) => {
+  pendingQueue.forEach(({ resolve, reject }) => {
+    if (token) resolve(token);
+    else reject(error);
+  });
+  pendingQueue = [];
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message?: string }>) => {
+  async (error: AxiosError<{ message?: string }>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Try token refresh on 401, but not on the refresh endpoint itself
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
+      if (isRefreshing) {
+        // Queue subsequent requests while refresh is in progress
+        return new Promise((resolve, reject) => {
+          pendingQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { data } = await apiClient.post<{ accessToken: string }>("/auth/refresh");
+        const newToken = data.accessToken;
+
+        // Update store with new access token
+        const currentSession = useAuthStore.getState().session;
+        if (currentSession) {
+          useAuthStore.getState().setSession({ ...currentSession, access_token: newToken });
+        }
+
+        processPendingQueue(null, newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processPendingQueue(refreshError, null);
+        // Refresh failed — sign out
+        await useAuthStore.getState().signOut();
+        return Promise.reject({ message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", status: 401 });
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     const message =
       error.response?.data?.message ??
       error.message ??
       "Network error. Please check your connection.";
     const status = error.response?.status;
 
-    // Re-throw dưới dạng plain object để store xử lý
     return Promise.reject({ message, status });
   }
 );
 
 export default apiClient;
+

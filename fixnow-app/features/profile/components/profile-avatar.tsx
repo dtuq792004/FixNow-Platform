@@ -2,12 +2,12 @@ import { Text as RNText, View } from 'react-native';
 import type { AuthUser } from '~/features/auth/types/auth.types';
 
 const getInitials = (user: AuthUser): string => {
-  if (user.fullName) {
+  if (user.fullName?.trim()) {
     const parts = user.fullName.trim().split(' ').filter(Boolean);
     if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     return user.fullName.slice(0, 2).toUpperCase();
   }
-  return user.email.slice(0, 2).toUpperCase();
+  return (user.email?.slice(0, 2) ?? '??').toUpperCase();
 };
 
 const ROLE_LABEL: Record<string, string> = {
