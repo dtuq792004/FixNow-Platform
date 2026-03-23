@@ -17,12 +17,12 @@ export type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
 
 // ─── Address form ─────────────────────────────────────────────────────────────
 export const addressSchema = z.object({
-  label: z.enum(['home', 'work', 'other'], { required_error: 'Vui lòng chọn loại địa chỉ' }),
+  label: z.enum(['home', 'work', 'other'] as const),
   addressLine: z.string().min(5, 'Vui lòng nhập địa chỉ đường (ít nhất 5 ký tự)'),
   ward: z.string().min(1, 'Vui lòng nhập phường/xã'),
   district: z.string().min(1, 'Vui lòng nhập quận/huyện'),
   city: z.string().min(1, 'Vui lòng nhập tỉnh/thành phố'),
-  isDefault: z.boolean().default(false),
+  isDefault: z.boolean(),
 });
 
 export type AddressFormData = z.infer<typeof addressSchema>;

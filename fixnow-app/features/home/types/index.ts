@@ -41,8 +41,10 @@ export interface HomeStats {
 }
 
 export interface ServiceCategoryConfig {
+  _id: string;       // MongoDB ObjectId từ DB (dùng khi tạo request)
   type: ServiceCategoryType;
   label: string;
+  description: string;
   icon: string;
   bgClass: string;
   iconColor: string;
