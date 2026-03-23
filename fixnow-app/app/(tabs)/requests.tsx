@@ -1,10 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, RefreshControl, Text as RNText, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text as RNText, View } from 'react-native';
 import { RequestCard } from '~/features/home/components/request-card';
 import { RequestsFilterTabs } from '~/features/requests/components/requests-filter-tabs';
 import { useRequestsList } from '~/features/requests/hooks/use-requests-list';
-import type { ServiceRequestDetail } from '~/features/requests/types';
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
@@ -41,11 +40,11 @@ const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
 // ── Main screen ───────────────────────────────────────────────────────────────
 const RequestsScreen = () => {
   const router = useRouter();
-  const { filter, setFilter, filtered, refreshing, onRefresh, counts } = useRequestsList();
+  const { filter, setFilter, filtered, refreshing, onRefresh, counts, loading, error } = useRequestsList();
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      {/* Header — same pt-safe pattern as HomeHeader */}
+      {/* Header */}
       <View className="flex-row items-center justify-between pt-safe px-5 pb-3 border-b border-border">
         <RNText style={{ fontSize: 20, fontWeight: '700', color: '#18181b' }}>Yêu cầu của tôi</RNText>
         <Pressable
@@ -61,24 +60,33 @@ const RequestsScreen = () => {
         </Pressable>
       </View>
 
-      {/* Filter chips — fixed height, no layout shift */}
+      {/* Filter chips */}
       <RequestsFilterTabs active={filter} counts={counts} onChange={setFilter} />
 
-      {/* List */}
-      <FlatList
-        data={filtered as ServiceRequestDetail[]}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <RequestCard request={item} />}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 8,
-          paddingBottom: 16,
-          flexGrow: 1,
-        }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={<EmptyState hasFilter={filter !== 'all'} />}
-      />
+      {/* Loading */}
+      {loading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#18181b" />
+        </View>
+      ) : error ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
+          <Feather name="wifi-off" size={32} color="#a1a1aa" style={{ marginBottom: 12 }} />
+          <RNText style={{ fontSize: 14, color: '#71717a', textAlign: 'center' }}>{error}</RNText>
+          <Pressable onPress={onRefresh} style={{ marginTop: 16, paddingHorizontal: 20, paddingVertical: 8, backgroundColor: '#18181b', borderRadius: 10 }}>
+            <RNText style={{ color: '#fff', fontWeight: '600' }}>Thử lại</RNText>
+          </Pressable>
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <RequestCard request={item} />}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16, flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={<EmptyState hasFilter={filter !== 'all'} />}
+        />
+      )}
     </View>
   );
 };

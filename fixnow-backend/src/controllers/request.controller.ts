@@ -1,6 +1,19 @@
 import { Request, Response } from "express";
 import * as requestService from "../services/request.service";
 //customer
+export const getRequestByIdController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const customerId = req.user.id;
+    const { id } = req.params;
+    const request = await requestService.getRequestById(id as string, customerId);
+    return res.json({ data: request });
+  } catch (error: any) {
+    const status = error.message === "Request not found" ? 404 : 500;
+    return res.status(status).json({ message: error.message });
+  }
+};
+
 export const createRequestController = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
