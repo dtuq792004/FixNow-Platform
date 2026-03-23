@@ -8,6 +8,7 @@ import Animated, {
   useDerivedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { useColorScheme } from '~/lib/useColorScheme';
 
 function Progress({
   className,
@@ -55,6 +56,8 @@ function WebIndicator({ value, className }: IndicatorProps) {
 }
 
 function NativeIndicator({ value, className }: IndicatorProps) {
+  const { isDarkColorScheme } = useColorScheme();
+  const fgColor = isDarkColorScheme ? 'hsl(0 0% 98%)' : 'hsl(240 10% 3.9%)';
   const progress = useDerivedValue(() => value ?? 0);
 
   const indicator = useAnimatedStyle(() => {
@@ -72,7 +75,7 @@ function NativeIndicator({ value, className }: IndicatorProps) {
 
   return (
     <ProgressPrimitive.Indicator asChild>
-      <Animated.View style={indicator} className={cn('bg-foreground h-full', className)} />
+      <Animated.View style={[indicator, { height: '100%', backgroundColor: fgColor }]} />
     </ProgressPrimitive.Indicator>
   );
 }

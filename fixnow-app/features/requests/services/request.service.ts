@@ -17,13 +17,13 @@ const BACKEND_TO_FRONTEND_STATUS: Record<string, RequestStatus> = {
 const mapStatus = (s: string): RequestStatus =>
   BACKEND_TO_FRONTEND_STATUS[s] ?? 'pending';
 
-// ── Category resolver: type slug → MongoDB ObjectId ──────────────────────────
+// ── Category resolver ─────────────────────────────────────────────────────────
 const ALL_CATEGORIES = [...SERVICE_CATEGORIES, OTHER_CATEGORY];
 
 const getCategoryId = (type: ServiceCategoryType): string =>
   ALL_CATEGORIES.find((c) => c.type === type)?._id ?? '';
 
-// ── Response mappers ──────────────────────────────────────────────────────────
+// ── Backend response shape ────────────────────────────────────────────────────
 interface BackendRequest {
   _id: string;
   title?: string;
@@ -33,7 +33,7 @@ interface BackendRequest {
   status: string;
   requestType: string;
   categoryId?: { _id: string; name: string } | null;
-  providerId?: { _id: string; fullName: string; avatar?: string } | null;
+  providerId?: { _id: string; fullName: string; avatar?: string; phone?: string } | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -53,7 +53,12 @@ const mapToServiceRequestDetail = (r: BackendRequest): ServiceRequestDetail => {
     created_at: r.createdAt,
     updated_at: r.updatedAt,
     provider: r.providerId
-      ? { id: r.providerId._id, name: r.providerId.fullName, avatar: r.providerId.avatar }
+      ? {
+          id: r.providerId._id,
+          name: r.providerId.fullName,
+          avatar: r.providerId.avatar,
+          phone: r.providerId.phone,
+        }
       : undefined,
   };
 };
@@ -91,4 +96,15 @@ export const createRequestApi = async (
 export const getMyRequestsApi = async (): Promise<ServiceRequestDetail[]> => {
   const { data: res } = await apiClient.get<{ data: BackendRequest[] }>('/requests/customer');
   return res.data.map(mapToServiceRequestDetail);
+};
+
+/** GET /requests/:id — get single request detail */
+export const getRequestByIdApi = async (id: string): Promise<ServiceRequestDetail> => {
+  const { data: res } = await apiClient.get<{ data: BackendRequest }>(`/requests/${id}`);
+  return mapToServiceRequestDetail(res.data);
+};
+
+/** PATCH /requests/:id/cancel — cancel a pending request */
+export const cancelRequestApi = async (id: string): Promise<void> => {
+  await apiClient.patch(`/requests/${id}/cancel`);
 };

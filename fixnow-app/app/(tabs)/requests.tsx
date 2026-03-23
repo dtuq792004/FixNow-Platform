@@ -4,7 +4,6 @@ import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text as RNText,
 import { RequestCard } from '~/features/home/components/request-card';
 import { RequestsFilterTabs } from '~/features/requests/components/requests-filter-tabs';
 import { useRequestsList } from '~/features/requests/hooks/use-requests-list';
-import type { ServiceRequestDetail } from '~/features/requests/types';
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
@@ -79,7 +78,7 @@ const RequestsScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filtered as ServiceRequestDetail[]}
+          data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <RequestCard request={item} />}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16, flexGrow: 1 }}

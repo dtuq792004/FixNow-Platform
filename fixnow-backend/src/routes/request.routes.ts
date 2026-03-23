@@ -1,31 +1,28 @@
 import { Router } from "express";
-import express from "express";
 import {
   createRequestController,
+  getRequestByIdController,
   getMyRequestsController,
   cancelRequestController,
   getAvailableRequestsController,
   respondRequestController,
   startServiceController,
-  completeServiceController
-  // confirmCompletionController,
-  // providerCancelRequestController,
+  completeServiceController,
 } from "../controllers/request.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// //Customer routes
+// ── Customer routes ───────────────────────────────────────────────────────────
 router.post("/", authMiddleware, createRequestController);
-
-router.get("/customer", authMiddleware, getMyRequestsController);
+router.get("/customer", authMiddleware, getMyRequestsController);      // must be before /:id
+router.get("/:id", authMiddleware, getRequestByIdController);
 router.patch("/:id/cancel", authMiddleware, cancelRequestController);
-// router.patch('/:id/confirm', authMiddleware, confirmCompletionController);
 
-// //Provider routes
+// ── Provider routes ───────────────────────────────────────────────────────────
 router.get("/provider", authMiddleware, getAvailableRequestsController);
 router.patch("/:id/respond", authMiddleware, respondRequestController);
 router.patch("/:id/start", authMiddleware, startServiceController);
 router.patch("/:id/complete", authMiddleware, completeServiceController);
-// router.patch('/:id/provider-cancel', authMiddleware, providerCancelRequestController);
+
 export default router;
