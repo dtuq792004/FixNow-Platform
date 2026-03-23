@@ -16,11 +16,12 @@ export const getFeedbacks = async (page: number, limit: number, filter: any) => 
               select: "socialId provider"
             }},
             { path: "providerId",
-              select: "fullName email phone role avatar socialLogin experienceYears activeStatus verified serviceCatagories workingAreas",
-            populate: {
-              path: "socialLogin",
-              select: "socialId provider"
-            }}
+              select: "userId experienceYears activeStatus verified serviceCategories workingAreas",
+              populate: {
+                path: "userId",
+                select: "fullName email phone role avatar"
+              }
+            }
             ]
             }
         );

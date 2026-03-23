@@ -37,7 +37,7 @@ const providerRequestSchema = new Schema<IProviderRequest>(
     serviceCategories: [
       {
         type: Schema.Types.ObjectId,
-        ref: "ServiceCategory",
+        ref: "Category",
         required: true,
       },
     ],

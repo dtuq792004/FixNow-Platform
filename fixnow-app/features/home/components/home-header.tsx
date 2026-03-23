@@ -38,6 +38,13 @@ export const HomeHeader = () => {
         <View className="flex-row items-center gap-3">
           <Pressable
             className="w-10 h-10 rounded-full bg-secondary items-center justify-center"
+            onPress={() => router.push('/chat')}
+            accessibilityLabel="Trò chuyện"
+          >
+            <Feather name="message-circle" size={20} color="#374151" />
+          </Pressable>
+          <Pressable
+            className="w-10 h-10 rounded-full bg-secondary items-center justify-center"
             accessibilityLabel="Thông báo"
           >
             <Feather name="bell" size={20} color="#374151" />

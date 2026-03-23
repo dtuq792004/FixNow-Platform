@@ -2,7 +2,8 @@ import { Router } from "express";
 import {
   createProviderRequest,
   getProviderRequests,
-  approveProviderRequest
+  approveProviderRequest,
+  rejectProviderRequest
 } from "../controllers/providerRequest.controller";
 
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -25,20 +26,20 @@ router.post(
 
 router.get(
   "/",
-  authMiddleware,
+  // authMiddleware,
   getProviderRequests
 );
 
 router.patch(
   "/:id",
-  authMiddleware,
+  // authMiddleware,
   approveProviderRequest
 );
 
-// router.patch(
-//   "/:id/reject",
-//   authMiddleware,
-//   rejectProviderRequest
-// );
+router.patch(
+  "/:id/reject",
+  // authMiddleware,
+  rejectProviderRequest
+);
 
 export default router;

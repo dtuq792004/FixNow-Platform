@@ -37,15 +37,27 @@ export const getProviderRequests = async (
   res: Response
 ) => {
   try {
-    const { status } = req.query;
+    const { status, page, limit, search } = req.query;
 
-    const requests = await providerRequestService.getProviderRequests(
-      status as string
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 5;
+
+    const result = await providerRequestService.getProviderRequests(
+      status as string,
+      pageNum,
+      limitNum,
+      search as string
     );
 
     return res.json({
       success: true,
-      data: requests,
+      data: result.requests,
+      pagination: {
+        total: result.total,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage
+      },
+      stats: result.stats
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -75,6 +87,35 @@ export const approveProviderRequest = async (
       success: true,
       data: result,
       message: "Provider request approved",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Admin reject provider request
+ */
+export const rejectProviderRequest = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const adminId = (req as any).user?.id;
+    const { id } = req.params;
+
+    const result = await providerRequestService.rejectProviderRequest(
+      id as string,
+      adminId as string
+    );
+
+    return res.json({
+      success: true,
+      data: result,
+      message: "Provider request rejected",
     });
   } catch (error: any) {
     return res.status(500).json({
