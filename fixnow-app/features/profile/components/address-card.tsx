@@ -48,7 +48,7 @@ export const AddressCard = ({ address, onEdit, onDelete, onSetDefault }: Address
 
       {/* Address text */}
       <RNText style={{ fontSize: 13, color: '#52525b', marginLeft: 42, lineHeight: 18 }}>
-        {address.street},{'\n'}{address.district}, {address.city}
+        {address.addressLine},{'\n'}{address.ward}, {address.district}, {address.city}
       </RNText>
 
       {/* Action row */}

@@ -1,46 +1,76 @@
-import { useCallback, useState } from 'react';
-import { MOCK_SAVED_ADDRESSES } from '../data/mock-addresses';
-import type { SavedAddress } from '../types';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  createAddress,
+  deleteAddress,
+  fetchAddresses,
+  setDefaultAddress,
+  updateAddress,
+} from '~/features/profile/services/address.service';
+import type { SavedAddress } from '~/features/profile/types';
+import type { AddressFormData } from '~/features/profile/validations/schemas';
 
-let _addresses = [...MOCK_SAVED_ADDRESSES]; // module-level mock store
+interface UseAddressesReturn {
+  addresses: SavedAddress[];
+  isLoading: boolean;
+  error: string | null;
+  add: (data: AddressFormData) => Promise<void>;
+  update: (id: string, data: AddressFormData) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  setDefault: (id: string) => Promise<void>;
+  reload: () => Promise<void>;
+}
 
-/**
- * Manages saved addresses locally.
- * Replace with real API calls when backend is ready.
- */
-export const useAddresses = () => {
-  const [addresses, setAddresses] = useState<SavedAddress[]>(_addresses);
+export const useAddresses = (): UseAddressesReturn => {
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const add = useCallback((data: Omit<SavedAddress, 'id'>) => {
-    const newItem: SavedAddress = { ...data, id: `addr-${Date.now()}` };
-    // If new address is default, unset others
-    const updated = data.isDefault
-      ? [...addresses.map((a) => ({ ...a, isDefault: false })), newItem]
-      : [...addresses, newItem];
-    _addresses = updated;
-    setAddresses(updated);
-  }, [addresses]);
+  const load = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await fetchAddresses();
+      setAddresses(data);
+    } catch (err: any) {
+      setError(err?.message ?? 'Không thể tải địa chỉ');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const update = useCallback((id: string, data: Omit<SavedAddress, 'id'>) => {
-    const updated = addresses.map((a) => {
-      if (data.isDefault && a.id !== id) return { ...a, isDefault: false };
-      return a.id === id ? { ...a, ...data } : a;
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const add = useCallback(async (data: AddressFormData) => {
+    const created = await createAddress(data);
+    setAddresses((prev) => {
+      const base = data.isDefault ? prev.map((a) => ({ ...a, isDefault: false })) : prev;
+      return [...base, created];
     });
-    _addresses = updated;
-    setAddresses(updated);
-  }, [addresses]);
+  }, []);
 
-  const remove = useCallback((id: string) => {
-    const updated = addresses.filter((a) => a.id !== id);
-    _addresses = updated;
-    setAddresses(updated);
-  }, [addresses]);
+  const update = useCallback(async (id: string, data: AddressFormData) => {
+    const updated = await updateAddress(id, data);
+    setAddresses((prev) =>
+      prev.map((a) => {
+        if (data.isDefault && a.id !== id) return { ...a, isDefault: false };
+        return a.id === id ? updated : a;
+      }),
+    );
+  }, []);
 
-  const setDefault = useCallback((id: string) => {
-    const updated = addresses.map((a) => ({ ...a, isDefault: a.id === id }));
-    _addresses = updated;
-    setAddresses(updated);
-  }, [addresses]);
+  const remove = useCallback(async (id: string) => {
+    await deleteAddress(id);
+    setAddresses((prev) => prev.filter((a) => a.id !== id));
+  }, []);
 
-  return { addresses, add, update, remove, setDefault };
+  const setDefault = useCallback(async (id: string) => {
+    const updated = await setDefaultAddress(id);
+    setAddresses((prev) =>
+      prev.map((a) => (a.id === id ? updated : { ...a, isDefault: false })),
+    );
+  }, []);
+
+  return { addresses, isLoading, error, add, update, remove, setDefault, reload: load };
 };
