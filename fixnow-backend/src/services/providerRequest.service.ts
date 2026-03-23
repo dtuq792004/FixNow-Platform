@@ -14,10 +14,38 @@ export const createProviderRequest = async (userId: string, data: any) => {
     throw new Error("Provider request already pending");
   }
 
-  const request = await ProviderRequest.create({
-    ...data,
+  // Map frontend data to backend model
+  const mappedData = {
     userId,
-  });
+    fullName: data.fullName,
+    phone: data.phone,
+    experience: data.experience,
+    specialties: data.specialties,
+    serviceArea: data.serviceArea,
+    idCard: data.idCard,
+    motivation: data.motivation,
+  };
+
+  const request = await ProviderRequest.create(mappedData);
+
+  return request;
+};
+
+// Helper function to parse experience text to years
+const parseExperienceYears = (experience: string): number => {
+  // Extract number from experience string like "3 năm", "5+ năm", etc.
+  const match = experience.match(/(\d+)/);
+  return match ? parseInt(match[1]) : 0;
+};
+
+export const getMyProviderRequest = async (userId: string) => {
+  const request = await ProviderRequest.findOne({ userId })
+    .populate("userId", "fullName email phone")
+    .sort({ createdAt: -1 });
+
+  if (!request) {
+    throw new Error("No provider request found");
+  }
 
   return request;
 };
@@ -56,10 +84,10 @@ export const approveProviderRequest = async (
 
   const provider = await Provider.create({
     userId: request.userId,
-    description: request.description,
-    experienceYears: request.experienceYears,
-    serviceCategories: request.serviceCategories,
-    workingAreas: request.workingAreas,
+    description: request.motivation || request.experience,
+    experienceYears: parseExperienceYears(request.experience),
+    serviceCategories: request.specialties.map(s => new Types.ObjectId()),
+    workingAreas: [request.serviceArea],
     verified: true,
   });
 
@@ -72,7 +100,8 @@ export const approveProviderRequest = async (
 
 export const rejectProviderRequest = async (
   requestId: string,
-  adminId: string
+  adminId: string,
+  rejectionReason?: string
 ) => {
   const request = await ProviderRequest.findById(requestId);
 
@@ -83,6 +112,7 @@ export const rejectProviderRequest = async (
   request.status = ProviderRequestStatus.REJECTED;
   request.reviewedBy = new Types.ObjectId(adminId);
   request.reviewedAt = new Date();
+  request.rejectionReason = rejectionReason;
 
   await request.save();
 

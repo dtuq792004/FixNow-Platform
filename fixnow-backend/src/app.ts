@@ -22,11 +22,16 @@ import chatRoutes from "./routes/chat.routes";
 
 const app: Application = express();
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8081", 
+  "http://localhost:19006",
+  "http://10.0.2.2:5000"
+];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: true, // Allow all origins temporarily
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -66,6 +71,12 @@ app.use("/withdraw", withdrawRoutes);
 app.use("/finance", financeRoutes);
 app.use("/chat", chatRoutes);
 
+// Debug logging
+app.use((req, res, next) => {
+  console.log(`🔍 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
@@ -75,6 +86,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req, res) => {
+  console.log(`❌ 404 - ${req.method} ${req.path} not found`);
   res.status(404).json({ message: "Route not found" });
 });
 
