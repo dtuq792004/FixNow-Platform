@@ -83,3 +83,60 @@ export const approveProviderRequest = async (
     });
   }
 };
+
+/**
+ * Customer get their provider request
+ */
+export const getMyProviderRequest = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    const request = await providerRequestService.getMyProviderRequest(
+      userId as string
+    );
+
+    return res.json({
+      success: true,
+      data: request,
+    });
+  } catch (error: any) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Admin reject provider request
+ */
+export const rejectProviderRequest = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const adminId = (req as any).user?.id;
+    const { id } = req.params;
+    const { rejectionReason } = req.body;
+
+    const result = await providerRequestService.rejectProviderRequest(
+      id as string,
+      adminId as string,
+      rejectionReason
+    );
+
+    return res.json({
+      success: true,
+      data: result,
+      message: "Provider request rejected",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

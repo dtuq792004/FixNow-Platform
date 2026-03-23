@@ -22,11 +22,16 @@ import chatRoutes from "./routes/chat.routes";
 
 const app: Application = express();
 
-// const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8081",
+  "http://localhost:19006",
+];
 
 app.use(
   cors({
-    origin: "*",
+    // Allow all in dev (mobile devices use dynamic IPs); restrict to allowedOrigins in prod
+    origin: process.env.NODE_ENV === "production" ? allowedOrigins : true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -44,6 +49,12 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       .json({ message: "JSON không hợp lệ", error: err.message });
   }
   next(err);
+});
+
+// Debug logging — must be before routes to capture all requests
+app.use((req, res, next) => {
+  console.log(`🔍 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
 });
 
 //app routes
@@ -75,6 +86,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req, res) => {
+  console.log(`❌ 404 - ${req.method} ${req.path} not found`);
   res.status(404).json({ message: "Route not found" });
 });
 

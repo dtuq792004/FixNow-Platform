@@ -1,11 +1,14 @@
 import { Router } from "express";
 import {
   createProviderRequest,
+  getMyProviderRequest,
   getProviderRequests,
+  rejectProviderRequest,
   approveProviderRequest
 } from "../controllers/providerRequest.controller";
 
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { roleMiddleware } from "../middlewares/role.middleware";
 
 const router = Router();
 
@@ -16,7 +19,19 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
+  roleMiddleware("CUSTOMER"),
   createProviderRequest
+);
+
+/**
+ * CUSTOMER get their request
+ */
+
+router.get(
+  "/my",
+  authMiddleware,
+  roleMiddleware("CUSTOMER"),
+  getMyProviderRequest
 );
 
 /**
@@ -26,19 +41,22 @@ router.post(
 router.get(
   "/",
   authMiddleware,
+  roleMiddleware("ADMIN"),
   getProviderRequests
 );
 
 router.patch(
   "/:id",
   authMiddleware,
+  roleMiddleware("ADMIN"),
   approveProviderRequest
 );
 
-// router.patch(
-//   "/:id/reject",
-//   authMiddleware,
-//   rejectProviderRequest
-// );
+router.patch(
+  "/:id/reject",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  rejectProviderRequest
+);
 
 export default router;

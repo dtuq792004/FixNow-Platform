@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, Text as RNText, View } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, ScrollView, Text as RNText, View, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ApplicationStatusCard } from '~/features/provider/components/application-status-card';
 import { ApplicationTimeline } from '~/features/provider/components/application-timeline';
@@ -56,9 +57,28 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => (
 const ApplicationStatusScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { application } = useProviderApplication();
+  const { application, loading, refetch, clearApplication } = useProviderApplication();
 
-  // Guard: no application yet → redirect to register
+  useEffect(() => {
+    // Check for existing application on mount
+    if (!application) {
+      refetch();
+    }
+  }, [application, refetch]);
+
+  // Guard: loading state
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#18181B" />
+        <RNText style={{ marginTop: 16, fontSize: 14, color: '#71717A' }}>
+          Đang tải thông tin đơn đăng ký...
+        </RNText>
+      </View>
+    );
+  }
+
+  // Guard: no application found → redirect to register
   if (!application) {
     return (
       <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
@@ -82,6 +102,11 @@ const ApplicationStatusScreen = () => {
   const specialtyLabels = application.specialties
     .map((s) => getCategoryConfig(s).label)
     .join(', ');
+
+  const handleReapply = () => {
+    clearApplication();
+    router.replace('/become-provider/register');
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -158,7 +183,7 @@ const ApplicationStatusScreen = () => {
         {/* Re-apply CTA (only if rejected) */}
         {application.status === 'rejected' && (
           <Pressable
-            onPress={() => router.replace('/become-provider/register')}
+            onPress={handleReapply}
             style={{
               marginTop: 24, height: 52, borderRadius: 14,
               borderWidth: 1.5, borderColor: '#18181B',
