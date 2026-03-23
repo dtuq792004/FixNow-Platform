@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User, {IUser } from "../models/user.model";
 import * as FeedbackService from "../services/feedback.services";
 import { IRequestFeedback } from "../models/feedback.model";
+import { Provider } from "../models/provider.model";
 import mongoose from "mongoose";
 
 export const getAllFeedbacks = async (req: Request, res: Response) => {
@@ -190,10 +191,28 @@ export const createFeedback = async (req: Request, res: Response) => {
       });
     }
 
-    const feedbackData : Partial<IRequestFeedback> = {
+    // Resolve đúng Provider._id:
+    // Client có thể truyền User._id hoặc Provider._id, cần đảm bảo lưu Provider._id
+    let resolvedProviderId: mongoose.Types.ObjectId;
+    const providerById = await Provider.findById(providerId).select("_id").lean();
+    if (providerById) {
+      // providerId đã là Provider._id hợp lệ
+      resolvedProviderId = providerById._id as mongoose.Types.ObjectId;
+    } else {
+      // Thử tìm Provider theo userId (trường hợp client truyền User._id)
+      const providerByUserId = await Provider.findOne({ userId: providerId }).select("_id").lean();
+      if (!providerByUserId) {
+        return res.status(404).json({
+          message: "Không tìm thấy provider tương ứng",
+        });
+      }
+      resolvedProviderId = providerByUserId._id as mongoose.Types.ObjectId;
+    }
+
+    const feedbackData: Partial<IRequestFeedback> = {
       requestId,
       customerId,
-      providerId,
+      providerId: resolvedProviderId,
       servicesFeedbacks
     };
 
