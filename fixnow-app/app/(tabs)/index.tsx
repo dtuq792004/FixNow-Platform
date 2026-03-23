@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
-import { CreateRequestBanner } from '~/features/home/components/create-request-banner';
-import { HomeHeader } from '~/features/home/components/home-header';
-import { QuickStatsRow } from '~/features/home/components/quick-stats-row';
-import { RecentRequestsSection } from '~/features/home/components/recent-requests-section';
-import { ServiceCategoryGrid } from '~/features/home/components/service-category-grid';
-import { useHomeData } from '~/features/home/hooks/use-home-data';
+import { useCallback, useState } from "react";
+import { RefreshControl, ScrollView, View } from "react-native";
+import { CreateRequestBanner } from "~/features/home/components/create-request-banner";
+import { HomeHeader } from "~/features/home/components/home-header";
+import { QuickStatsRow } from "~/features/home/components/quick-stats-row";
+import { RecentRequestsSection } from "~/features/home/components/recent-requests-section";
+import { ServiceCategoryGrid } from "~/features/home/components/service-category-grid";
+import { useHomeData } from "~/features/home/hooks/use-home-data";
 
 const HomeScreen = () => {
   const { stats, recentRequests, isLoading, refetch } = useHomeData();
@@ -23,7 +23,11 @@ const HomeScreen = () => {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 32,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -32,7 +36,10 @@ const HomeScreen = () => {
         <CreateRequestBanner />
         <ServiceCategoryGrid />
         <QuickStatsRow stats={stats} isLoading={isLoading} />
-        <RecentRequestsSection requests={recentRequests} isLoading={isLoading} />
+        <RecentRequestsSection
+          requests={recentRequests}
+          isLoading={isLoading}
+        />
       </ScrollView>
     </View>
   );

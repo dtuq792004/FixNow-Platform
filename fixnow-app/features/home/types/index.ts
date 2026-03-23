@@ -1,18 +1,18 @@
 export type ServiceCategoryType =
-  | 'electrical'
-  | 'plumbing'
-  | 'hvac'
-  | 'appliance'
-  | 'security'
-  | 'painting'
-  | 'other';
+  | "electrical"
+  | "plumbing"
+  | "hvac"
+  | "appliance"
+  | "security"
+  | "painting"
+  | "other";
 
 export type RequestStatus =
-  | 'pending'
-  | 'assigned'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled';
+  | "pending"
+  | "assigned"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
 
 export interface RequestProvider {
   id: string;
