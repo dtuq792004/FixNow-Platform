@@ -22,9 +22,10 @@ const getInitials = (user: AuthUser) => {
 type Props = {
   isOnline: boolean;
   onToggleOnline: () => void;
+  isLoading?: boolean;
 };
 
-export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
+export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: Props) {
   const user = useUser();
   const router = useRouter();
   const initials = user ? getInitials(user) : '??';
@@ -44,6 +45,7 @@ export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
           {/* Online toggle */}
           <Pressable
             onPress={onToggleOnline}
+            disabled={isLoading}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -53,22 +55,29 @@ export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
               backgroundColor: isOnline ? '#f0fdf4' : '#f9fafb',
               borderWidth: 1,
               borderColor: isOnline ? '#bbf7d0' : '#e5e7eb',
+              opacity: isLoading ? 0.6 : 1,
             }}
           >
-            <View
-              style={{
-                width: 8, height: 8, borderRadius: 4,
-                backgroundColor: isOnline ? '#22c55e' : '#9ca3af',
-                marginRight: 5,
-              }}
-            />
+            {isLoading ? (
+              <View className="w-4 h-4 mr-2">
+                <Feather name="loader" size={14} color="#6b7280" />
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: 8, height: 8, borderRadius: 4,
+                  backgroundColor: isOnline ? '#22c55e' : '#9ca3af',
+                  marginRight: 5,
+                }}
+              />
+            )}
             <Text
               style={{
                 fontSize: 12, fontWeight: '600',
                 color: isOnline ? '#15803d' : '#6b7280',
               }}
             >
-              {isOnline ? 'Online' : 'Offline'}
+              {isLoading ? 'Đang xử lý...' : (isOnline ? 'Online' : 'Offline')}
             </Text>
           </Pressable>
 
