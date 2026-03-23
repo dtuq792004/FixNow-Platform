@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
-import { updateProfileService } from "../services/user.service";
+import { getProfileService, updateProfileService } from "../services/user.service";
 
 export const getProfile = async (req: Request, res: Response) => {
-  return res.json({
-    message: "User profile",
-    user: (req as any).user
-  });
+  try {
+    const userId = (req as any).user?.id;
+    const user = await getProfileService(userId);
+    return res.json({
+      message: "User profile",
+      user,
+    });
+  } catch (error: any) {
+    return res.status(404).json({ message: error.message || "User not found" });
+  }
 };
 
 export const updateProfile = async (req: Request, res: Response) => {

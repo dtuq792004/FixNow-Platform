@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '~/components/ui/input';
 import { useUser } from '~/features/auth/stores/auth.store';
 import { useAuthStore } from '~/features/auth/stores/auth.store';
+import { updateProfileApi } from '~/features/profile/services/user.service';
 import {
   personalInfoSchema,
   type PersonalInfoFormData,
@@ -52,11 +53,15 @@ const PersonalInfoScreen = () => {
 
   const onSubmit = async (data: PersonalInfoFormData) => {
     if (!user) return;
-    // TODO: call API to update user info
-    setUser({ ...user, fullName: data.fullName, phone: data.phone ?? '' });
-    Alert.alert('Đã lưu', 'Thông tin cá nhân đã được cập nhật.', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+    try {
+      const updated = await updateProfileApi({ fullName: data.fullName, phone: data.phone ?? '' });
+      setUser({ ...user, ...updated });
+      Alert.alert('Đã lưu', 'Thông tin cá nhân đã được cập nhật.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (err: any) {
+      Alert.alert('Lỗi', err?.message ?? 'Không thể cập nhật thông tin. Vui lòng thử lại.');
+    }
   };
 
   return (

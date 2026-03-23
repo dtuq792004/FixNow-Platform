@@ -7,52 +7,44 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '~/components/ui/input';
+import { AddressFieldWrapper as FieldWrapper } from '~/features/profile/components/address-field-wrapper';
 import { LabelSelector } from '~/features/profile/components/label-selector';
 import type { SavedAddress } from '~/features/profile/types';
 import { addressSchema, type AddressFormData } from '~/features/profile/validations/schemas';
-
-// ── Field wrapper ─────────────────────────────────────────────────────────────
-interface FieldWrapperProps {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}
-const FieldWrapper = ({ label, error, required, children }: FieldWrapperProps) => (
-  <View style={{ marginBottom: 14 }}>
-    <RNText style={{ fontSize: 12, fontWeight: '600', color: '#52525b', marginBottom: 5 }}>
-      {label}{required ? <RNText style={{ color: '#ef4444' }}> *</RNText> : null}
-    </RNText>
-    {children}
-    {error ? <RNText style={{ fontSize: 11, color: '#ef4444', marginTop: 3 }}>{error}</RNText> : null}
-  </View>
-);
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface AddressFormModalProps {
   visible: boolean;
   editing: SavedAddress | null;
+  isSaving?: boolean;
   onClose: () => void;
   onSave: (data: AddressFormData, id?: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export const AddressFormModal = ({ visible, editing, onClose, onSave }: AddressFormModalProps) => {
+export const AddressFormModal = ({ visible, editing, isSaving, onClose, onSave }: AddressFormModalProps) => {
   const insets = useSafeAreaInsets();
 
   const { control, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<AddressFormData>({
       resolver: zodResolver(addressSchema),
       defaultValues: {
-        label: 'home', street: '', district: '', city: 'TP. Hồ Chí Minh', isDefault: false,
+        label: 'home', addressLine: '', ward: '', district: '', city: 'TP. Hồ Chí Minh', isDefault: false,
       },
     });
 
   useEffect(() => {
     if (!visible) return;
     reset(editing
-      ? { label: editing.label, street: editing.street, district: editing.district, city: editing.city, isDefault: editing.isDefault }
-      : { label: 'home', street: '', district: '', city: 'TP. Hồ Chí Minh', isDefault: false }
+      ? {
+          label: editing.label,
+          addressLine: editing.addressLine,
+          ward: editing.ward,
+          district: editing.district,
+          city: editing.city,
+          isDefault: editing.isDefault,
+        }
+      : { label: 'home', addressLine: '', ward: '', district: '', city: 'TP. Hồ Chí Minh', isDefault: false }
     );
   }, [visible, editing, reset]);
 
@@ -86,27 +78,43 @@ export const AddressFormModal = ({ visible, editing, onClose, onSave }: AddressF
               />
             </FieldWrapper>
 
-            {/* Street */}
-            <FieldWrapper label="Số nhà, tên đường" required error={errors.street?.message}>
+            {/* Address line */}
+            <FieldWrapper label="Số nhà, tên đường" required error={errors.addressLine?.message}>
               <Controller
-                control={control} name="street"
+                control={control} name="addressLine"
                 render={({ field: { value, onChange, onBlur } }) => (
-                  <Input value={value} onChangeText={onChange} onBlur={onBlur}
-                    placeholder="VD: 123 Nguyễn Trãi, Phường 2"
-                    style={errors.street ? { borderColor: '#ef4444' } : undefined}
+                  <Input
+                    value={value} onChangeText={onChange} onBlur={onBlur}
+                    placeholder="VD: 123 Nguyễn Trãi"
+                    style={errors.addressLine ? { borderColor: '#ef4444' } : undefined}
                   />
                 )}
               />
             </FieldWrapper>
 
-            {/* District + City */}
+            {/* Ward + District side by side */}
             <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <FieldWrapper label="Phường / Xã" required error={errors.ward?.message}>
+                  <Controller
+                    control={control} name="ward"
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <Input
+                        value={value} onChangeText={onChange} onBlur={onBlur}
+                        placeholder="VD: Phường 2"
+                        style={errors.ward ? { borderColor: '#ef4444' } : undefined}
+                      />
+                    )}
+                  />
+                </FieldWrapper>
+              </View>
               <View style={{ flex: 1 }}>
                 <FieldWrapper label="Quận / Huyện" required error={errors.district?.message}>
                   <Controller
                     control={control} name="district"
                     render={({ field: { value, onChange, onBlur } }) => (
-                      <Input value={value} onChangeText={onChange} onBlur={onBlur}
+                      <Input
+                        value={value} onChangeText={onChange} onBlur={onBlur}
                         placeholder="VD: Quận 5"
                         style={errors.district ? { borderColor: '#ef4444' } : undefined}
                       />
@@ -114,20 +122,21 @@ export const AddressFormModal = ({ visible, editing, onClose, onSave }: AddressF
                   />
                 </FieldWrapper>
               </View>
-              <View style={{ flex: 1 }}>
-                <FieldWrapper label="Tỉnh / Thành phố" required error={errors.city?.message}>
-                  <Controller
-                    control={control} name="city"
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <Input value={value} onChangeText={onChange} onBlur={onBlur}
-                        placeholder="TP. Hồ Chí Minh"
-                        style={errors.city ? { borderColor: '#ef4444' } : undefined}
-                      />
-                    )}
-                  />
-                </FieldWrapper>
-              </View>
             </View>
+
+            {/* City */}
+            <FieldWrapper label="Tỉnh / Thành phố" required error={errors.city?.message}>
+              <Controller
+                control={control} name="city"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <Input
+                    value={value} onChangeText={onChange} onBlur={onBlur}
+                    placeholder="TP. Hồ Chí Minh"
+                    style={errors.city ? { borderColor: '#ef4444' } : undefined}
+                  />
+                )}
+              />
+            </FieldWrapper>
 
             {/* Default toggle */}
             <View style={{
@@ -164,13 +173,15 @@ export const AddressFormModal = ({ visible, editing, onClose, onSave }: AddressF
               </Pressable>
               <Pressable
                 onPress={handleSubmit((data) => onSave(data, editing?.id))}
+                disabled={isSaving}
                 style={{
                   flex: 2, height: 48, borderRadius: 12,
-                  backgroundColor: '#18181b', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: isSaving ? '#a1a1aa' : '#18181b',
+                  alignItems: 'center', justifyContent: 'center',
                 }}
               >
                 <RNText style={{ color: '#fff', fontWeight: '700' }}>
-                  {editing ? 'Lưu thay đổi' : 'Thêm địa chỉ'}
+                  {isSaving ? 'Đang lưu...' : editing ? 'Lưu thay đổi' : 'Thêm địa chỉ'}
                 </RNText>
               </Pressable>
             </View>
