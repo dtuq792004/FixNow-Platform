@@ -22,11 +22,11 @@ import chatRoutes from "./routes/chat.routes";
 
 const app: Application = express();
 
-const allowedOrigins = ["http://localhost:5173"];
+// const allowedOrigins = ["http://localhost:5173"];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

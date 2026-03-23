@@ -2,18 +2,20 @@ import { Feather } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUser, useAuthLoading } from "~/features/auth/stores/auth.store";
+import { useActiveMode } from "~/features/app/stores/app-mode.store";
 
 const TabsLayout = () => {
   const insets = useSafeAreaInsets();
   const user = useUser();
   const loading = useAuthLoading();
+  const activeMode = useActiveMode();
 
-  if (loading) {
-    return null; // Or a loading spinner
-  }
+  if (loading) return null;
+  if (!user) return <Redirect href="/(auth)/sign-in" />;
 
-  if (!user) {
-    return <Redirect href="/(auth)/sign-in" />;
+  // Nếu là provider và đang ở mode provider → redirect sang provider tabs
+  if (user.role === "PROVIDER" && activeMode === "provider") {
+    return <Redirect href="/(provider-tabs)" />;
   }
 
   return (
@@ -34,25 +36,25 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "",
+          title: "Trang chủ",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="notes"
+        name="requests"
         options={{
-          title: "",
+          title: "Yêu cầu",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="file-text" size={size} color={color} />
+            <Feather name="clipboard" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          title: "",
+          title: "Tìm kiếm",
           tabBarIcon: ({ color, size }) => (
             <Feather name="search" size={size} color={color} />
           ),
@@ -61,12 +63,13 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "",
+          title: "Tài khoản",
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),
         }}
       />
+      <Tabs.Screen name="notes" options={{ href: null }} />
     </Tabs>
   );
 };

@@ -3,12 +3,13 @@ import type {
   ForgotPasswordResponseData,
   LoginResponseData,
   RegisterResponseData,
+  ResetPasswordResponseData,
 } from "~/features/auth/types/auth.types";
 
 /**
  * POST /auth/login
  * Body: { email, password }
- * Response 200: { message, data: { token, user } }
+ * Response: { message, accessToken, user }
  */
 export const loginApi = async (
   email: string,
@@ -24,7 +25,7 @@ export const loginApi = async (
 /**
  * POST /auth/register
  * Body: { email, password, fullName, phone? }
- * Response 201: { message, user }
+ * Response: { message, user }
  */
 export const registerApi = async (
   email: string,
@@ -32,16 +33,18 @@ export const registerApi = async (
   fullName: string,
   phone?: string
 ): Promise<RegisterResponseData> => {
-  const { data } = await apiClient.post<RegisterResponseData>(
-    "/auth/register",
-    { email, password, fullName, ...(phone ? { phone } : {}) }
-  );
+  const { data } = await apiClient.post<RegisterResponseData>("/auth/register", {
+    email,
+    password,
+    fullName,
+    ...(phone ? { phone } : {}),
+  });
   return data;
 };
 
 /**
  * POST /auth/logout
- * Response 200: { message: "Logout successful" }
+ * Response: { message }
  */
 export const logoutApi = async (): Promise<void> => {
   await apiClient.post("/auth/logout");
@@ -50,7 +53,7 @@ export const logoutApi = async (): Promise<void> => {
 /**
  * POST /auth/forgot-password
  * Body: { email }
- * Response 200: { message, resetUrl }
+ * Response: { message, otp? }
  */
 export const forgotPasswordApi = async (
   email: string
@@ -63,13 +66,32 @@ export const forgotPasswordApi = async (
 };
 
 /**
- * POST /auth/reset-password/:token
- * Body: { password }
- * Response 200: { message: "Password reset successful" }
+ * POST /auth/reset-password
+ * Body: { resetToken, newPassword, confirmPassword }
+ * Response: { message }
  */
 export const resetPasswordApi = async (
   resetToken: string,
-  password: string
-): Promise<void> => {
-  await apiClient.post(`/auth/reset-password/${resetToken}`, { password });
+  newPassword: string
+): Promise<ResetPasswordResponseData> => {
+  const { data } = await apiClient.post<ResetPasswordResponseData>(
+    "/auth/reset-password",
+    { resetToken, newPassword, confirmPassword: newPassword }
+  );
+  return data;
+};
+
+/**
+ * POST /auth/verify-otp
+ * Body: { otp }
+ * Response: { message, resetToken? }
+ */
+export const verifyOtpApi = async (
+  otp: string
+): Promise<{ message: string; resetToken?: string }> => {
+  const { data } = await apiClient.post<{ message: string; resetToken?: string }>(
+    "/auth/verify-otp",
+    { otp }
+  );
+  return data;
 };
