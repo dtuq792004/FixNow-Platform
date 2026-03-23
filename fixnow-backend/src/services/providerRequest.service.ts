@@ -3,6 +3,7 @@ import { Provider } from "../models/provider.model";
 import { Types } from "mongoose";
 import { ProviderRequestStatus } from "../models/providerRequest.model";
 import User from "../models/user.model";
+import Category from "../models/category.model";
 
 export const createProviderRequest = async (userId: string, data: any) => {
   const existing = await ProviderRequest.findOne({
@@ -73,8 +74,8 @@ export const approveProviderRequest = async (
   }
 
   if (request.status !== ProviderRequestStatus.PENDING) {
-  throw new Error("Request already processed");
-}
+    throw new Error("Request already processed");
+  }
 
   request.status = ProviderRequestStatus.APPROVED;
   request.reviewedBy = new Types.ObjectId(adminId);
@@ -82,16 +83,19 @@ export const approveProviderRequest = async (
 
   await request.save();
 
+  // Look up real Category ObjectIds by type matching the specialty strings
+  const categories = await Category.find({ type: { $in: request.specialties } });
+
   const provider = await Provider.create({
     userId: request.userId,
     description: request.motivation || request.experience,
     experienceYears: parseExperienceYears(request.experience),
-    serviceCategories: request.specialties.map(s => new Types.ObjectId()),
+    serviceCategories: categories.map((c) => c._id as Types.ObjectId),
     workingAreas: [request.serviceArea],
     verified: true,
   });
 
-   await User.findByIdAndUpdate(request.userId, {
+  await User.findByIdAndUpdate(request.userId, {
     role: "PROVIDER",
   });
 

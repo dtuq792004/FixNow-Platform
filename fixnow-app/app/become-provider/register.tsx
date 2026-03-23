@@ -21,22 +21,22 @@ const RegisterProviderScreen = () => {
     formState: { errors, isSubmitting },
   } = useForm<RegisterProviderFormData>({
     resolver: zodResolver(registerProviderSchema),
-    defaultValues: { 
-  fullName: user?.fullName || '',
-  phone: user?.phone || '',
-  specialties: [], 
-  experience: '', 
-  serviceArea: '', 
-  idCard: '', 
-  motivation: '' 
-},
+    defaultValues: {
+      fullName: user?.fullName || '',
+      phone: user?.phone || '',
+      specialties: [],
+      experience: '',
+      serviceArea: '',
+      idCard: '',
+      motivation: '',
+    },
   });
 
   const selectedSpecialties = watch('specialties');
 
   useEffect(() => {
     if (user) {
-      checkExistingApplication(user._id).then((existingApp) => {
+      checkExistingApplication().then((existingApp) => {
         if (existingApp) {
           // User already has an application, redirect to status
           router.replace('/become-provider/status');
@@ -49,7 +49,7 @@ const RegisterProviderScreen = () => {
     if (!user) return;
     
     try {
-      await submit(data, user);
+      await submit(data);
       router.replace('/become-provider/status');
     } catch (error: any) {
       console.error('Submit application error:', error);

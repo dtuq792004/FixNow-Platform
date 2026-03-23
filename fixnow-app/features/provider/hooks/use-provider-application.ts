@@ -1,6 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
-import type { AuthUser } from '~/features/auth/types/auth.types';
-import type { ServiceCategoryType } from '~/features/home/types';
+import { useCallback, useState } from 'react';
 import type { ProviderApplication } from '../types';
 import type { RegisterProviderFormData } from '../validations/schemas';
 import { submitProviderApplication, getMyProviderApplication } from '../services/provider.service';
@@ -13,7 +11,7 @@ export const useProviderApplication = () => {
   const [loading, setLoading] = useState(false);
 
   const submit = useCallback(
-    async (data: RegisterProviderFormData, user: AuthUser) => {
+    async (data: RegisterProviderFormData) => {
       try {
         setLoading(true);
         const response = await submitProviderApplication(data);
@@ -33,7 +31,7 @@ export const useProviderApplication = () => {
   );
 
   const checkExistingApplication = useCallback(
-    async (userId?: string) => {
+    async () => {
       try {
         setLoading(true);
         
