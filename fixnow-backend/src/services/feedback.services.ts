@@ -104,3 +104,92 @@ export const updateFeedback = async (
         throw error;
     }
 };
+
+/**
+ * Tính điểm rating trung bình cho 1 provider cụ thể
+ */
+export const getProviderAverageRating = async (providerId: string | mongoose.Types.ObjectId) => {
+  const stats = await FeedbackModel.aggregate([
+    { $match: { providerId: new mongoose.Types.ObjectId(providerId), status: "VISIBLE" } },
+    { $unwind: "$servicesFeedbacks" },
+    {
+      $group: {
+        _id: "$providerId",
+        avgRating: { $avg: "$servicesFeedbacks.rating" },
+        reviewCount: { $sum: 1 }
+      }
+    }
+  ]);
+  return stats[0] || { avgRating: 0, reviewCount: 0 };
+};
+
+/**
+ * Lấy Top n thợ có đánh giá cao nhất
+ */
+export const getTopRatedProviders = async (limit: number = 4) => {
+  const topProviders = await FeedbackModel.aggregate([
+    { $match: { status: "VISIBLE" } },
+    { $unwind: "$servicesFeedbacks" },
+    {
+      $group: {
+        _id: "$providerId",
+        avgRating: { $avg: "$servicesFeedbacks.rating" },
+        // Sử dụng $addToSet nếu muốn đếm số lượng feedback duy nhất thay vì đếm từng dòng rating
+        feedbackIds: { $addToSet: "$_id" }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        avgRating: 1,
+        reviewCount: { $size: "$feedbackIds" }
+      }
+    },
+    { $sort: { avgRating: -1, reviewCount: -1 } },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: "providers",
+        localField: "_id",
+        foreignField: "_id",
+        as: "providerInfo"
+      }
+    },
+    { $unwind: { path: "$providerInfo", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "providerInfo.userId",
+        foreignField: "_id",
+        as: "userInfo"
+      }
+    },
+    { $unwind: { path: "$userInfo", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "providerInfo.serviceCategories",
+        foreignField: "_id",
+        as: "categories"
+      }
+    },
+    {
+      $project: {
+        _id: "$_id",
+        avgRating: 1,
+        reviewCount: 1,
+        experienceYears: { $ifNull: ["$providerInfo.experienceYears", 0] },
+        description: { $ifNull: ["$providerInfo.description", ""] },
+        workingAreas: { $ifNull: ["$providerInfo.workingAreas", []] },
+        userId: {
+          fullName: { $ifNull: ["$userInfo.fullName", "Thợ chưa cập nhật"] },
+          avatar: "$userInfo.avatar",
+          phone: "$userInfo.phone"
+        },
+        serviceCategories: "$categories"
+      }
+    }
+  ]);
+
+  return topProviders;
+};
