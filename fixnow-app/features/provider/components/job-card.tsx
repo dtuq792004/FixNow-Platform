@@ -1,27 +1,28 @@
-import { Feather } from '@expo/vector-icons';
-import { Pressable, View } from 'react-native';
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
-import type { ProviderJob } from '~/features/provider/data/mock-provider-jobs';
+import { Feather } from "@expo/vector-icons";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "~/components/ui/text";
+import { Button } from "~/components/ui/button";
+import type { ProviderJob } from "~/features/provider/data/mock-provider-jobs";
 
-const BRAND = '#F97316';
+const BRAND = "#F97316";
 
 const CATEGORY_ICON: Record<string, string> = {
-  plumbing: 'droplet',
-  electrical: 'zap',
-  hvac: 'wind',
-  painting: 'edit-2',
-  carpentry: 'box',
-  cleaning: 'trash-2',
-  appliance: 'cpu',
+  plumbing: "droplet",
+  electrical: "zap",
+  hvac: "wind",
+  painting: "edit-2",
+  carpentry: "box",
+  cleaning: "trash-2",
+  appliance: "cpu",
 };
 
 const STATUS_CONFIG = {
-  PENDING: { label: 'Chờ xác nhận', color: '#D97706', bg: '#fffbeb' },
-  ASSIGNED: { label: 'Đã nhận', color: '#2563EB', bg: '#eff6ff' },
-  IN_PROGRESS: { label: 'Đang làm', color: '#059669', bg: '#f0fdf4' },
-  COMPLETED: { label: 'Hoàn thành', color: '#6b7280', bg: '#f9fafb' },
-  CANCELLED: { label: 'Đã hủy', color: '#dc2626', bg: '#fef2f2' },
+  PENDING: { label: "Chờ xác nhận", color: "#D97706", bg: "#fffbeb" },
+  ACCEPTED: { label: "Đã nhận", color: "#2563EB", bg: "#eff6ff" },
+  ASSIGNED: { label: "Đã nhận", color: "#2563EB", bg: "#eff6ff" },
+  IN_PROGRESS: { label: "Đang làm", color: "#059669", bg: "#f0fdf4" },
+  COMPLETED: { label: "Hoàn thành", color: "#6b7280", bg: "#f9fafb" },
+  CANCELLED: { label: "Đã hủy", color: "#dc2626", bg: "#fef2f2" },
 };
 
 type Props = {
@@ -31,14 +32,24 @@ type Props = {
   onDecline?: (id: string) => void;
   onStart?: (id: string) => void;
   onComplete?: (id: string) => void;
+  isLoading?: boolean;
 };
 
-export function JobCard({ job, onPress, onAccept, onDecline, onStart, onComplete }: Props) {
+export function JobCard({
+  job,
+  onPress,
+  onAccept,
+  onDecline,
+  onStart,
+  onComplete,
+  isLoading = false,
+}: Props) {
+  const jobId = job._id || job.id;
   const statusCfg = STATUS_CONFIG[job.status];
-  const icon = (CATEGORY_ICON[job.serviceCategory] ?? 'tool') as any;
+  const icon = (CATEGORY_ICON[job.serviceCategory] ?? "tool") as any;
 
   const formatPrice = (p?: number) =>
-    p ? `${(p / 1000).toFixed(0)}k` : 'Thỏa thuận';
+    p ? `${(p / 1000).toFixed(0)}k` : "Thỏa thuận";
 
   const formatTime = (iso: string) => {
     const d = new Date(iso);
@@ -51,78 +62,153 @@ export function JobCard({ job, onPress, onAccept, onDecline, onStart, onComplete
 
   return (
     <Pressable
-      onPress={() => onPress?.(job.id)}
+      onPress={() => onPress?.(jobId as string)}
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#f3f4f6',
-        shadowColor: '#000',
+        borderColor: "#f3f4f6",
+        shadowColor: "#000",
         shadowOpacity: 0.05,
         shadowRadius: 6,
         elevation: 2,
+        opacity: isLoading ? 0.6 : 1,
       }}
+      disabled={isLoading}
     >
       {/* Header row */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 }}>
-        <View style={{
-          width: 40, height: 40, borderRadius: 12,
-          backgroundColor: '#fff7ed',
-          alignItems: 'center', justifyContent: 'center',
-          marginRight: 12,
-        }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          marginBottom: 10,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: "#fff7ed",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 12,
+          }}
+        >
           <Feather name={icon} size={18} color={BRAND} />
         </View>
 
         <View style={{ flex: 1 }}>
-          <Text style={{ fontWeight: '700', fontSize: 15, color: '#111827', marginBottom: 2 }}>
+          <Text
+            style={{
+              fontWeight: "700",
+              fontSize: 15,
+              color: "#111827",
+              marginBottom: 2,
+            }}
+          >
             {job.serviceName}
           </Text>
-          <Text style={{ fontSize: 12, color: '#6b7280' }}>{job.customerName}</Text>
+          <Text style={{ fontSize: 12, color: "#6b7280" }}>
+            {job.customerName}
+          </Text>
         </View>
 
         {/* Status badge */}
-        <View style={{ backgroundColor: statusCfg.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '600', color: statusCfg.color }}>{statusCfg.label}</Text>
+        <View
+          style={{
+            backgroundColor: statusCfg.bg,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            borderRadius: 8,
+          }}
+        >
+          <Text
+            style={{ fontSize: 11, fontWeight: "600", color: statusCfg.color }}
+          >
+            {statusCfg.label}
+          </Text>
         </View>
       </View>
 
       {/* Address */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-        <Feather name="map-pin" size={13} color="#9ca3af" style={{ marginRight: 5 }} />
-        <Text style={{ fontSize: 13, color: '#4b5563', flex: 1 }} numberOfLines={1}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
+      >
+        <Feather
+          name="map-pin"
+          size={13}
+          color="#9ca3af"
+          style={{ marginRight: 5 }}
+        />
+        <Text
+          style={{ fontSize: 13, color: "#4b5563", flex: 1 }}
+          numberOfLines={1}
+        >
           {job.address}, {job.district}
         </Text>
       </View>
 
       {/* Description */}
-      <Text style={{ fontSize: 13, color: '#6b7280', lineHeight: 18, marginBottom: 10 }} numberOfLines={2}>
+      <Text
+        style={{
+          fontSize: 13,
+          color: "#6b7280",
+          lineHeight: 18,
+          marginBottom: 10,
+        }}
+        numberOfLines={2}
+      >
         {job.description}
       </Text>
 
       {/* Footer: price + time + urgent badge */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: BRAND }}>{formatPrice(job.estimatedPrice)}</Text>
-          {job.requestType === 'URGENT' && (
-            <View style={{ backgroundColor: '#fef2f2', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 }}>
-              <Text style={{ fontSize: 11, color: '#dc2626', fontWeight: '600' }}>⚡ Gấp</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Text style={{ fontSize: 14, fontWeight: "700", color: BRAND }}>
+            {formatPrice(job.estimatedPrice)}
+          </Text>
+          {job.requestType === "URGENT" && (
+            <View
+              style={{
+                backgroundColor: "#fef2f2",
+                paddingHorizontal: 7,
+                paddingVertical: 2,
+                borderRadius: 6,
+              }}
+            >
+              <Text
+                style={{ fontSize: 11, color: "#dc2626", fontWeight: "600" }}
+              >
+                ⚡ Gấp
+              </Text>
             </View>
           )}
         </View>
-        <Text style={{ fontSize: 11, color: '#9ca3af' }}>{formatTime(job.createdAt)}</Text>
+        <Text style={{ fontSize: 11, color: "#9ca3af" }}>
+          {formatTime(job.createdAt)}
+        </Text>
       </View>
 
       {/* Action buttons */}
-      {job.status === 'PENDING' && (onAccept || onDecline) && (
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+      {job.status === "PENDING" && (onAccept || onDecline) && !isLoading && (
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
           <Button
             variant="outline"
             size="sm"
             className="flex-1 rounded-xl"
-            onPress={() => onDecline?.(job.id)}
+            onPress={(e: any) => {
+              e?.stopPropagation?.();
+              onDecline?.(jobId as string);
+            }}
           >
             <Text className="text-sm font-medium">Từ chối</Text>
           </Button>
@@ -130,27 +216,92 @@ export function JobCard({ job, onPress, onAccept, onDecline, onStart, onComplete
             variant="brand"
             size="sm"
             className="flex-1 rounded-xl"
-            onPress={() => onAccept?.(job.id)}
+            onPress={(e: any) => {
+              e?.stopPropagation?.();
+              onAccept?.(jobId as string);
+            }}
           >
             <Text className="text-sm font-semibold text-white">Nhận việc</Text>
           </Button>
         </View>
       )}
 
-      {job.status === 'ASSIGNED' && onStart && (
-        <View style={{ marginTop: 12 }}>
-          <Button variant="brand" size="sm" className="rounded-xl flex-row" onPress={() => onStart(job.id)}>
-            <Feather name="play-circle" size={14} color="#fff" style={{ marginRight: 6 }} />
-            <Text className="text-sm font-semibold text-white">Bắt đầu làm việc</Text>
+      {job.status === "ACCEPTED" && onStart && (
+        <View
+          style={{
+            marginTop: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Button
+            variant="brand"
+            size="sm"
+            className="rounded-xl flex-1 flex-row"
+            onPress={(e: any) => {
+              e?.stopPropagation?.();
+              onStart(jobId as string);
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator
+                size="small"
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+            ) : (
+              <Feather
+                name="play-circle"
+                size={14}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+            )}
+            <Text className="text-sm font-semibold text-white">
+              {isLoading ? "Đang..." : "Bắt đầu"}
+            </Text>
           </Button>
         </View>
       )}
 
-      {job.status === 'IN_PROGRESS' && onComplete && (
-        <View style={{ marginTop: 12 }}>
-          <Button variant="brand" size="sm" className="rounded-xl flex-row" onPress={() => onComplete(job.id)}>
-            <Feather name="check-circle" size={14} color="#fff" style={{ marginRight: 6 }} />
-            <Text className="text-sm font-semibold text-white">Hoàn thành</Text>
+      {job.status === "IN_PROGRESS" && onComplete && (
+        <View
+          style={{
+            marginTop: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Button
+            variant="brand"
+            size="sm"
+            className="rounded-xl flex-1 flex-row"
+            onPress={(e: any) => {
+              e?.stopPropagation?.();
+              onComplete(jobId as string);
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator
+                size="small"
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+            ) : (
+              <Feather
+                name="check-circle"
+                size={14}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+            )}
+            <Text className="text-sm font-semibold text-white">
+              {isLoading ? "Đang..." : "Hoàn thành"}
+            </Text>
           </Button>
         </View>
       )}

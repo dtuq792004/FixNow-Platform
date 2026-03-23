@@ -1,48 +1,139 @@
-import { useCallback, useState } from 'react';
-import { MOCK_PROVIDER_JOBS, type ProviderJob, type ProviderJobStatus } from '~/features/provider/data/mock-provider-jobs';
+import { useCallback, useState, useEffect } from "react";
+import apiClient from "~/lib/api-client";
+import type {
+  ProviderJob,
+  ProviderJobStatus,
+} from "~/features/provider/data/mock-provider-jobs";
 
-export type JobFilter = 'available' | 'active' | 'completed';
+export type JobFilter = "available" | "active" | "completed";
 export type JobCounts = Record<JobFilter, number>;
 
-const FILTER_STATUSES: Record<JobFilter, ProviderJobStatus[]> = {
-  available: ['PENDING'],
-  active: ['ASSIGNED', 'IN_PROGRESS'],
-  completed: ['COMPLETED', 'CANCELLED'],
+// Map backend status to filter
+const FILTER_STATUSES: Record<JobFilter, string[]> = {
+  available: ["PENDING"],
+  active: ["ACCEPTED", "IN_PROGRESS"],
+  completed: ["COMPLETED", "CANCELLED"],
 };
 
-// Module-level mock store — persists across renders
-let _jobs: ProviderJob[] = [...MOCK_PROVIDER_JOBS];
-
 export function useProviderJobs() {
-  const [jobs, setJobs] = useState<ProviderJob[]>(_jobs);
-  const [filter, setFilter] = useState<JobFilter>('available');
+  const [jobs, setJobs] = useState<ProviderJob[]>([]);
+  const [filter, setFilter] = useState<JobFilter>("available");
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = jobs.filter((j) => FILTER_STATUSES[filter].includes(j.status));
+  // Fetch jobs from API
+  const fetchJobs = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiClient.get("/requests/provider");
+      const jobs = response.data?.data || [];
+      setJobs(jobs);
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Failed to load jobs";
+      setError(errorMsg);
+      console.error("❌ fetchJobs error:", errorMsg, err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const counts: Record<JobFilter, number> = {
-    available: jobs.filter((j) => FILTER_STATUSES.available.includes(j.status)).length,
-    active: jobs.filter((j) => FILTER_STATUSES.active.includes(j.status)).length,
-    completed: jobs.filter((j) => FILTER_STATUSES.completed.includes(j.status)).length,
+  // Load jobs on mount
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
+
+  const filtered = jobs.filter((j) =>
+    FILTER_STATUSES[filter].includes(j.status),
+  );
+
+  const counts: JobCounts = {
+    available: jobs.filter((j) => FILTER_STATUSES.available.includes(j.status))
+      .length,
+    active: jobs.filter((j) => FILTER_STATUSES.active.includes(j.status))
+      .length,
+    completed: jobs.filter((j) => FILTER_STATUSES.completed.includes(j.status))
+      .length,
   };
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setRefreshing(false);
-  }, []);
+    try {
+      await fetchJobs();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchJobs]);
 
-  const updateStatus = useCallback((id: string, status: ProviderJobStatus) => {
-    _jobs = _jobs.map((j) => (j.id === id ? { ...j, status } : j));
-    setJobs([..._jobs]);
-  }, []);
+  const respondJob = useCallback(
+    async (id: string, action: "ACCEPT" | "REJECT") => {
+      try {
+        setError(null);
+        const response = await apiClient.patch(`/requests/${id}/respond`, {
+          action,
+        });
+        // Update local list
+        await fetchJobs();
+      } catch (err: any) {
+        console.error(`❌ respondJob error:`, err);
+        const errorMsg =
+          err.response?.data?.message || "Failed to respond to job";
+        setError(errorMsg);
+        throw err;
+      }
+    },
+    [fetchJobs],
+  );
 
-  const acceptJob = useCallback((id: string) => updateStatus(id, 'ASSIGNED'), [updateStatus]);
-  const declineJob = useCallback((id: string) => updateStatus(id, 'CANCELLED'), [updateStatus]);
-  const startJob = useCallback((id: string) => updateStatus(id, 'IN_PROGRESS'), [updateStatus]);
-  const completeJob = useCallback((id: string) => updateStatus(id, 'COMPLETED'), [updateStatus]);
+  const startJob = useCallback(
+    async (id: string) => {
+      try {
+        setError(null);
+        await apiClient.patch(`/requests/${id}/start`);
+        await fetchJobs();
+      } catch (err: any) {
+        const errorMsg = err.response?.data?.message || "Failed to start job";
+        setError(errorMsg);
+        throw err;
+      }
+    },
+    [fetchJobs],
+  );
 
-  const getById = useCallback((id: string) => jobs.find((j) => j.id === id), [jobs]);
+  const completeJob = useCallback(
+    async (id: string, completionMedia?: string[], completionNote?: string) => {
+      try {
+        setError(null);
+        await apiClient.patch(`/requests/${id}/complete`, {
+          completionMedia: completionMedia || [],
+          completionNote: completionNote || "",
+        });
+        await fetchJobs();
+      } catch (err: any) {
+        const errorMsg =
+          err.response?.data?.message || "Failed to complete job";
+        setError(errorMsg);
+        throw err;
+      }
+    },
+    [fetchJobs],
+  );
+
+  const acceptJob = useCallback(
+    (id: string) => respondJob(id, "ACCEPT"),
+    [respondJob],
+  );
+  const declineJob = useCallback(
+    (id: string) => respondJob(id, "REJECT"),
+    [respondJob],
+  );
+
+  const getById = useCallback(
+    (id: string) => jobs.find((j) => j._id === id || j.id === id),
+    [jobs],
+  );
 
   return {
     jobs,
@@ -51,6 +142,8 @@ export function useProviderJobs() {
     setFilter,
     counts,
     refreshing,
+    loading,
+    error,
     refresh,
     acceptJob,
     declineJob,

@@ -3,3 +3,11 @@
 !/fixnow-app/
 !/fixnow-backend/
 !/PROJECT_OVERVIEW.md
+
+# Developer documentation (not for commit)
+PROVIDER_FEATURE_ANALYSIS.md
+BACKEND_API_REFERENCE.md
+PROVIDER_FRONTEND_API_GUIDE.md
+*_ANALYSIS.md
+*_API_*.md
+*_DOC.md

@@ -22,9 +22,10 @@ const getInitials = (user: AuthUser) => {
 type Props = {
   isOnline: boolean;
   onToggleOnline: () => void;
+  toggling?: boolean;
 };
 
-export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
+export function ProviderHeader({ isOnline, onToggleOnline, toggling = false }: Props) {
   const user = useUser();
   const router = useRouter();
   const initials = user ? getInitials(user) : '??';
@@ -44,6 +45,7 @@ export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
           {/* Online toggle */}
           <Pressable
             onPress={onToggleOnline}
+            disabled={toggling}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -53,6 +55,7 @@ export function ProviderHeader({ isOnline, onToggleOnline }: Props) {
               backgroundColor: isOnline ? '#f0fdf4' : '#f9fafb',
               borderWidth: 1,
               borderColor: isOnline ? '#bbf7d0' : '#e5e7eb',
+              opacity: toggling ? 0.6 : 1,
             }}
           >
             <View
