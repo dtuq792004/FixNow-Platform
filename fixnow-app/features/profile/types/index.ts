@@ -5,11 +5,12 @@ export * from './enums';
 
 // ─── Saved Address ────────────────────────────────────────────────────────────
 export interface SavedAddress {
-  id: string;
+  id: string;             // mapped from backend _id
   label: 'home' | 'work' | 'other';
-  street: string;
-  district: string;
-  city: string;
+  addressLine: string;    // số nhà + tên đường  (backend: addressLine)
+  ward: string;           // phường / xã
+  district: string;       // quận / huyện
+  city: string;           // tỉnh / thành phố
   isDefault: boolean;
 }
 
