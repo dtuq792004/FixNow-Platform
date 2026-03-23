@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { Pressable, Text as RNText, ScrollView, View } from 'react-native';
 import { Text } from '~/components/ui/text';
-import { SERVICE_CATEGORIES } from '~/features/home/data/service-categories';
+import { OTHER_CATEGORY, SERVICE_CATEGORIES } from '~/features/home/data/service-categories';
+import type { ServiceCategoryConfig } from '~/features/home/types';
 import type { ServiceCategoryType } from '~/features/requests/types';
 
 interface CategoryPickerProps {
@@ -10,32 +11,7 @@ interface CategoryPickerProps {
   error?: string;
 }
 
-const OTHER_CATEGORY = {
-  type: 'other' as ServiceCategoryType,
-  label: 'Khác',
-  description: 'Dịch vụ sửa chữa khác',
-  icon: 'tool',
-  bgClass: 'bg-gray-100',
-  iconColor: '#6B7280',
-};
-
-const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  electrical: 'Điện dân dụng, đèn, ổ cắm',
-  plumbing: 'Ống nước, vòi, bồn rửa',
-  hvac: 'Máy lạnh, điều hòa, quạt',
-  appliance: 'Tủ lạnh, máy giặt, TV',
-  security: 'Khóa, cửa, bảo mật',
-  painting: 'Sơn tường, trần, nội thất',
-  other: 'Dịch vụ sửa chữa khác',
-};
-
-const ALL_CATEGORIES = [
-  ...SERVICE_CATEGORIES.map((c) => ({
-    ...c,
-    description: CATEGORY_DESCRIPTIONS[c.type] ?? '',
-  })),
-  { ...OTHER_CATEGORY, description: OTHER_CATEGORY.description },
-];
+const ALL_CATEGORIES: ServiceCategoryConfig[] = [...SERVICE_CATEGORIES, OTHER_CATEGORY];
 
 interface CategoryItemProps {
   type: ServiceCategoryType;
@@ -74,40 +50,24 @@ const CategoryItem = ({
         padding: 14,
       }}
     >
-      {/* Icon */}
       <View
         className={bgClass}
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 10,
-        }}
+        style={{ width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}
       >
         <Feather name={icon as never} size={22} color={iconColor} />
       </View>
 
-      {/* Label + description */}
       <RNText style={{ fontSize: 14, fontWeight: '700', color: '#18181b', marginBottom: 2 }}>
         {label}
       </RNText>
       <RNText style={{ fontSize: 11, color: '#71717a', lineHeight: 15 }}>{description}</RNText>
 
-      {/* Selected checkmark */}
       {isSelected && (
         <View
           style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            backgroundColor: '#18181b',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'absolute', top: 10, right: 10,
+            width: 20, height: 20, borderRadius: 10,
+            backgroundColor: '#18181b', alignItems: 'center', justifyContent: 'center',
           }}
         >
           <Feather name="check" size={11} color="#fff" />
@@ -143,9 +103,7 @@ export const CategoryPicker = ({ selected, onSelect, error }: CategoryPickerProp
         ))}
       </View>
 
-      {error && (
-        <Text className="text-destructive text-sm mt-1">{error}</Text>
-      )}
+      {error && <Text className="text-destructive text-sm mt-1">{error}</Text>}
     </ScrollView>
   </View>
 );

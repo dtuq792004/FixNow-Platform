@@ -27,22 +27,16 @@ const CategoryItem = ({ category, onPress }: CategoryItemProps) => (
 export const ServiceCategoryGrid = () => {
   const router = useRouter();
 
-  const handleCategoryPress = (type: string) => {
-    // TODO: navigate to create request with pre-selected category
-    router.push(`/requests?category=${type}` as never);
-  };
-
   return (
     <View className="mb-6">
       <Text className="text-base font-semibold text-foreground mb-3">Dịch vụ</Text>
-
       <View className="bg-card border border-border rounded-2xl overflow-hidden">
         <View className="flex-row flex-wrap">
           {SERVICE_CATEGORIES.map((category) => (
             <CategoryItem
               key={category.type}
               category={category}
-              onPress={() => handleCategoryPress(category.type)}
+              onPress={() => router.push(`/requests?category=${category.type}` as never)}
             />
           ))}
         </View>
