@@ -7,13 +7,13 @@ export interface IUser extends Document {
   passwordHash: string;
   fullName: string;
   phone?: string;
-  avatar?: string;
+  avatar?: string | null;
   role: UserRole;
   status: "ACTIVE" | "INACTIVE" | "BANNED";
 
   resetPasswordTokenHash?: string;
   resetPasswordExpire?: Date;
-  
+
   resetPasswordOtp?: string;
   resetPasswordOtpExpire?: Date;
 }
@@ -37,7 +37,7 @@ const UserSchema = new Schema<IUser>(
     },
 
     phone: String,
-    avatar: String,
+    avatar: { type: String, default: null },
 
     role: {
       type: String,
@@ -52,10 +52,9 @@ const UserSchema = new Schema<IUser>(
       enum: ["ACTIVE", "INACTIVE", "BANNED"],
       default: "ACTIVE"
     },
-
     resetPasswordTokenHash: String,
     resetPasswordExpire: Date,
-    
+
     resetPasswordOtp: String,
     resetPasswordOtpExpire: Date
   },

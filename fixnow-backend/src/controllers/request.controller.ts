@@ -8,11 +8,12 @@ export const createRequestController = async (req: Request, res: Response) => {
     }
     const customerId = req.user.id;
 
-    const request = await requestService.createRequest(customerId, req.body);
+    const { request, checkoutUrl } = await requestService.createRequest(customerId, req.body);
 
     return res.status(201).json({
-      message: "Request created",
+      message: "Request created. Please pay to proceed.",
       data: request,
+      checkoutUrl
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
@@ -129,22 +130,4 @@ export const completeServiceController = async (req: Request, res: Response) => 
   }
 };
 
-export const confirmCompletionController = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
 
-    const customerId = req.user._id;
-    const  id  = req.params.id as string;
-
-    const request = await requestService.confirmCompletion(id, customerId);
-
-    return res.json({
-      message: "Service confirmed completed",
-      data: request,
-    });
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
-  }
-};

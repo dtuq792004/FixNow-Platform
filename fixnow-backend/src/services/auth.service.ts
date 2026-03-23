@@ -1,6 +1,5 @@
 import User, { IUser } from "../models/user.model";
 import Session from "../models/session.model";
-import PasswordResetToken from "../models/passwordResetToken.model";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -8,7 +7,7 @@ import { generateOtp } from "../utils/generateOtp";
 import { hashToken } from "../utils/hashToken";
 import { sendOtpEmail } from "../utils/sendEmail";
 
-const ACCESS_TOKEN_TTL = "15m";
+const ACCESS_TOKEN_TTL = "60m";
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 ngày
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 
@@ -137,6 +136,7 @@ export const verifyOtpService = async (otp: string) => {
   user.resetPasswordTokenHash = resetToken;
   await user.save();
 
+  console.log("RESET TOKEN GENERATED:", resetToken);
   return { 
     message: "Xác thực OTP thành công",
     resetToken // Client should store this for reset password
@@ -158,7 +158,7 @@ export const resetPasswordService = async (
 
   // Find user by reset token
   const user = await User.findOne({ resetPasswordTokenHash: resetToken });
-
+console.log("RESET TOKEN RECEIVED:", resetToken);
   if (!user) {
     throw new Error("Token không hợp lệ hoặc đã hết hạn");
   }
@@ -247,6 +247,5 @@ export const logoutService = async (refreshToken: string) => {
 
   return { message: "Đăng xuất thành công" };
 };
-
 
 
