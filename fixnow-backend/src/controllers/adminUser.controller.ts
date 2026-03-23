@@ -3,13 +3,19 @@ import * as adminUserService from "../services/adminUser.service";
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const { role } = req.query;
+    const { role, status, search, page = 1, limit = 5 } = req.query;
 
-    const users = await adminUserService.getUsers(role as string);
+    const result = await adminUserService.getUsers(
+      role as string,
+      status as string,
+      search as string,
+      Number(page),
+      Number(limit)
+    );
 
     return res.json({
       success: true,
-      data: users,
+      data: result,
       message: "Success",
     });
   } catch (error: any) {

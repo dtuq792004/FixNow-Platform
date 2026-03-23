@@ -4,29 +4,31 @@ import RequestModel from "../models/request.model";
 import { WithdrawRequest } from "../models/withdrawRequest.model";
 
 export const getDashboardSummaryService = async () => {
-
-  const totalUsers = await User.countDocuments();
-
-  const totalOrders = await RequestModel.countDocuments();
+  const [totalUsers, totalProviders, totalRequests] = await Promise.all([
+    User.countDocuments(),
+    User.countDocuments({ role: "PROVIDER" }),
+    RequestModel.countDocuments(),
+  ]);
 
   const revenueData = await Payment.aggregate([
     {
-      $match: { status: "SUCCESS" }
+      $match: { status: "SUCCESS" },
     },
     {
       $group: {
         _id: null,
-        totalRevenue: { $sum: "$amount" },
-        platformFee: { $sum: "$platformFee" }
-      }
-    }
+        totalGrossRevenue: { $sum: "$amount" },
+        totalNetRevenue: { $sum: "$platformFee" },
+      },
+    },
   ]);
 
   return {
     totalUsers,
-    totalOrders,
-    totalRevenue: revenueData[0]?.totalRevenue || 0,
-    platformFee: revenueData[0]?.platformFee || 0
+    totalProviders,
+    totalRequests,
+    totalGrossRevenue: revenueData[0]?.totalGrossRevenue || 0,
+    totalNetRevenue: revenueData[0]?.totalNetRevenue || 0,
   };
 };
 
@@ -91,6 +93,28 @@ export const getTopProvidersService = async () => {
     },
     {
       $limit: 10
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "providerInfo"
+      }
+    },
+    {
+      $unwind: "$providerInfo"
+    },
+    {
+      $project: {
+        _id: 1,
+        revenue: 1,
+        orders: 1,
+        name: "$providerInfo.fullName",
+        avatar: "$providerInfo.avatar",
+        email: "$providerInfo.email",
+        phone: "$providerInfo.phone"
+      }
     }
   ]);
 };
