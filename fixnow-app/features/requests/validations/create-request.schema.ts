@@ -11,9 +11,7 @@ const CATEGORY_VALUES = [
 ] as const;
 
 export const createRequestSchema = z.object({
-  category: z.enum(CATEGORY_VALUES, {
-    required_error: 'Vui lòng chọn loại dịch vụ',
-  }),
+  category: z.enum(CATEGORY_VALUES),
   title: z
     .string()
     .min(1, 'Vui lòng nhập tiêu đề yêu cầu')

@@ -8,7 +8,8 @@ import type { ProviderStatus } from '~/features/provider/types/provider.types';
 
 interface UseProviderStatusReturn {
   providerStatus: ProviderStatus | null;
-  isLoading: boolean;
+  isLoading: boolean;    // initial fetch
+  isUpdating: boolean;   // mutation (updateStatus / updateWorkingAreas)
   error: string | null;
   updateStatus: (activeStatus: 'ONLINE' | 'OFFLINE') => Promise<void>;
   updateWorkingAreas: (workingAreas: string[]) => Promise<void>;
@@ -16,8 +17,9 @@ interface UseProviderStatusReturn {
 }
 
 export const useProviderStatus = (): UseProviderStatusReturn => {
-  const [providerStatus, setProviderStatus] = useState<UseProviderStatusReturn['providerStatus']>(null);
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -39,33 +41,34 @@ export const useProviderStatus = (): UseProviderStatusReturn => {
 
   const updateStatus = useCallback(async (activeStatus: 'ONLINE' | 'OFFLINE') => {
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       const updated = await updateProviderStatus(activeStatus);
       setProviderStatus(updated);
     } catch (err: any) {
       setError(err?.message ?? 'Không thể cập nhật trạng thái');
       throw err;
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   }, []);
 
   const updateWorkingAreas = useCallback(async (workingAreas: string[]) => {
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       const updated = await updateProviderWorkingAreas(workingAreas);
       setProviderStatus(updated);
     } catch (err: any) {
       setError(err?.message ?? 'Không thể cập nhật khu vực làm việc');
       throw err;
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   }, []);
 
   return {
     providerStatus,
     isLoading,
+    isUpdating,
     error,
     updateStatus,
     updateWorkingAreas,

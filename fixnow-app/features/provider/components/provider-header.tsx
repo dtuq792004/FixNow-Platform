@@ -20,9 +20,9 @@ const getInitials = (user: AuthUser) => {
 };
 
 type Props = {
-  isOnline: boolean;
+  isOnline: boolean | undefined; // undefined = initial loading (status unknown)
   onToggleOnline: () => void;
-  isLoading?: boolean;
+  isLoading?: boolean;           // true only during update mutation
 };
 
 export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: Props) {
@@ -30,6 +30,10 @@ export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: 
   const router = useRouter();
   const initials = user ? getInitials(user) : '??';
   const displayName = user?.fullName?.split(' ').pop() ?? user?.email ?? '';
+
+  // Still fetching initial status — show neutral state
+  const isInitialLoading = isOnline === undefined;
+  const showOnline = isOnline === true;
 
   return (
     <View className="pt-safe px-4 pb-2">
@@ -45,20 +49,20 @@ export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: 
           {/* Online toggle */}
           <Pressable
             onPress={onToggleOnline}
-            disabled={isLoading}
+            disabled={isLoading || isInitialLoading}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               paddingHorizontal: 10,
               paddingVertical: 6,
               borderRadius: 20,
-              backgroundColor: isOnline ? '#f0fdf4' : '#f9fafb',
+              backgroundColor: showOnline ? '#f0fdf4' : '#f9fafb',
               borderWidth: 1,
-              borderColor: isOnline ? '#bbf7d0' : '#e5e7eb',
-              opacity: isLoading ? 0.6 : 1,
+              borderColor: showOnline ? '#bbf7d0' : '#e5e7eb',
+              opacity: (isLoading || isInitialLoading) ? 0.6 : 1,
             }}
           >
-            {isLoading ? (
+            {(isLoading || isInitialLoading) ? (
               <View className="w-4 h-4 mr-2">
                 <Feather name="loader" size={14} color="#6b7280" />
               </View>
@@ -66,7 +70,7 @@ export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: 
               <View
                 style={{
                   width: 8, height: 8, borderRadius: 4,
-                  backgroundColor: isOnline ? '#22c55e' : '#9ca3af',
+                  backgroundColor: showOnline ? '#22c55e' : '#9ca3af',
                   marginRight: 5,
                 }}
               />
@@ -74,10 +78,10 @@ export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: 
             <Text
               style={{
                 fontSize: 12, fontWeight: '600',
-                color: isOnline ? '#15803d' : '#6b7280',
+                color: showOnline ? '#15803d' : '#6b7280',
               }}
             >
-              {isLoading ? 'Đang xử lý...' : (isOnline ? 'Online' : 'Offline')}
+              {isLoading ? 'Đang xử lý...' : isInitialLoading ? '...' : (showOnline ? 'Online' : 'Offline')}
             </Text>
           </Pressable>
 
