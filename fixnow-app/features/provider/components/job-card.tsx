@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
-import type { ProviderJob } from '~/features/provider/data/mock-provider-jobs';
+import type { ProviderJob } from '~/features/provider/types/job.types';
 
 const BRAND = '#F97316';
 
