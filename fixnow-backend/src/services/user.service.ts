@@ -6,6 +6,14 @@ interface UpdateProfileInput {
   avatar?: string;
 }
 
+export const getProfileService = async (userId: string) => {
+  const user = await User.findById(userId).select("-passwordHash -resetPasswordOtp -resetPasswordOtpExpire -resetPasswordTokenHash -resetPasswordExpire");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
+};
+
 export const updateProfileService = async (
   userId: string,
   data: UpdateProfileInput
