@@ -86,6 +86,16 @@ export const searchProvidersService = async (keyword: string) => {
   return providers;
 };
 
+export const getProviderByUserId = async (userId: string) => {
+  const provider = await Provider.findOne({ userId });
+  
+  if (!provider) {
+    throw new Error("Provider not found");
+  }
+
+  return provider;
+};
+
 export const updateProviderStatus = async (
   userId: string,
   activeStatus: "ONLINE" | "OFFLINE"

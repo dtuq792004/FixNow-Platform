@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { 
+  getProvider,
   updateProviderStatus, 
   updateWorkingArea, 
   searchProviders, 
@@ -13,8 +14,14 @@ const router = Router();
  * PROVIDER routes
  */
 
-router.get("/top-rated", getTopRatedProvidersController);
-router.get("/search", searchProviders);
+router.get("/top-rated", authMiddleware, getTopRatedProvidersController);
+router.get("/search", authMiddleware, searchProviders);
+
+router.get(
+  "/me",
+  authMiddleware,
+  getProvider
+);
 
 router.patch(
   "/status",
