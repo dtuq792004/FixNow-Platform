@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { JobCard } from '~/features/provider/components/job-card';
-import type { ProviderJob } from '~/features/provider/data/mock-provider-jobs';
+import type { ProviderJob } from '~/features/provider/types/job.types';
 
 const BRAND = '#F97316';
 

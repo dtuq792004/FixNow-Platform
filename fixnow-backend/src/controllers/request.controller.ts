@@ -70,10 +70,33 @@ export const cancelRequestController = async (req: Request, res: Response) => {
 export const getAvailableRequestsController = async (req: Request, res: Response) => {
   try {
     const requests = await requestService.getAvailableRequests();
-
     return res.json({ data: requests });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getMyProviderJobsController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const providerId = req.user.id;
+    const jobs = await requestService.getMyProviderJobs(providerId);
+    return res.json({ data: jobs });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getProviderJobByIdController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const providerId = req.user.id;
+    const { id } = req.params;
+    const job = await requestService.getProviderJobById(id as string, providerId);
+    return res.json({ data: job });
+  } catch (error: any) {
+    const status = error.message === "Job not found" ? 404 : 500;
+    return res.status(status).json({ message: error.message });
   }
 };
 
@@ -82,7 +105,7 @@ export const respondRequestController = async (req: Request, res: Response) => {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    const providerId = req.user._id;
+    const providerId = req.user.id;
     const  id  = req.params.id as string;
     const { action } = req.body;
 
@@ -103,7 +126,7 @@ export const startServiceController = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const providerId = req.user._id;
+    const providerId = req.user.id;
     const id  = req.params.id as string;
 
     const request = await requestService.startService(id, providerId);
@@ -123,7 +146,7 @@ export const completeServiceController = async (req: Request, res: Response) => 
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const providerId = req.user._id;
+    const providerId = req.user.id;
     const id  = req.params.id as string;
     const { completionMedia, completionNote } = req.body;
 

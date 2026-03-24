@@ -1,4 +1,4 @@
-import { FlatList, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { JobCard } from '~/features/provider/components/job-card';
 import { JobsEmptyState } from '~/features/provider/components/jobs-empty-state';
@@ -12,9 +12,18 @@ export default function ProviderJobsScreen() {
   const router = useRouter();
   const {
     filtered, filter, setFilter, counts,
-    refreshing, refresh,
+    loading, refreshing, refresh,
     acceptJob, declineJob, startJob, completeJob,
   } = useProviderJobs();
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center">
+        <ActivityIndicator size="large" color={BRAND} />
+        <Text className="text-sm text-muted-foreground mt-3">Đang tải công việc...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-background">

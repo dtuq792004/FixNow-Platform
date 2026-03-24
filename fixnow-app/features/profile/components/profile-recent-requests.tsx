@@ -4,15 +4,21 @@ import { Pressable, Text as RNText, View } from 'react-native';
 import { getCategoryConfig } from '~/features/home/data/service-categories';
 import { getRelativeTime } from '~/features/home/utils/format-time';
 import { RequestStatusBadge } from '~/features/home/components/request-status-badge';
-import { MOCK_ALL_REQUESTS } from '~/features/requests/data/mock-requests-data';
+import type { ServiceRequestDetail } from '~/features/requests/types';
 
 const RECENT_COUNT = 3;
 
-export const ProfileRecentRequests = () => {
+interface Props {
+  requests: ServiceRequestDetail[];
+}
+
+export const ProfileRecentRequests = ({ requests }: Props) => {
   const router = useRouter();
-  const recent = [...MOCK_ALL_REQUESTS]
+  const recent = [...requests]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, RECENT_COUNT);
+
+  if (recent.length === 0) return null;
 
   return (
     <View style={{ marginHorizontal: 16, marginBottom: 20 }}>

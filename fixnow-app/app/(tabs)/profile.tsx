@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text as RNText, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSignOut, useUser } from '~/features/auth/stores/auth.store';
@@ -8,19 +8,26 @@ import { ProfileAvatar } from '~/features/profile/components/profile-avatar';
 import { ProfileRecentRequests } from '~/features/profile/components/profile-recent-requests';
 import { ProfileStatsRow } from '~/features/profile/components/profile-stats-row';
 import { SettingsMenu } from '~/features/profile/components/settings-menu';
-import { MOCK_ALL_REQUESTS } from '~/features/requests/data/mock-requests-data';
-import { ACTIVE_STATUSES } from '~/features/requests/types';
+import { getMyRequestsApi } from '~/features/requests/services/request.service';
+import { ACTIVE_STATUSES, type ServiceRequestDetail } from '~/features/requests/types';
 
 const ProfileScreen = () => {
   const user = useUser();
   const router = useRouter();
   const signOut = useSignOut();
+  const [requests, setRequests] = useState<ServiceRequestDetail[]>([]);
+
+  useEffect(() => {
+    getMyRequestsApi()
+      .then(setRequests)
+      .catch(() => {}); // silent — show zeroes on failure
+  }, []);
 
   const stats = useMemo(() => ({
-    total: MOCK_ALL_REQUESTS.length,
-    active: MOCK_ALL_REQUESTS.filter((r) => ACTIVE_STATUSES.includes(r.status)).length,
-    completed: MOCK_ALL_REQUESTS.filter((r) => r.status === 'completed').length,
-  }), []);
+    total: requests.length,
+    active: requests.filter((r) => ACTIVE_STATUSES.includes(r.status)).length,
+    completed: requests.filter((r) => r.status === 'completed').length,
+  }), [requests]);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -71,7 +78,7 @@ const ProfileScreen = () => {
       />
 
       {/* ── Recent requests ───────────────────────────────────────────────── */}
-      <ProfileRecentRequests />
+      <ProfileRecentRequests requests={requests} />
 
       {/* ── Settings ──────────────────────────────────────────────────────── */}
       <SettingsMenu onPress={(id) => {
