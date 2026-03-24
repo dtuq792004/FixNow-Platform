@@ -51,16 +51,52 @@ export const getMyProviderRequest = async (userId: string) => {
   return request;
 };
 
-export const getProviderRequests = async (status?: string) => {
+export const getProviderRequests = async (status?: string, page: number = 1, limit: number = 5, search?: string) => {
   const filter: any = {};
+  const statsFilter: any = {};
 
   if (status) {
     filter.status = status;
   }
 
-  return ProviderRequest.find(filter)
-    .populate("userId", "fullName email phone")
-    .sort({ createdAt: -1 });
+  if (search) {
+    const users = await User.find({
+      $or: [
+        { fullName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } }
+      ]
+    }).select('_id');
+    const userIds = users.map(u => u._id);
+    filter.userId = { $in: userIds };
+    statsFilter.userId = { $in: userIds };
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [requests, total, pendingCount, approvedCount, rejectedCount] = await Promise.all([
+    ProviderRequest.find(filter)
+      .populate("userId", "fullName email phone")
+      .populate("serviceCategories", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    ProviderRequest.countDocuments(filter),
+    ProviderRequest.countDocuments({ ...statsFilter, status: "PENDING" }),
+    ProviderRequest.countDocuments({ ...statsFilter, status: "APPROVED" }),
+    ProviderRequest.countDocuments({ ...statsFilter, status: "REJECTED" })
+  ]);
+
+  return {
+    requests,
+    total,
+    totalPages: Math.ceil(total / limit) || 1,
+    currentPage: page,
+    stats: {
+      pending: pendingCount,
+      approved: approvedCount,
+      rejected: rejectedCount
+    }
+  };
 };
 
 export const approveProviderRequest = async (
