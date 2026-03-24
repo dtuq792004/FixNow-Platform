@@ -66,7 +66,7 @@ export const QuickStatsRow = ({ stats, isLoading }: QuickStatsRowProps) => (
             icon="loader"
             iconBg="bg-blue-100"
             iconColor="#2563EB"
-            value={stats.pending + stats.in_progress}
+            value={stats.active}
             label="Đang xử lý"
           />
           <StatCard

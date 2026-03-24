@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { FlatList, Pressable, Text as RNText, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { ProviderCard } from '~/features/search/components/provider-card';
 import { SearchBrowse } from '~/features/search/components/search-browse';
 import { SearchInput } from '~/features/search/components/search-input';
@@ -77,6 +78,7 @@ const NoResults = ({ query }: { query: string }) => (
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 const SearchScreen = () => {
+  const router = useRouter();
   const {
     query, setQuery, clearQuery,
     segment, setSegment,
@@ -120,7 +122,10 @@ const SearchScreen = () => {
             item.type === 'service' ? (
               <ServiceResultCard item={item} />
             ) : (
-              <ProviderCard provider={item.provider} />
+              <ProviderCard
+                provider={item.provider}
+                onPress={() => router.push(`/providers/${item.provider.id}` as never)}
+              />
             )
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 24, flexGrow: 1 }}

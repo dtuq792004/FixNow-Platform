@@ -1,38 +1,25 @@
 import { Router } from "express";
-import { 
+import {
   getProvider,
-  updateProviderStatus, 
-  updateWorkingArea, 
-  searchProviders, 
-  getTopRatedProvidersController 
+  updateProviderStatus,
+  updateWorkingArea,
+  searchProviders,
+  getTopRatedProvidersController,
+  getProviderPublicProfileController,
 } from "../controllers/provider.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-/**
- * PROVIDER routes
- */
-
+// Named routes first — must precede /:id to avoid param capture
 router.get("/top-rated", authMiddleware, getTopRatedProvidersController);
 router.get("/search", authMiddleware, searchProviders);
+router.get("/me", authMiddleware, getProvider);
 
-router.get(
-  "/me",
-  authMiddleware,
-  getProvider
-);
+router.patch("/status", authMiddleware, updateProviderStatus);
+router.patch("/working-area", authMiddleware, updateWorkingArea);
 
-router.patch(
-  "/status",
-  authMiddleware,
-  updateProviderStatus
-);
-
-router.patch(
-  "/working-area",
-  authMiddleware,
-  updateWorkingArea
-);
+// Public profile — last to avoid shadowing named routes above
+router.get("/:id", authMiddleware, getProviderPublicProfileController);
 
 export default router;
