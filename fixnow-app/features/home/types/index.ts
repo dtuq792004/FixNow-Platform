@@ -34,8 +34,8 @@ export interface ServiceRequest {
 }
 
 export interface HomeStats {
-  pending: number;
-  in_progress: number;
+  /** pending + assigned + in_progress — mirrors ACTIVE_STATUSES */
+  active: number;
   completed: number;
   total: number;
 }

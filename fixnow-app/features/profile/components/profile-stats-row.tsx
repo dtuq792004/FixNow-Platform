@@ -12,12 +12,27 @@ interface ProfileStatsRowProps {
   total: number;
   active: number;
   completed: number;
+  isLoading?: boolean;
 }
 
-export const ProfileStatsRow = ({ total, active, completed }: ProfileStatsRowProps) => {
+const SkeletonCell = ({ isLast }: { isLast: boolean }) => (
+  <View
+    style={{
+      flex: 1, alignItems: 'center', paddingVertical: 16,
+      borderRightWidth: isLast ? 0 : 1,
+      borderRightColor: '#e4e4e7',
+    }}
+  >
+    <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: '#f4f4f5', marginBottom: 6 }} />
+    <View style={{ width: 28, height: 22, borderRadius: 6, backgroundColor: '#f4f4f5', marginBottom: 4 }} />
+    <View style={{ width: 44, height: 12, borderRadius: 4, backgroundColor: '#f4f4f5' }} />
+  </View>
+);
+
+export const ProfileStatsRow = ({ total, active, completed, isLoading }: ProfileStatsRowProps) => {
   const stats: Stat[] = [
-    { icon: 'clipboard', value: total, label: 'Tổng YC', color: '#6366f1' },
-    { icon: 'tool', value: active, label: 'Đang xử lý', color: '#f59e0b' },
+    { icon: 'clipboard', value: total,     label: 'Tổng YC',     color: '#6366f1' },
+    { icon: 'tool',      value: active,    label: 'Đang xử lý',  color: '#f59e0b' },
     { icon: 'check-circle', value: completed, label: 'Hoàn thành', color: '#22c55e' },
   ];
 
@@ -27,31 +42,38 @@ export const ProfileStatsRow = ({ total, active, completed }: ProfileStatsRowPro
       backgroundColor: '#fafafa', borderWidth: 1, borderColor: '#e4e4e7',
       borderRadius: 16, marginHorizontal: 16, marginBottom: 20,
     }}>
-      {stats.map((stat, index) => (
-        <View
-          key={stat.label}
-          style={{
-            flex: 1, alignItems: 'center', paddingVertical: 16,
-            borderRightWidth: index < stats.length - 1 ? 1 : 0,
-            borderRightColor: '#e4e4e7',
-          }}
-        >
-          <View style={{
-            width: 32, height: 32, borderRadius: 10,
-            backgroundColor: stat.color + '18',
-            alignItems: 'center', justifyContent: 'center',
-            marginBottom: 6,
-          }}>
-            <Feather name={stat.icon as never} size={15} color={stat.color} />
-          </View>
-          <RNText style={{ fontSize: 20, fontWeight: '700', color: '#18181b', lineHeight: 24 }}>
-            {stat.value}
-          </RNText>
-          <RNText style={{ fontSize: 11, color: '#71717a', marginTop: 2, textAlign: 'center' }}>
-            {stat.label}
-          </RNText>
-        </View>
-      ))}
+      {isLoading
+        ? <>
+            <SkeletonCell isLast={false} />
+            <SkeletonCell isLast={false} />
+            <SkeletonCell isLast={true} />
+          </>
+        : stats.map((stat, index) => (
+            <View
+              key={stat.label}
+              style={{
+                flex: 1, alignItems: 'center', paddingVertical: 16,
+                borderRightWidth: index < stats.length - 1 ? 1 : 0,
+                borderRightColor: '#e4e4e7',
+              }}
+            >
+              <View style={{
+                width: 32, height: 32, borderRadius: 10,
+                backgroundColor: stat.color + '18',
+                alignItems: 'center', justifyContent: 'center',
+                marginBottom: 6,
+              }}>
+                <Feather name={stat.icon as never} size={15} color={stat.color} />
+              </View>
+              <RNText style={{ fontSize: 20, fontWeight: '700', color: '#18181b', lineHeight: 24 }}>
+                {stat.value}
+              </RNText>
+              <RNText style={{ fontSize: 11, color: '#71717a', marginTop: 2, textAlign: 'center' }}>
+                {stat.label}
+              </RNText>
+            </View>
+          ))
+      }
     </View>
   );
 };

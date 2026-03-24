@@ -1,8 +1,7 @@
 import type { HomeStats, ServiceRequest } from '../types';
 
 export const MOCK_HOME_STATS: HomeStats = {
-  pending: 1,
-  in_progress: 2,
+  active: 3,
   completed: 8,
   total: 11,
 };

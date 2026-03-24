@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Alert, Pressable, ScrollView, Text as RNText, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSignOut, useUser } from '~/features/auth/stores/auth.store';
@@ -8,24 +8,18 @@ import { ProfileAvatar } from '~/features/profile/components/profile-avatar';
 import { ProfileRecentRequests } from '~/features/profile/components/profile-recent-requests';
 import { ProfileStatsRow } from '~/features/profile/components/profile-stats-row';
 import { SettingsMenu } from '~/features/profile/components/settings-menu';
-import { getMyRequestsApi } from '~/features/requests/services/request.service';
-import { ACTIVE_STATUSES, type ServiceRequestDetail } from '~/features/requests/types';
+import { useMyRequests } from '~/features/requests/hooks/use-my-requests';
+import { ACTIVE_STATUSES } from '~/features/requests/types';
 
 const ProfileScreen = () => {
   const user = useUser();
   const router = useRouter();
   const signOut = useSignOut();
-  const [requests, setRequests] = useState<ServiceRequestDetail[]>([]);
-
-  useEffect(() => {
-    getMyRequestsApi()
-      .then(setRequests)
-      .catch(() => {}); // silent — show zeroes on failure
-  }, []);
+  const { requests, isLoading } = useMyRequests();
 
   const stats = useMemo(() => ({
-    total: requests.length,
-    active: requests.filter((r) => ACTIVE_STATUSES.includes(r.status)).length,
+    total:     requests.length,
+    active:    requests.filter((r) => ACTIVE_STATUSES.includes(r.status)).length,
     completed: requests.filter((r) => r.status === 'completed').length,
   }), [requests]);
 
@@ -75,6 +69,7 @@ const ProfileScreen = () => {
         total={stats.total}
         active={stats.active}
         completed={stats.completed}
+        isLoading={isLoading}
       />
 
       {/* ── Recent requests ───────────────────────────────────────────────── */}

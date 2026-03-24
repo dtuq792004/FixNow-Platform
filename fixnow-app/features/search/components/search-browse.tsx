@@ -67,7 +67,11 @@ export const SearchBrowse = () => {
           Thợ nổi bật
         </RNText>
         {topProviders.map((item, index) => (
-          <ProviderCard key={`${item.provider.id}-${index}`} provider={item.provider} />
+          <ProviderCard
+            key={`${item.provider.id}-${index}`}
+            provider={item.provider}
+            onPress={() => router.push(`/providers/${item.provider.id}` as never)}
+          />
         ))}
         {topProviders.length === 0 && !error && (
           <RNText style={{ fontSize: 13, color: '#a1a1aa', textAlign: 'center', marginTop: 10 }}>

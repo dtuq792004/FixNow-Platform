@@ -58,6 +58,7 @@ export default function RootLayout() {
           <Stack.Screen name="requests/index" />
           <Stack.Screen name="requests/[id]" />
           <Stack.Screen name="jobs/[id]" />
+          <Stack.Screen name="providers/[id]" />
         </Stack>
       </SafeAreaProvider>
       <StatusBar style="dark" />

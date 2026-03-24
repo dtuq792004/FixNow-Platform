@@ -14,9 +14,8 @@ interface Props {
 
 export const ProfileRecentRequests = ({ requests }: Props) => {
   const router = useRouter();
-  const recent = [...requests]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, RECENT_COUNT);
+  // Data arrives pre-sorted from useMyRequests (API returns desc createdAt)
+  const recent = requests.slice(0, RECENT_COUNT);
 
   if (recent.length === 0) return null;
 
