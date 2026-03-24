@@ -8,13 +8,17 @@ export enum ProviderRequestStatus {
 
 export interface IProviderRequest extends Document {
   userId: Types.ObjectId;
-  description: string;
-  experienceYears: number;
-  serviceCategories: Types.ObjectId[];
-  workingAreas: string[];
+  fullName: string;
+  phone: string;
+  experience: string;
+  specialties: string[];
+  serviceArea: string;
+  idCard: string;
+  motivation?: string;
   status: ProviderRequestStatus;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
+  rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,27 +30,35 @@ const providerRequestSchema = new Schema<IProviderRequest>(
       ref: "User",
       required: true,
     },
-    description: {
+    fullName: {
       type: String,
       required: true,
     },
-    experienceYears: {
-      type: Number,
+    phone: {
+      type: String,
       required: true,
     },
-    serviceCategories: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Category",
-        required: true,
-      },
-    ],
-    workingAreas: [
+    experience: {
+      type: String,
+      required: true,
+    },
+    specialties: [
       {
         type: String,
         required: true,
       },
     ],
+    serviceArea: {
+      type: String,
+      required: true,
+    },
+    idCard: {
+      type: String,
+      required: true,
+    },
+    motivation: {
+      type: String,
+    },
     status: {
       type: String,
       enum: Object.values(ProviderRequestStatus),
@@ -58,6 +70,9 @@ const providerRequestSchema = new Schema<IProviderRequest>(
     },
     reviewedAt: {
       type: Date,
+    },
+    rejectionReason: {
+      type: String,
     },
   },
   {

@@ -14,24 +14,31 @@ export interface IRequest extends Document {
   customerId: mongoose.Types.ObjectId;
   providerId?: mongoose.Types.ObjectId;
 
-  services: mongoose.Types.ObjectId[];
+  // ── Service selection ─────────────────────────────────────────────────────
+  categoryId?: mongoose.Types.ObjectId; // category selected by customer
+  services: mongoose.Types.ObjectId[];  // specific Service documents (optional)
 
-  addressId: mongoose.Types.ObjectId;
+  // ── Address ───────────────────────────────────────────────────────────────
+  addressId?: mongoose.Types.ObjectId;  // saved Address ref (optional)
+  addressText?: string;                 // plain-text fallback
+
+  // ── Request info ──────────────────────────────────────────────────────────
+  title?: string;
+  description?: string;
+  note?: string;
+  media?: string[];
   requestType: RequestType;
 
+  // ── Pricing ───────────────────────────────────────────────────────────────
   totalPrice: number;
   discountAmount: number;
   finalPrice: number;
   promoCode?: string;
 
-  description?: string;
-  media?: string[];
-
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
   status: RequestStatus;
-
-  providerCompletedAt?: Date;
   startAt: Date;
-
+  providerCompletedAt?: Date;
   completionMedia?: string[];
   completionNote?: string;
 
@@ -52,19 +59,43 @@ const requestSchema = new Schema<IRequest>(
       ref: "User",
     },
 
+    // ── Service selection ───────────────────────────────────────────────────
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+    },
+
     services: [
       {
         type: Schema.Types.ObjectId,
         ref: "Service",
-        required: true,
       },
     ],
 
+    // ── Address ─────────────────────────────────────────────────────────────
     addressId: {
       type: Schema.Types.ObjectId,
       ref: "Address",
-      required: true,
     },
+
+    addressText: {
+      type: String,
+    },
+
+    // ── Request info ─────────────────────────────────────────────────────────
+    title: {
+      type: String,
+    },
+
+    description: {
+      type: String,
+    },
+
+    note: {
+      type: String,
+    },
+
+    media: [String],
 
     requestType: {
       type: String,
@@ -72,9 +103,10 @@ const requestSchema = new Schema<IRequest>(
       default: "NORMAL",
     },
 
+    // ── Pricing ──────────────────────────────────────────────────────────────
     totalPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     discountAmount: {
@@ -84,15 +116,12 @@ const requestSchema = new Schema<IRequest>(
 
     finalPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     promoCode: String,
 
-    description: String,
-
-    media: [String],
-
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
     status: {
       type: String,
       enum: [
@@ -103,7 +132,7 @@ const requestSchema = new Schema<IRequest>(
         "COMPLETED",
         "CANCELLED",
       ],
-      default: "AWAITING_PAYMENT",
+      default: "PENDING",
     },
 
     startAt: {
@@ -112,9 +141,7 @@ const requestSchema = new Schema<IRequest>(
     },
 
     providerCompletedAt: Date,
-
     completionMedia: [String],
-
     completionNote: String,
   },
   { timestamps: true },

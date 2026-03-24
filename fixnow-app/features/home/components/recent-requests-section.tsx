@@ -3,11 +3,11 @@ import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Text } from '~/components/ui/text';
-import type { ServiceRequest } from '~/features/home/types';
+import type { ServiceRequestDetail } from '~/features/requests/types';
 import { RequestCard } from './request-card';
 
 interface RecentRequestsSectionProps {
-  requests: ServiceRequest[];
+  requests: ServiceRequestDetail[];
   isLoading: boolean;
 }
 
@@ -30,7 +30,6 @@ const RequestCardSkeleton = () => (
 
 const EmptyState = () => {
   const router = useRouter();
-
   return (
     <View className="items-center py-8 px-4">
       <View className="w-16 h-16 bg-secondary rounded-full items-center justify-center mb-4">
@@ -52,34 +51,29 @@ const EmptyState = () => {
 
 export const RecentRequestsSection = ({ requests, isLoading }: RecentRequestsSectionProps) => {
   const router = useRouter();
-  const displayRequests = requests.slice(0, 3);
 
   return (
     <View className="mb-6">
-      {/* Section header */}
       <View className="flex-row items-center justify-between mb-3">
         <Text className="text-base font-semibold text-foreground">Yêu cầu gần đây</Text>
         {requests.length > 0 && (
           <Pressable
-            className="flex-row items-center active:opacity-70"
+            className="flex-row items-center gap-1 active:opacity-70"
             onPress={() => router.push('/(tabs)/requests' as never)}
           >
-            <Text className="text-xs text-primary mr-1">Xem tất cả</Text>
+            <Text className="text-xs text-primary">Xem tất cả</Text>
             <Feather name="chevron-right" size={14} color="#1a1a1a" />
           </Pressable>
         )}
       </View>
 
-      {/* Content */}
       {isLoading ? (
         <>
           <RequestCardSkeleton />
           <RequestCardSkeleton />
         </>
-      ) : displayRequests.length > 0 ? (
-        displayRequests.map((request) => (
-          <RequestCard key={request.id} request={request} />
-        ))
+      ) : requests.length > 0 ? (
+        requests.map((request) => <RequestCard key={request.id} request={request} />)
       ) : (
         <View className="bg-card border border-border rounded-xl overflow-hidden">
           <EmptyState />

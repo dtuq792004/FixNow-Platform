@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
 export const registerProviderSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, 'Họ và tên không được để trống'),
+  phone: z
+    .string()
+    .min(10, 'Số điện thoại không hợp lệ'),
   specialties: z
     .array(z.string())
     .min(1, 'Vui lòng chọn ít nhất 1 chuyên môn'),

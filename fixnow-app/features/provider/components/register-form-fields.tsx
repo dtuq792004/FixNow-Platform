@@ -28,13 +28,54 @@ export const RegisterFormFields = ({
   user, isSubmitting, onSubmit,
 }: RegisterFormFieldsProps) => (
   <>
-    {/* ── Thông tin cơ bản (readonly) ──────────────────────────────────── */}
+    {/* ── Thông tin cơ bản ──────────────────────────────────── */}
     <SectionHeader title="Thông tin cơ bản" />
-    <View style={{ gap: 10, marginBottom: 20 }}>
-      <InfoRow icon="user"  label="Họ và tên"       value={user.fullName} />
-      <InfoRow icon="phone" label="Số điện thoại"   value={user.phone ?? 'Chưa cập nhật'} />
-      <InfoRow icon="mail"  label="Email"            value={user.email} />
-    </View>
+    
+    {/* Full Name Input */}
+    <FieldWrapper
+      label="Họ và tên" required
+      error={errors.fullName?.message}
+    >
+      <Controller
+        control={control} name="fullName"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            value={value} onChangeText={onChange} onBlur={onBlur}
+            placeholder="Nhập họ và tên của bạn"
+            style={{
+              height: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12,
+              borderColor: errors.fullName ? '#ef4444' : '#e4e4e7',
+              fontSize: 14, color: '#18181b', backgroundColor: '#fff',
+            }}
+          />
+        )}
+      />
+    </FieldWrapper>
+
+    {/* Phone Input */}
+    <FieldWrapper
+      label="Số điện thoại" required
+      error={errors.phone?.message}
+    >
+      <Controller
+        control={control} name="phone"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            value={value} onChangeText={onChange} onBlur={onBlur}
+            placeholder="Nhập số điện thoại của bạn"
+            keyboardType="phone-pad"
+            style={{
+              height: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12,
+              borderColor: errors.phone ? '#ef4444' : '#e4e4e7',
+              fontSize: 14, color: '#18181b', backgroundColor: '#fff',
+            }}
+          />
+        )}
+      />
+    </FieldWrapper>
+
+    {/* Email (readonly) */}
+    <InfoRow icon="mail" label="Email" value={user.email} />
 
     {/* ── Chuyên môn ───────────────────────────────────────────────────── */}
     <SectionHeader title="Chuyên môn" />
