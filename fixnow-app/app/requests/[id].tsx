@@ -1,111 +1,44 @@
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, ActivityIndicator, Pressable, ScrollView, Text as RNText, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FeedbackModal } from '~/features/feedback/components/feedback-modal';
+import { useHasFeedback } from '~/features/feedback/hooks/use-feedback';
 import { getRelativeTime } from '~/features/home/utils/format-time';
 import { DetailHeroCard } from '~/features/requests/components/detail-hero-card';
-import {
-  DetailInfoRow,
-  DetailSection,
-} from '~/features/requests/components/detail-primitives';
+import { DetailInfoRow, DetailSection } from '~/features/requests/components/detail-primitives';
 import { DetailProviderCard } from '~/features/requests/components/detail-provider-card';
+import {
+  RequestDetailErrorState,
+  RequestDetailLoadingSkeleton,
+} from '~/features/requests/components/request-detail-states';
 import { StatusTimeline } from '~/features/requests/components/status-timeline';
 import { useRequestDetail } from '~/features/requests/hooks/use-request-detail';
 import { cancelRequestApi } from '~/features/requests/services/request.service';
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
-const LoadingSkeleton = ({ onBack }: { onBack: () => void }) => {
-  const insets = useSafeAreaInsets();
-  return (
-    <View className="flex-1 bg-white">
-      <View
-        className="flex-row items-center border-b border-zinc-100 px-4 pb-3"
-        style={{ paddingTop: insets.top + 8 }}
-      >
-        <Pressable onPress={onBack} className="p-2 mr-1">
-          <Feather name="arrow-left" size={22} color="#18181b" />
-        </Pressable>
-        <View className="h-5 w-48 bg-zinc-100 rounded" />
-      </View>
-      <View className="flex-1 items-center justify-center gap-3">
-        <ActivityIndicator size="large" color="#18181b" />
-        <RNText style={{ fontSize: 13, color: '#a1a1aa' }}>Đang tải...</RNText>
-      </View>
-    </View>
-  );
-};
-
-// ── Error state ───────────────────────────────────────────────────────────────
-const ErrorState = ({
-  message,
-  onBack,
-  onRetry,
-}: {
-  message: string;
-  onBack: () => void;
-  onRetry: () => void;
-}) => {
-  const insets = useSafeAreaInsets();
-  return (
-    <View className="flex-1 bg-white">
-      <View
-        className="flex-row items-center border-b border-zinc-100 px-4 pb-3"
-        style={{ paddingTop: insets.top + 8 }}
-      >
-        <Pressable onPress={onBack} className="p-2 mr-1">
-          <Feather name="arrow-left" size={22} color="#18181b" />
-        </Pressable>
-        <RNText style={{ fontSize: 16, fontWeight: '700', color: '#18181b' }}>
-          Chi tiết yêu cầu
-        </RNText>
-      </View>
-      <View className="flex-1 items-center justify-center px-8">
-        <View className="w-16 h-16 rounded-full bg-red-50 items-center justify-center mb-4">
-          <Feather name="alert-circle" size={30} color="#ef4444" />
-        </View>
-        <RNText style={{ fontSize: 15, fontWeight: '700', color: '#18181b', textAlign: 'center', marginBottom: 8 }}>
-          Không tìm thấy yêu cầu
-        </RNText>
-        <RNText style={{ fontSize: 13, color: '#71717a', textAlign: 'center', lineHeight: 20, marginBottom: 24 }}>
-          {message}
-        </RNText>
-        <View className="flex-row gap-3 w-full">
-          <Pressable
-            onPress={onBack}
-            className="flex-1 h-11 border border-zinc-200 rounded-xl items-center justify-center active:opacity-70"
-          >
-            <RNText style={{ fontSize: 14, fontWeight: '600', color: '#3f3f46' }}>Quay lại</RNText>
-          </Pressable>
-          <Pressable
-            onPress={onRetry}
-            className="flex-1 h-11 bg-zinc-900 rounded-xl items-center justify-center active:opacity-80"
-          >
-            <RNText style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>Thử lại</RNText>
-          </Pressable>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// ── Main screen ───────────────────────────────────────────────────────────────
+// ── Screen ────────────────────────────────────────────────────────────────────
 const RequestDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
   const { request, timeline, isLoading, error, refetch } = useRequestDetail(id ?? '');
 
-  if (isLoading) return <LoadingSkeleton onBack={() => router.back()} />;
+  const isCompleted = request?.status === 'completed';
+  const { data: hasFeedback } = useHasFeedback(request?.id ?? '', isCompleted);
+
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  if (isLoading) return <RequestDetailLoadingSkeleton onBack={() => router.back()} />;
   if (error || !request)
     return (
-      <ErrorState
+      <RequestDetailErrorState
         message={error ?? 'Yêu cầu không tồn tại hoặc bạn không có quyền truy cập.'}
         onBack={() => router.back()}
         onRetry={refetch}
       />
     );
-
-  const canCancel = request.status === 'pending';
 
   const handleCancel = () => {
     Alert.alert('Huỷ yêu cầu', 'Bạn có chắc muốn huỷ yêu cầu này không?', [
@@ -129,7 +62,7 @@ const RequestDetailScreen = () => {
 
   return (
     <View className="flex-1 bg-white">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* Header */}
       <View
         className="flex-row items-center border-b border-zinc-100 px-4 pb-3"
         style={{ paddingTop: insets.top + 8 }}
@@ -138,16 +71,16 @@ const RequestDetailScreen = () => {
           <Feather name="arrow-left" size={22} color="#18181b" />
         </Pressable>
         <View className="flex-1">
-          <RNText style={{ fontSize: 16, fontWeight: '700', color: '#18181b' }} numberOfLines={1}>
+          <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
             {request.title}
-          </RNText>
-          <RNText style={{ fontSize: 11, color: '#a1a1aa', marginTop: 1 }}>
+          </Text>
+          <Text className="text-[11px] text-zinc-400 mt-px">
             #{request.id.slice(-8).toUpperCase()}
-          </RNText>
+          </Text>
         </View>
       </View>
 
-      {/* ── Content ────────────────────────────────────────────────────────── */}
+      {/* Content */}
       <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24 }}
         showsVerticalScrollIndicator={false}
@@ -155,11 +88,11 @@ const RequestDetailScreen = () => {
         <DetailHeroCard category={request.category} status={request.status} />
 
         <DetailSection title="Chi tiết yêu cầu">
-          <DetailInfoRow icon="file-text" label="Tiêu đề" value={request.title} />
-          <DetailInfoRow icon="align-left" label="Mô tả vấn đề" value={request.description} />
-          <DetailInfoRow icon="map-pin" label="Địa chỉ" value={request.address} />
+          <DetailInfoRow icon="file-text"    label="Tiêu đề"       value={request.title} />
+          <DetailInfoRow icon="align-left"   label="Mô tả vấn đề"  value={request.description} />
+          <DetailInfoRow icon="map-pin"      label="Địa chỉ"       value={request.address} />
           {request.note && (
-            <DetailInfoRow icon="message-circle" label="Ghi chú" value={request.note} />
+            <DetailInfoRow icon="message-circle" label="Ghi chú"   value={request.note} />
           )}
           <DetailInfoRow
             icon="clock"
@@ -178,18 +111,46 @@ const RequestDetailScreen = () => {
           <StatusTimeline events={timeline} />
         </DetailSection>
 
-        {canCancel && (
+        {/* ── Cancel (pending only) ─────────────────────────────────────── */}
+        {request.status === 'pending' && (
           <Pressable
             onPress={handleCancel}
             className="mt-2 h-12 rounded-xl border border-red-200 bg-red-50 flex-row items-center justify-center gap-2 active:opacity-80"
           >
             <Feather name="x-circle" size={16} color="#ef4444" />
-            <RNText style={{ color: '#ef4444', fontWeight: '600', fontSize: 14, marginLeft: 6 }}>
-              Huỷ yêu cầu
-            </RNText>
+            <Text className="text-red-500 font-semibold text-sm">Huỷ yêu cầu</Text>
           </Pressable>
         )}
+
+        {/* ── Feedback (completed only) ─────────────────────────────────── */}
+        {isCompleted && request.provider && (
+          hasFeedback ? (
+            <View className="mt-2 h-12 rounded-xl border border-zinc-200 bg-zinc-50 flex-row items-center justify-center gap-2">
+              <Feather name="check-circle" size={16} color="#16a34a" />
+              <Text className="text-zinc-500 font-semibold text-sm">Đã đánh giá</Text>
+            </View>
+          ) : (
+            <Pressable
+              onPress={() => setFeedbackOpen(true)}
+              className="mt-2 h-12 rounded-xl bg-zinc-900 flex-row items-center justify-center gap-2 active:opacity-80"
+            >
+              <Feather name="star" size={15} color="#F59E0B" />
+              <Text className="text-white font-bold text-sm">Đánh giá dịch vụ</Text>
+            </Pressable>
+          )
+        )}
       </ScrollView>
+
+      {/* Feedback modal */}
+      {isCompleted && request.provider && (
+        <FeedbackModal
+          visible={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          requestId={request.id}
+          providerId={request.provider.id}
+          providerName={request.provider.name}
+        />
+      )}
     </View>
   );
 };

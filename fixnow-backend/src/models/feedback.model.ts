@@ -2,7 +2,7 @@ import mongoose, { Document, PaginateModel } from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 export interface IServiceFeedback extends Document {
-  serviceId: mongoose.Types.ObjectId;
+  serviceId?: mongoose.Types.ObjectId; // optional — overall rating needs no specific service
   rating: number;
   comment?: string;
 }
@@ -21,7 +21,7 @@ const ServiceFeedbackSchema = new mongoose.Schema<IServiceFeedback>({
   serviceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Service",
-    required: true
+    required: false, // optional — customer can rate overall without a specific service
   },
   rating: {
     type: Number,
