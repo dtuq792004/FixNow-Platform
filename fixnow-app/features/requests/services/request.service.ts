@@ -71,10 +71,12 @@ export const createRequestApi = async (
 ): Promise<CreateRequestResponse> => {
   const dto = {
     categoryId: getCategoryId(data.category),
+    serviceId: data.serviceId || undefined,
     title: data.title,
     description: data.description,
     addressText: data.address,
     addressId: data.addressId || undefined,
+    promotionCode: data.promotionCode || undefined,
     note: data.note || undefined,
   };
 
@@ -108,3 +110,49 @@ export const getRequestByIdApi = async (id: string): Promise<ServiceRequestDetai
 export const cancelRequestApi = async (id: string): Promise<void> => {
   await apiClient.patch(`/requests/${id}/cancel`);
 };
+
+// ── Services by Category ──────────────────────────────────────────────────────
+
+export interface ServiceItem {
+  id: string;
+  name: string;
+  price: number;
+  unit: 'hour' | 'job';
+  description?: string;
+}
+
+/** GET /services/category/:categoryId — list approved services for a category */
+export const fetchServicesByCategoryApi = async (
+  categoryId: string,
+): Promise<ServiceItem[]> => {
+  const { data: res } = await apiClient.get<{
+    data: { _id: string; name: string; price: number; unit: string; description?: string }[];
+  }>(`/services/category/${categoryId}`);
+  return res.data.map((s) => ({
+    id: s._id,
+    name: s.name,
+    price: s.price,
+    unit: s.unit as 'hour' | 'job',
+    description: s.description,
+  }));
+};
+
+// ── Promotion ─────────────────────────────────────────────────────────────────
+
+export interface PromotionResult {
+  _id: string;
+  code: string;
+  discountType: 'PERCENT' | 'AMOUNT';
+  discountValue: number;
+  expiredAt?: string | null;
+}
+
+/** POST /promotions/validate — validate a promotion code */
+export const validatePromotionApi = async (code: string): Promise<PromotionResult> => {
+  const { data: res } = await apiClient.post<{ success: boolean; data: PromotionResult }>(
+    '/promotions/validate',
+    { code },
+  );
+  return res.data;
+};
+

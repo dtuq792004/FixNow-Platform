@@ -7,13 +7,16 @@ import { Textarea } from '~/components/ui/textarea';
 import { Text } from '~/components/ui/text';
 import { fetchAddresses } from '~/features/profile/services/address.service';
 import type { CreateRequestSchema } from '~/features/requests/validations/create-request.schema';
+import type { ServiceCategoryType } from '~/features/home/types';
 import { formatSavedAddress } from '../utils/address-format.utils';
 import { AddressPicker } from './address-picker';
+import { ServicePicker } from './service-picker';
 
 interface DetailsFormProps {
   control: Control<CreateRequestSchema>;
   errors: FieldErrors<CreateRequestSchema>;
   setValue: UseFormSetValue<CreateRequestSchema>;
+  category: ServiceCategoryType;
 }
 
 interface FormRowProps {
@@ -36,7 +39,7 @@ const FormRow = ({ label, required, error, hint, children }: FormRowProps) => (
   </View>
 );
 
-export const DetailsForm = ({ control, errors, setValue }: DetailsFormProps) => {
+export const DetailsForm = ({ control, errors, setValue, category }: DetailsFormProps) => {
   // Auto-fill default address on first render (only when address is still empty)
   useEffect(() => {
     const currentAddress = control._formValues.address ?? '';
@@ -50,8 +53,8 @@ export const DetailsForm = ({ control, errors, setValue }: DetailsFormProps) => 
           setValue('addressId', defaultAddr.id);
         }
       })
-      .catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch(() => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -67,6 +70,25 @@ export const DetailsForm = ({ control, errors, setValue }: DetailsFormProps) => 
           Cung cấp thông tin để thợ hiểu rõ công việc cần làm
         </RNText>
       </View>
+
+      {/* Service Picker */}
+      <Controller
+        control={control}
+        name="serviceId"
+        render={({ field: { value } }) => (
+          <ServicePicker
+            category={category}
+            selectedServiceId={value}
+            selectedServiceName={control._formValues.serviceName}
+            onSelect={(svc) => {
+              setValue('serviceId', svc?.id ?? undefined);
+              setValue('serviceName', svc?.name ?? undefined);
+              setValue('servicePrice', svc?.price ?? undefined);
+              setValue('serviceUnit', svc?.unit ?? undefined);
+            }}
+          />
+        )}
+      />
 
       {/* Title */}
       <FormRow
