@@ -1,23 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getConversations, getMessages, createConversation, sendMessageApi, uploadImageApi } from '../services/chat.service';
+import {
+  getConversations,
+  getMessages,
+  createConversation,
+  sendMessageApi,
+  uploadImageApi,
+} from '../services/chat.service';
+import type { ChatMessage } from '../types/chat.types';
 
-// --- Danh sách cuộc hội thoại ---
+// ── Conversations ─────────────────────────────────────────────────────────────
+
 export const useConversations = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['conversations'],
     queryFn: getConversations,
+    staleTime: 30_000, // 30s — socket keeps list fresh
   });
 
-  return {
-    conversations: data || [],
-    isLoading,
-    refetch,
-  };
+  return { conversations: data ?? [], isLoading, refetch };
 };
 
 export const useCreateConversationMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createConversation,
     onSuccess: () => {
@@ -26,30 +31,40 @@ export const useCreateConversationMutation = () => {
   });
 };
 
-// --- Chi tiết cuộc hội thoại ---
+// ── Messages ──────────────────────────────────────────────────────────────────
+
 export const useMessages = (conversationId: string) => {
   const { data, isLoading } = useQuery({
     queryKey: ['messages', conversationId],
     queryFn: () => getMessages(conversationId),
     enabled: !!conversationId,
+    staleTime: 60_000,
   });
 
-  return {
-    messages: data || [],
-    isLoading,
-  };
+  return { messages: data ?? [], isLoading };
 };
 
-export const useSendMessageMutation = () => {
+export const useSendMessageMutation = (conversationId?: string) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: sendMessageApi,
-    // Typically, you might want to optimistically update or invalidate queries here,
-    // but with socket.io handles the real-time update in this architecture.
+    onSuccess: (newMessage) => {
+      // Append to message cache (REST fallback path — socket usually handles this)
+      if (conversationId) {
+        queryClient.setQueryData<ChatMessage[]>(
+          ['messages', conversationId],
+          (prev = []) =>
+            prev.some((m) => m._id === newMessage._id) ? prev : [...prev, newMessage],
+        );
+      }
+      // Refresh conversation list so lastMessage / updatedAt update
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
   });
 };
 
-export const useUploadChatImageMutation = () => {
-  return useMutation({
-    mutationFn: uploadImageApi,
-  });
-};
+// ── Image upload ──────────────────────────────────────────────────────────────
+
+export const useUploadChatImageMutation = () =>
+  useMutation({ mutationFn: uploadImageApi });

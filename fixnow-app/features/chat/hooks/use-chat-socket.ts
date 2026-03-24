@@ -1,76 +1,90 @@
-import { useEffect, useState, useCallback } from 'react';
+/**
+ * Socket.IO hook for real-time chat.
+ *
+ * Design decisions:
+ * - Socket connects once per token (not per conversationId) to avoid thrashing.
+ * - conversationId is stored in a ref so event handlers always read the latest
+ *   value without needing to be recreated.
+ * - realtimeMessages resets when conversationId changes so stale messages from
+ *   the previous conversation are never shown.
+ */
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import apiClient from '~/lib/api-client';
 import { useAuthStore } from '~/features/auth/stores/auth.store';
 import type { ChatMessage, SendMessageDto } from '../types/chat.types';
 
-const getSocketUrl = () => {
-  const apiClientBase = apiClient.defaults.baseURL;
-  return apiClientBase || 'http://localhost:5000';
+/**
+ * Strip any path suffix from the API base URL to get the Socket.IO server root.
+ * e.g. "http://10.0.2.2:5000/api" → "http://10.0.2.2:5000"
+ */
+const getSocketUrl = (): string => {
+  const base = apiClient.defaults.baseURL ?? 'http://localhost:5000';
+  try {
+    const url = new URL(base);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return base.replace(/\/api.*$/, '');
+  }
 };
 
 export const useChatSocket = (conversationId: string | undefined) => {
-  const session = useAuthStore((s) => s.session);
-  const currentUserId = session?.user?._id || (session?.user as any)?.id;
-  const token = session?.access_token;
+  const token = useAuthStore((s) => s.session?.access_token);
 
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const conversationIdRef = useRef(conversationId);
   const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[]>([]);
 
+  // Keep ref in sync so event handlers always read the latest conversationId
   useEffect(() => {
-    if (!token || !conversationId) return;
+    conversationIdRef.current = conversationId;
+    // Reset real-time buffer whenever the conversation changes
+    setRealtimeMessages([]);
+  }, [conversationId]);
 
-    const newSocket = io(getSocketUrl(), {
+  // Connect once per token — not per conversationId
+  useEffect(() => {
+    if (!token) return;
+
+    const socket = io(getSocketUrl(), {
       auth: { token },
+      transports: ['websocket'],
     });
 
-    newSocket.on('connect', () => {
-      if (currentUserId) newSocket.emit('join', currentUserId);
-    });
-
-    const handleIncomingMessage = (msg: ChatMessage) => {
-      if (msg.conversationId === conversationId) {
-        setRealtimeMessages((prev) => {
-          if (prev.find((m) => m._id === msg._id)) return prev;
-          return [...prev, msg];
-        });
-      }
+    const handleMessage = (msg: ChatMessage) => {
+      if (msg.conversationId !== conversationIdRef.current) return;
+      setRealtimeMessages((prev) => {
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
     };
 
-    newSocket.on('new_message', handleIncomingMessage);
-    newSocket.on('message_sent', handleIncomingMessage);
+    socket.on('new_message', handleMessage);
+    socket.on('message_sent', handleMessage);
 
-    setSocket(newSocket);
+    socketRef.current = socket;
 
     return () => {
-      newSocket.off('new_message');
-      newSocket.off('message_sent');
-      newSocket.disconnect();
+      socket.off('new_message', handleMessage);
+      socket.off('message_sent', handleMessage);
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }, [token, currentUserId, conversationId]);
+  }, [token]);
 
-  const sendRealtimeMessage = useCallback(
-    (payload: SendMessageDto) => {
-      if (!socket || !socket.connected) return;
+  const sendRealtimeMessage = useCallback((payload: SendMessageDto) => {
+    const socket = socketRef.current;
+    if (socket?.connected) {
       socket.emit('send_message', payload);
-    },
-    [socket]
+      return true;
+    }
+    return false; // caller should fall back to REST
+  }, []);
+
+  const isConnected = useCallback(
+    () => socketRef.current?.connected ?? false,
+    [],
   );
 
-  return {
-    socket,
-    realtimeMessages,
-    sendRealtimeMessage,
-    // Provide a helper to manually merge fetched historical messages with incoming ones
-    mergeMessages: (historical: ChatMessage[]) => {
-      // Historical messages + Any new messages from socket not already in historical
-      const all = [...historical];
-      realtimeMessages.forEach((rt) => {
-        if (!all.find((h) => h._id === rt._id)) {
-          all.push(rt);
-        }
-      });
-      return all;
-    },
-  };
+  return { realtimeMessages, sendRealtimeMessage, isConnected };
 };

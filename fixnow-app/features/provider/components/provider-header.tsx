@@ -46,10 +46,18 @@ export function ProviderHeader({ isOnline, onToggleOnline, isLoading = false }: 
         </View>
 
         <View className="flex-row items-center gap-3">
+          {/* Chat */}
+          <Pressable
+            className="w-10 h-10 rounded-full bg-secondary items-center justify-center"
+            onPress={() => router.push('/chat')}
+            accessibilityLabel="Tin nhắn"
+          >
+            <Feather name="message-circle" size={20} color="#374151" />
+          </Pressable>
+
           {/* Online toggle */}
           <Pressable
             onPress={onToggleOnline}
-            disabled={isLoading || isInitialLoading}
             style={{
               flexDirection: 'row',
               alignItems: 'center',

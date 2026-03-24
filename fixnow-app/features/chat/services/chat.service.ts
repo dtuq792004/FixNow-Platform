@@ -17,8 +17,9 @@ export const createConversation = async (participantId: string): Promise<Convers
 };
 
 export const sendMessageApi = async (payload: SendMessageDto): Promise<ChatMessage> => {
-  const { data } = await apiClient.post<ChatMessage>('/chat/messages', payload);
-  return data;
+  // Backend returns { message: ChatMessage, recipientId: string }
+  const { data } = await apiClient.post<{ message: ChatMessage; recipientId: string }>('/chat/messages', payload);
+  return data.message;
 };
 
 export const uploadImageApi = async (uri: string): Promise<string> => {
