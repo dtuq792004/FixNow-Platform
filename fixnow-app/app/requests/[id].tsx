@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedbackModal } from '~/features/feedback/components/feedback-modal';
 import { useHasFeedback } from '~/features/feedback/hooks/use-feedback';
@@ -15,6 +15,7 @@ import {
 } from '~/features/requests/components/request-detail-states';
 import { StatusTimeline } from '~/features/requests/components/status-timeline';
 import { useRequestDetail } from '~/features/requests/hooks/use-request-detail';
+import { paymentService } from '~/features/payment/services/payment.service';
 import { cancelRequestApi } from '~/features/requests/services/request.service';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ const RequestDetailScreen = () => {
   const { data: hasFeedback } = useHasFeedback(request?.id ?? '', isCompleted);
 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
 
   if (isLoading) return <RequestDetailLoadingSkeleton onBack={() => router.back()} />;
   if (error || !request)
@@ -39,6 +41,25 @@ const RequestDetailScreen = () => {
         onRetry={refetch}
       />
     );
+
+  const handlePayNow = async () => {
+    try {
+      setIsPaying(true);
+      const checkoutUrl = await paymentService.createPaymentUrl(request.id);
+      router.push({
+        pathname: '/payment/select-method',
+        params: {
+          checkoutUrl,
+          requestId: request.id,
+          finalPrice: request.price?.toString() ?? '0',
+        },
+      } as never);
+    } catch {
+      Alert.alert('Lỗi', 'Không thể tạo phiên thanh toán. Vui lòng thử lại.');
+    } finally {
+      setIsPaying(false);
+    }
+  };
 
   const handleCancel = () => {
     Alert.alert('Huỷ yêu cầu', 'Bạn có chắc muốn huỷ yêu cầu này không?', [
@@ -88,11 +109,11 @@ const RequestDetailScreen = () => {
         <DetailHeroCard category={request.category} status={request.status} />
 
         <DetailSection title="Chi tiết yêu cầu">
-          <DetailInfoRow icon="file-text"    label="Tiêu đề"       value={request.title} />
-          <DetailInfoRow icon="align-left"   label="Mô tả vấn đề"  value={request.description} />
-          <DetailInfoRow icon="map-pin"      label="Địa chỉ"       value={request.address} />
+          <DetailInfoRow icon="file-text" label="Tiêu đề" value={request.title} />
+          <DetailInfoRow icon="align-left" label="Mô tả vấn đề" value={request.description} />
+          <DetailInfoRow icon="map-pin" label="Địa chỉ" value={request.address} />
           {request.note && (
-            <DetailInfoRow icon="message-circle" label="Ghi chú"   value={request.note} />
+            <DetailInfoRow icon="message-circle" label="Ghi chú" value={request.note} />
           )}
           <DetailInfoRow
             icon="clock"
@@ -111,11 +132,28 @@ const RequestDetailScreen = () => {
           <StatusTimeline events={timeline} />
         </DetailSection>
 
-        {/* ── Cancel (pending only) ─────────────────────────────────────── */}
-        {request.status === 'pending' && (
+        {/* ── Cancel & Pay (pending / awaiting_payment) ────────────────────────── */}
+        {request.status === 'awaiting_payment' && (
+          <Pressable
+            onPress={handlePayNow}
+            disabled={isPaying}
+            className="mt-4 h-12 rounded-xl bg-orange-500 flex-row items-center justify-center gap-2 active:opacity-80"
+          >
+            {isPaying ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <>
+                <Feather name="credit-card" size={16} color="#ffffff" />
+                <Text className="text-white font-bold text-sm">Tiến hành thanh toán</Text>
+              </>
+            )}
+          </Pressable>
+        )}
+
+        {['pending', 'awaiting_payment'].includes(request.status) && (
           <Pressable
             onPress={handleCancel}
-            className="mt-2 h-12 rounded-xl border border-red-200 bg-red-50 flex-row items-center justify-center gap-2 active:opacity-80"
+            className="mt-3 h-12 rounded-xl border border-red-200 bg-red-50 flex-row items-center justify-center gap-2 active:opacity-80"
           >
             <Feather name="x-circle" size={16} color="#ef4444" />
             <Text className="text-red-500 font-semibold text-sm">Huỷ yêu cầu</Text>

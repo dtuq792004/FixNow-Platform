@@ -9,6 +9,7 @@ export type ServiceCategoryType =
 
 export type RequestStatus =
   | 'pending'
+  | 'awaiting_payment'
   | 'assigned'
   | 'in_progress'
   | 'completed'

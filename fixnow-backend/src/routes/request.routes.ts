@@ -10,6 +10,7 @@ import {
   respondRequestController,
   startServiceController,
   completeServiceController,
+  payLaterController,
 } from "../controllers/request.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -30,5 +31,6 @@ router.patch("/:id/cancel", authMiddleware, cancelRequestController);
 router.patch("/:id/respond", authMiddleware, respondRequestController);
 router.patch("/:id/start", authMiddleware, startServiceController);
 router.patch("/:id/complete", authMiddleware, completeServiceController);
+router.patch("/:id/pay-later", authMiddleware, payLaterController);
 
 export default router;

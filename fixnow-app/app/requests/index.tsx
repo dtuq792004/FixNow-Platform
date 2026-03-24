@@ -68,7 +68,21 @@ const CreateRequestScreen = () => {
     try {
       setIsSubmitting(true);
       const response = await createRequestApi(data);
-      setSubmittedId(response.id);
+
+      if (response.checkoutUrl) {
+        // ── Có dịch vụ + giá → cho user chọn phương thức thanh toán ──
+        router.push({
+          pathname: '/payment/select-method',
+          params: {
+            checkoutUrl: response.checkoutUrl,
+            requestId: response.id,
+            finalPrice: data.servicePrice?.toString() ?? '0',
+          },
+        } as never);
+      } else {
+        // ── Không có giá (flow công khai) → thành công luôn ──
+        setSubmittedId(response.id);
+      }
     } catch (err: any) {
       Alert.alert(
         'Gửi yêu cầu thất bại',

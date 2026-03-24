@@ -8,7 +8,7 @@ export const cancelRequest = async (requestId: string, customerId: string) => {
 
   if (!request) throw new Error("Request not found");
   if (request.customerId.toString() !== customerId) throw new Error("Not authorized");
-  if (!["PENDING", "ACCEPTED", "IN_PROGRESS"].includes(request.status)) {
+  if (!["AWAITING_PAYMENT", "PENDING", "ACCEPTED", "IN_PROGRESS"].includes(request.status)) {
     throw new Error("Cannot cancel this request");
   }
 

@@ -37,6 +37,7 @@ export interface ServiceRequestDetail {
   status: RequestStatus;
   address: string;
   note?: string;
+  price?: number;
   created_at: string;
   updated_at?: string;
   provider?: {
@@ -59,4 +60,4 @@ export const FILTER_LABELS: Record<RequestFilterOption, string> = {
   cancelled: 'Đã hủy',
 };
 
-export const ACTIVE_STATUSES: RequestStatus[] = ['pending', 'assigned', 'in_progress'];
+export const ACTIVE_STATUSES: RequestStatus[] = ['pending', 'awaiting_payment', 'assigned', 'in_progress'];

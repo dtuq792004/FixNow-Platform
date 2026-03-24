@@ -166,4 +166,22 @@ export const completeServiceController = async (req: Request, res: Response) => 
   }
 };
 
+export const payLaterController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const customerId = req.user.id;
+    const id = req.params.id as string;
 
+    const request = await requestService.payLater(id, customerId);
+
+    return res.json({
+      message: "Request set to pay on completion",
+      data: request,
+    });
+  } catch (error: any) {
+    const status = error.message === "Request not found" ? 404 : 400;
+    return res.status(status).json({ message: error.message });
+  }
+};

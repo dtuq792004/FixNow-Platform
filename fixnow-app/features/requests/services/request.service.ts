@@ -6,7 +6,7 @@ import type { CreateRequestSchema } from '../validations/create-request.schema';
 
 // ── Status mapper: backend UPPERCASE → frontend lowercase ─────────────────────
 const BACKEND_TO_FRONTEND_STATUS: Record<string, RequestStatus> = {
-  AWAITING_PAYMENT: 'pending',
+  AWAITING_PAYMENT: 'awaiting_payment',
   PENDING: 'pending',
   ACCEPTED: 'assigned',
   IN_PROGRESS: 'in_progress',
@@ -32,6 +32,7 @@ interface BackendRequest {
   addressText?: string;
   status: string;
   requestType: string;
+  finalPrice?: number;
   categoryId?: { _id: string; name: string } | null;
   providerId?: { _id: string; fullName: string; avatar?: string; phone?: string } | null;
   createdAt: string;
@@ -50,6 +51,7 @@ const mapToServiceRequestDetail = (r: BackendRequest): ServiceRequestDetail => {
     status: mapStatus(r.status),
     address: r.addressText ?? '',
     note: r.note,
+    price: r.finalPrice,
     created_at: r.createdAt,
     updated_at: r.updatedAt,
     provider: r.providerId
@@ -71,7 +73,7 @@ export const createRequestApi = async (
 ): Promise<CreateRequestResponse> => {
   const dto = {
     categoryId: getCategoryId(data.category),
-    serviceId: data.serviceId || undefined,
+    services: data.serviceId ? [data.serviceId] : undefined,
     title: data.title,
     description: data.description,
     addressText: data.address,
