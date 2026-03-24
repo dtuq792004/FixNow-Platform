@@ -80,6 +80,12 @@ const CreateRequestScreen = () => {
     }
   };
 
+  // Called by ConfirmSummary with the (optional) validated promotion code
+  const handleConfirmSubmit = (promotionCode?: string) => {
+    if (promotionCode) setValue('promotionCode', promotionCode);
+    handleSubmit(onSubmit)();
+  };
+
   // ── Success screen ──────────────────────────────────────────────────────────
   if (submittedId) {
     return (
@@ -128,12 +134,12 @@ const CreateRequestScreen = () => {
             error={errors.category?.message}
           />
         )}
-        {step === 2 && <DetailsForm control={control} errors={errors} setValue={setValue} />}
+        {step === 2 && <DetailsForm control={control} errors={errors} setValue={setValue} category={selectedCategory} />}
         {step === 3 && (
           <ConfirmSummary
             data={formData as CreateRequestSchema}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleConfirmSubmit}
           />
         )}
       </View>

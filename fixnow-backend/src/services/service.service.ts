@@ -38,13 +38,7 @@ export const getServices = async (query: any) => {
 
 
 export const getServicesByCategory = async (categoryId: string) => {
-
-  const services = await Service.find( {categoryId }).populate("categoryId");
-
-  if (!services || services.length === 0) {
-    throw new Error("No services found for this category");
-  }
-
+  const services = await Service.find({ categoryId, status: "APPROVED" }).populate("categoryId");
   return services;
 };
 

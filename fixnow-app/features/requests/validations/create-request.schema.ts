@@ -26,7 +26,12 @@ export const createRequestSchema = z.object({
     .string()
     .min(1, 'Vui lòng nhập địa chỉ')
     .min(5, 'Địa chỉ phải có ít nhất 5 ký tự'),
-  addressId: z.string().optional(), // MongoDB _id of saved address (when picked from list)
+  addressId: z.string().optional(),
+  serviceId: z.string().optional(),
+  serviceName: z.string().optional(),
+  servicePrice: z.number().optional(),
+  serviceUnit: z.enum(['hour', 'job']).optional(),
+  promotionCode: z.string().optional(),
   note: z.string().max(200, 'Ghi chú không được quá 200 ký tự').optional(),
 });
 
