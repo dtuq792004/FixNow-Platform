@@ -35,9 +35,8 @@ export const ChatMessageBubble = ({ item, currentUserId }: Props) => {
 
         {/* Bubble */}
         <View
-          className={`max-w-[75%] rounded-2xl px-3 py-2 ${
-            isMine ? 'bg-primary rounded-tr-sm' : 'bg-secondary rounded-tl-sm'
-          }`}
+          className={`max-w-[75%] rounded-2xl px-3 py-2 ${isMine ? 'bg-primary rounded-tr-sm' : 'bg-secondary rounded-tl-sm'
+            }`}
         >
           {item.type === 'IMAGE' ? (
             <Pressable onPress={() => setFullscreenImage(item.content)}>
@@ -49,17 +48,15 @@ export const ChatMessageBubble = ({ item, currentUserId }: Props) => {
             </Pressable>
           ) : (
             <Text
-              className={`text-base leading-5 ${
-                isMine ? 'text-primary-foreground' : 'text-foreground'
-              }`}
+              className={`text-base leading-5 ${isMine ? 'text-primary-foreground' : 'text-foreground'
+                }`}
             >
               {item.content}
             </Text>
           )}
           <Text
-            className={`text-[10px] mt-1 ${
-              isMine ? 'text-primary-foreground/60 text-right' : 'text-muted-foreground text-left'
-            }`}
+            className={`text-[10px] mt-1 ${isMine ? 'text-primary-foreground/60 text-right' : 'text-muted-foreground text-left'
+              }`}
           >
             {format(new Date(item.createdAt), 'HH:mm')}
           </Text>

@@ -16,6 +16,12 @@ const STATUS_CONFIG: Record<RequestStatus, StatusConfig> = {
     dotClass: 'bg-amber-400',
     textClass: 'text-amber-700',
   },
+  awaiting_payment: {
+    label: 'Chờ thanh toán',
+    bgClass: 'bg-orange-50',
+    dotClass: 'bg-orange-400',
+    textClass: 'text-orange-700',
+  },
   assigned: {
     label: 'Đã giao thợ',
     bgClass: 'bg-blue-50',

@@ -61,6 +61,11 @@ export default function RootLayout() {
           <Stack.Screen name="providers/[id]" />
           <Stack.Screen name="chat/index" />
           <Stack.Screen name="chat/[id]" />
+          <Stack.Screen name="payment/webview" />
+          <Stack.Screen name="payment/success" />
+          <Stack.Screen name="payment/cancel" />
+          <Stack.Screen name="payment/select-method" />
+          <Stack.Screen name="payment/cash-success" />
         </Stack>
       </SafeAreaProvider>
       <StatusBar style="dark" />
