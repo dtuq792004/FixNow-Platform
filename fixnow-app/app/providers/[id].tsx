@@ -155,6 +155,7 @@ export default function ProviderProfileScreen() {
         <PublicProfileReviews
           reviews={profile.recentReviews}
           reviewCount={profile.reviewCount}
+          onSeeAll={() => router.push(`/providers/${profile.id}/reviews` as never)}
         />
       </ScrollView>
     </View>
