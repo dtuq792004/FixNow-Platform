@@ -60,6 +60,7 @@ export default function RootLayout() {
           <Stack.Screen name="jobs/[id]" />
           <Stack.Screen name="providers/[id]" />
           <Stack.Screen name="chat/index" />
+          <Stack.Screen name="chat/ai" />
           <Stack.Screen name="chat/[id]" />
           <Stack.Screen name="payment/webview" />
           <Stack.Screen name="payment/success" />

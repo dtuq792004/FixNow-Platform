@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI, Part, SchemaType } from "@google/generative-ai";
 import Service from "../models/service.model";
 import Category from "../models/category.model";
+import { Provider } from "../models/provider.model";
+import { getTopRatedProviders } from "./feedback.services";
 
 // Khởi tạo Gemini SDK
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -17,7 +19,9 @@ Vai trò của bạn:
    - Thanh toán QR (PayOS): Khách hàng cần chuyển khoản trực tiếp ngay sau khi vừa đặt dịch vụ xong (thanh toán trước).
    - Thanh toán Tiền mặt: Khách hàng sẽ thanh toán trực tiếp cho thợ sau khi yêu cầu được hoàn thành xong xuôi (thanh toán sau).
 2. Chẩn đoán và Tư vấn: Khi khách mô tả lỗi hoặc gửi ảnh, hãy phân tích nguyên nhân và đề xuất Dịch vụ + Thợ phù hợp.
-3. Đề xuất Thợ: Sử dụng công cụ để tìm thợ dựa trên chuyên môn/kinh nghiệm. Ưu tiên thợ ONLINE và có kinh nghiệm cao.
+3. Đề xuất Thợ: 
+   - Sử dụng 'find_providers' để tìm thợ theo chuyên môn chung.
+   - Sử dụng 'find_top_rated_providers' khi khách hàng muốn tìm thợ chất lượng nhất, có đánh giá cao nhất (Top 3). Bạn có thể lọc theo chuyên môn nếu khách yêu cầu.
 4. Phong cách: Thân thiện, chuyên nghiệp, tiếng Việt. Trả lời chi tiết nhưng đi thẳng vào vấn đề. Luôn khuyến khích đặt lịch trên app.`;
 
 export const chatWithGemini = async (
@@ -28,7 +32,7 @@ export const chatWithGemini = async (
 ) => {
   // Sử dụng gemini-1.5-flash hoặc 2.0-flash (ưu tiên 1.5/2.0 để ổn định)
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: SYSTEM_INSTRUCTION,
     tools: [
       {
@@ -55,11 +59,24 @@ export const chatWithGemini = async (
               properties: {
                 category_name: {
                   type: SchemaType.STRING,
-                  description: "Tên loại chuyên môn (VD: 'Điện lạnh', 'Điện nước')",
+                  description: "Tên loại chuyên môn (VD: 'Điện lạnh', 'Điện nước', 'Thiết bị')",
                 },
                 min_experience: {
                   type: SchemaType.NUMBER,
                   description: "Số năm kinh nghiệm tối thiểu",
+                },
+              },
+            },
+          },
+          {
+            name: "find_top_rated_providers",
+            description: "Tìm kiếm top 3 thợ kỹ thuật có lượt đánh giá và điểm số cao nhất hệ thống.",
+            parameters: {
+              type: SchemaType.OBJECT,
+              properties: {
+                category_name: {
+                  type: SchemaType.STRING,
+                  description: "Tên loại chuyên môn cần lọc (không bắt buộc)",
                 },
               },
             },
@@ -142,7 +159,7 @@ export const chatWithGemini = async (
         }
         
         // Tìm providers kết hợp với thông tin User
-        const providers = await (require("../models/provider.model").Provider)
+        const providers = await Provider
           .find(query)
           .populate("userId", "fullName avatar phone")
           .limit(3);
@@ -168,6 +185,46 @@ export const chatWithGemini = async (
       } catch (error) {
         console.error("AI find_providers error:", error);
         return "Hiện tại tôi không thể tra cứu danh sách thợ kỹ thuật.";
+      }
+    }
+
+    // Xử lý hàm find_top_rated_providers
+    if (call.name === "find_top_rated_providers") {
+      const args = call.args as { category_name?: string };
+      console.log(`[AI] Đang tìm kiếm thợ chất lượng cao: ${JSON.stringify(args)}`);
+
+      try {
+        let categoryId: string | undefined;
+        if (args.category_name) {
+          const category = await Category.findOne({ name: new RegExp(args.category_name, "i") });
+          if (category) {
+            categoryId = (category._id as any).toString();
+          }
+        }
+
+        const topProviders = await getTopRatedProviders(3, categoryId);
+
+        const functionResponseResult = await chat.sendMessage([
+          {
+            functionResponse: {
+              name: "find_top_rated_providers",
+              response: {
+                providers: topProviders.map((p: any) => ({
+                  name: p.userId?.fullName,
+                  avgRating: p.avgRating,
+                  reviewCount: p.reviewCount,
+                  experience: p.experienceYears,
+                  description: p.description,
+                })),
+              },
+            },
+          },
+        ]);
+
+        return functionResponseResult.response.text();
+      } catch (error) {
+        console.error("AI find_top_rated_providers error:", error);
+        return "Hiện tại tôi không thể tra cứu danh sách thợ xuất sắc nhất.";
       }
     }
   }
