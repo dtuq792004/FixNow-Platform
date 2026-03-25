@@ -17,6 +17,7 @@ import { JobStatusBadge } from '~/features/provider/components/job-status-badge'
 import { useProviderJobDetail } from '~/features/provider/hooks/use-provider-job-detail';
 import { useJobDetailHandlers } from '~/features/provider/hooks/use-job-detail-handlers';
 import { buildProviderTimeline } from '~/features/provider/utils/job-timeline';
+import { JobFeedbackCard } from '~/features/feedback/components/job-feedback-card';
 
 const BRAND = '#F97316';
 
@@ -152,6 +153,9 @@ export default function ProviderJobDetailScreen() {
             )}
           </DetailSection>
         )}
+
+        {/* Customer feedback — visible once job is completed */}
+        {job.status === 'COMPLETED' && <JobFeedbackCard requestId={job.id} />}
 
         {/* Timeline */}
         <DetailSection title="Tiến trình">
