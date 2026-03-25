@@ -1,127 +1,153 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '~/components/ui/text';
+import { AiSuggestionChips } from '~/features/chatbot/components/ai-suggestion-chips';
+import { MessageBubble } from '~/features/chatbot/components/message-bubble';
+import { TypingIndicator } from '~/features/chatbot/components/typing-indicator';
 import { useAiChat } from '~/features/chatbot/hooks/use-ai-chat';
 
 export default function AiChatScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [input, setInput] = useState('');
-  const { messages, sendMessage, isSending } = useAiChat();
+  const { messages, sendMessage, isSending, clearChat } = useAiChat();
+  const listRef = useRef<FlatList>(null);
 
   const reversedMessages = useMemo(() => [...messages].reverse(), [messages]);
+  const showSuggestions = messages.length === 1; // only greeting visible
+  const canSend = input.trim().length > 0 && !isSending;
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || isSending) return;
     setInput('');
     sendMessage(text);
+  }, [input, isSending, sendMessage]);
+
+  const handleSuggestion = useCallback(
+    (text: string) => {
+      if (!isSending) sendMessage(text);
+    },
+    [isSending, sendMessage],
+  );
+
+  const handleClear = () => {
+    Alert.alert('Xoá cuộc trò chuyện', 'Bắt đầu cuộc trò chuyện mới?', [
+      { text: 'Huỷ', style: 'cancel' },
+      { text: 'Xoá', style: 'destructive', onPress: clearChat },
+    ]);
   };
 
   return (
-    <View className="flex-1 bg-[#F9FAFB]">
+    <View className="flex-1 bg-white">
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header - Blue background like mockup */}
-        <View className="bg-primary pt-safe px-4 pb-4 flex-row items-center border-b border-primary/20">
-          <Pressable onPress={() => router.back()} className="p-1 mr-2" hitSlop={10}>
-            <Feather name="chevron-left" size={26} color="#ffffff" />
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <View
+          style={{ paddingTop: insets.top + 8 }}
+          className="flex-row items-center px-4 pb-3 border-b border-zinc-100 bg-white"
+        >
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={8}
+            className="w-9 h-9 items-center justify-center rounded-full mr-1"
+          >
+            <Feather name="chevron-left" size={24} color="#18181b" />
           </Pressable>
-          <View className="w-10 h-10 rounded-full bg-white items-center justify-center mr-3 shadow-sm">
-            <View className="bg-primary/10 w-8 h-8 rounded-full items-center justify-center">
-              <Feather name="cpu" size={18} color="#0066FF" />
-            </View>
+
+          <View className="w-9 h-9 rounded-full bg-zinc-900 items-center justify-center mr-3">
+            <Feather name="cpu" size={16} color="#fff" />
           </View>
+
           <View className="flex-1">
-            <Text className="text-[17px] font-bold text-white">FixNow Chatbot</Text>
-            <View className="flex-row items-center">
-              <View className="w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5" />
-              <Text className="text-xs text-white/80">Trợ lý ảo đang hoạt động</Text>
+            <Text className="text-base font-bold text-zinc-900 leading-tight">FixNow AI</Text>
+            <View className="flex-row items-center gap-1 mt-0.5">
+              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <Text className="text-xs text-zinc-400">Trợ lý đang hoạt động</Text>
             </View>
           </View>
-          <Pressable className="p-1">
-            <Feather name="more-horizontal" size={22} color="#ffffff" />
+
+          <Pressable
+            onPress={handleClear}
+            hitSlop={8}
+            className="w-9 h-9 items-center justify-center rounded-full"
+            accessibilityLabel="Xoá cuộc trò chuyện"
+          >
+            <Feather name="refresh-ccw" size={18} color="#71717a" />
           </Pressable>
         </View>
 
+        {/* ── Messages ───────────────────────────────────────────────────── */}
         <FlatList
+          ref={listRef}
           data={reversedMessages}
           inverted
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            const isBot = item.role === 'assistant';
-            return (
-              <View className={`mb-4 flex-row ${isBot ? 'justify-start' : 'justify-end'}`}>
-                {isBot && (
-                  <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2 self-end">
-                    <Feather name="cpu" size={14} color="#ffffff" />
-                  </View>
-                )}
-                <View
-                  className={`max-w-[75%] px-4 py-2.5 ${isBot
-                      ? 'bg-white rounded-2xl rounded-bl-sm border border-gray-100 shadow-sm'
-                      : 'bg-primary rounded-2xl rounded-br-sm'
-                    }`}
-                >
-                  <Text
-                    className={`text-[15px] leading-5 ${isBot ? 'text-gray-800' : 'text-white'
-                      }`}
-                  >
-                    {item.content}
-                  </Text>
-                </View>
-              </View>
-            );
-          }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 20 }}
+          renderItem={({ item }) => <MessageBubble role={item.role} content={item.content} />}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          // In an inverted list, ListHeaderComponent appears at the visual bottom
+          ListHeaderComponent={isSending ? <TypingIndicator /> : null}
+          // ListFooterComponent appears at the visual top (shown above the greeting)
+          ListFooterComponent={
+            showSuggestions ? (
+              <AiSuggestionChips onSelect={handleSuggestion} disabled={isSending} />
+            ) : null
+          }
         />
 
-        {/* Input Bar - Rounded like mockup */}
-        <View className="bg-white px-4 py-3 pb-safe border-t border-gray-100 shadow-lg">
-          <View className="flex-row items-center bg-[#F3F4F6] rounded-full px-4 py-1.5 border border-gray-200">
-            <TextInput
-              className="flex-1 text-[15px] text-gray-800 py-1"
-              placeholder="Hỏi AI bất kỳ điều gì..."
-              placeholderTextColor="#9CA3AF"
-              value={input}
-              onChangeText={setInput}
-              multiline
-              blurOnSubmit={false}
-              editable={!isSending}
-            />
-            <View className="flex-row items-center gap-3">
-              <Pressable hitSlop={5}>
-                <Feather name="smile" size={20} color="#9CA3AF" />
-              </Pressable>
-              <Pressable hitSlop={5}>
-                <Feather name="paperclip" size={19} color="#9CA3AF" />
-              </Pressable>
-
-              <Pressable
-                onPress={handleSend}
-                disabled={!input.trim() || isSending}
-                className={`w-9 h-9 rounded-full items-center justify-center ${input.trim() ? 'bg-primary' : 'hidden'
-                  }`}
-              >
-                {isSending ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Feather name="send" size={16} color="#fff" style={{ marginLeft: 1 }} />
-                )}
-              </Pressable>
+        {/* ── Input bar ──────────────────────────────────────────────────── */}
+        <View
+          style={{ paddingBottom: Math.max(insets.bottom, 8) + 8 }}
+          className="bg-white border-t border-zinc-100 px-4 pt-3"
+        >
+          <View className="flex-row items-end gap-2">
+            <View className="flex-1 bg-zinc-100 rounded-2xl px-4 py-2.5 min-h-[44px] justify-center">
+              <TextInput
+                className="text-sm text-zinc-900 max-h-28"
+                placeholder="Nhập câu hỏi cho AI..."
+                placeholderTextColor="#a1a1aa"
+                value={input}
+                onChangeText={setInput}
+                multiline
+                editable={!isSending}
+                blurOnSubmit={false}
+                returnKeyType="send"
+                onSubmitEditing={handleSend}
+              />
             </View>
+
+            {/* Send — always visible; dims when empty/busy */}
+            <Pressable
+              onPress={handleSend}
+              disabled={!canSend}
+              className={`w-11 h-11 rounded-full items-center justify-center ${
+                canSend ? 'bg-zinc-900' : 'bg-zinc-200'
+              }`}
+              accessibilityRole="button"
+              accessibilityLabel="Gửi tin nhắn"
+            >
+              <Feather
+                name="send"
+                size={16}
+                color={canSend ? '#fff' : '#a1a1aa'}
+                style={{ marginLeft: 1 }}
+              />
+            </Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>

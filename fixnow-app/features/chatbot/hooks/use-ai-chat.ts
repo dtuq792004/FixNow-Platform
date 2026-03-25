@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { sendAiChat } from '../services/chatbot.service';
 import type { AiChatMessage, AiHistoryItem } from '../types/chatbot.types';
 
 const BOT_GREETING =
-  'Xin chào! Mình là trợ lý AI của FixNow. Bạn cần tư vấn sửa chữa hoặc giải đáp về dịch vụ nào?';
+  'Xin chào! Mình là trợ lý AI của FixNow 👋\nBạn có thể hỏi về dịch vụ sửa chữa, tìm thợ, bảng giá hoặc bất kỳ thắc mắc nào về nền tảng nhé!';
 
 const createMessage = (role: AiChatMessage['role'], content: string): AiChatMessage => ({
   id: `${Date.now()}-${Math.random()}`,
@@ -13,54 +13,76 @@ const createMessage = (role: AiChatMessage['role'], content: string): AiChatMess
   createdAt: new Date().toISOString(),
 });
 
+// ── Module-level singleton ────────────────────────────────────────────────────
+// Shared across the FAB entry-point and the full-screen /chat/ai route,
+// so both views always reflect the same conversation.
+let _messages: AiChatMessage[] = [createMessage('assistant', BOT_GREETING)];
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 export const useAiChat = () => {
-  const [messages, setMessages] = useState<AiChatMessage[]>([
-    createMessage('assistant', BOT_GREETING),
-  ]);
+  const [messages, setMessages] = useState<AiChatMessage[]>(_messages);
+
+  /** Update both local state and the module-level store atomically. */
+  const syncMessages = useCallback(
+    (updater: (prev: AiChatMessage[]) => AiChatMessage[]) => {
+      setMessages((prev) => {
+        const next = updater(prev);
+        _messages = next;
+        return next;
+      });
+    },
+    [],
+  );
 
   const mutation = useMutation({
     mutationFn: sendAiChat,
     onSuccess: (reply) => {
-      setMessages((prev) => [...prev, createMessage('assistant', reply)]);
+      syncMessages((prev) => [...prev, createMessage('assistant', reply)]);
     },
     onError: () => {
-      setMessages((prev) => [
+      syncMessages((prev) => [
         ...prev,
         createMessage(
           'assistant',
-          'Mình đang gặp lỗi khi xử lý yêu cầu. Bạn thử lại sau ít phút nhé.',
+          'Mình gặp lỗi khi xử lý yêu cầu. Bạn thử lại sau ít phút nhé 🙏',
         ),
       ]);
     },
   });
 
+  /** Conversation history sent to Gemini API (excludes the current message being sent). */
   const history = useMemo<AiHistoryItem[]>(() => {
     const res: AiHistoryItem[] = [];
     let firstUserFound = false;
-
     for (const m of messages) {
       if (m.role === 'user') firstUserFound = true;
       if (firstUserFound) {
-        res.push({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.content }],
-        });
+        res.push({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] });
       }
     }
     return res;
   }, [messages]);
 
-  const sendMessage = (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || mutation.isPending) return;
+  const sendMessage = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || mutation.isPending) return;
+      syncMessages((prev) => [...prev, createMessage('user', trimmed)]);
+      mutation.mutate({ message: trimmed, history });
+    },
+    [mutation, history, syncMessages],
+  );
 
-    setMessages((prev) => [...prev, createMessage('user', trimmed)]);
-    mutation.mutate({ message: trimmed, history });
-  };
+  const clearChat = useCallback(() => {
+    const fresh = [createMessage('assistant', BOT_GREETING)];
+    _messages = fresh;
+    setMessages(fresh);
+  }, []);
 
   return {
     messages,
     sendMessage,
     isSending: mutation.isPending,
+    clearChat,
   };
 };
