@@ -49,6 +49,10 @@ export const getProviderRequests = async (
       search as string
     );
 
+    if (result.requests && result.requests.length > 0) {
+      console.log("[GET PROVIDER REQUESTS] First request specialties:", JSON.stringify(result.requests[0].specialties, null, 2));
+    }
+
     return res.json({
       success: true,
       data: result.requests,
@@ -89,6 +93,7 @@ export const approveProviderRequest = async (
       message: "Provider request approved",
     });
   } catch (error: any) {
+    console.error("[APPROVE ERROR]:", error);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -146,6 +151,7 @@ export const rejectProviderRequest = async (
       message: "Provider request rejected",
     });
   } catch (error: any) {
+    console.error("[REJECT ERROR]:", error);
     return res.status(500).json({
       success: false,
       message: error.message,

@@ -76,14 +76,14 @@ export const getProviderRequests = async (status?: string, page: number = 1, lim
   const [requests, total, pendingCount, approvedCount, rejectedCount] = await Promise.all([
     ProviderRequest.find(filter)
       .populate("userId", "fullName email phone")
-      .populate("serviceCategories", "name")
+      .populate("specialties", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
     ProviderRequest.countDocuments(filter),
-    ProviderRequest.countDocuments({ ...statsFilter, status: "PENDING" }),
-    ProviderRequest.countDocuments({ ...statsFilter, status: "APPROVED" }),
-    ProviderRequest.countDocuments({ ...statsFilter, status: "REJECTED" })
+    ProviderRequest.countDocuments({ ...filter, status: "PENDING" }),
+    ProviderRequest.countDocuments({ ...filter, status: "APPROVED" }),
+    ProviderRequest.countDocuments({ ...filter, status: "REJECTED" })
   ]);
 
   return {
@@ -103,6 +103,7 @@ export const approveProviderRequest = async (
   requestId: string,
   adminId: string
 ) => {
+  console.log(`Approving request ${requestId} by admin ${adminId}`);
   const request = await ProviderRequest.findById(requestId);
 
   if (!request) {
@@ -119,17 +120,22 @@ export const approveProviderRequest = async (
 
   await request.save();
 
-  // Look up real Category ObjectIds by type matching the specialty strings
-  const categories = await Category.find({ type: { $in: request.specialties } });
+  // Look up real Category ObjectIds matching the specialty IDs
+  const categories = await Category.find({ _id: { $in: request.specialties } });
 
-  const provider = await Provider.create({
-    userId: request.userId,
-    description: request.motivation || request.experience,
-    experienceYears: parseExperienceYears(request.experience),
-    serviceCategories: categories.map((c) => c._id as Types.ObjectId),
-    workingAreas: [request.serviceArea],
-    verified: true,
-  });
+  // Use findOneAndUpdate with upsert to avoid duplicate userId error
+  const provider = await Provider.findOneAndUpdate(
+    { userId: request.userId },
+    {
+      userId: request.userId,
+      description: request.motivation || request.experience,
+      experienceYears: parseExperienceYears(request.experience),
+      serviceCategories: categories.map((c) => c._id as Types.ObjectId),
+      workingAreas: [request.serviceArea],
+      verified: true,
+    },
+    { upsert: true, new: true }
+  );
 
   await User.findByIdAndUpdate(request.userId, {
     role: "PROVIDER",

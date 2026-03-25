@@ -127,15 +127,14 @@ export const getProviderAverageRating = async (providerId: string | mongoose.Typ
 /**
  * Lấy Top n thợ có đánh giá cao nhất
  */
-export const getTopRatedProviders = async (limit: number = 4) => {
-  const topProviders = await FeedbackModel.aggregate([
+export const getTopRatedProviders = async (limit: number = 4, categoryId?: string) => {
+  const pipeline: any[] = [
     { $match: { status: "VISIBLE" } },
     { $unwind: "$servicesFeedbacks" },
     {
       $group: {
         _id: "$providerId",
         avgRating: { $avg: "$servicesFeedbacks.rating" },
-        // Sử dụng $addToSet nếu muốn đếm số lượng feedback duy nhất thay vì đếm từng dòng rating
         feedbackIds: { $addToSet: "$_id" }
       }
     },
@@ -156,7 +155,19 @@ export const getTopRatedProviders = async (limit: number = 4) => {
         as: "providerInfo"
       }
     },
-    { $unwind: { path: "$providerInfo", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$providerInfo", preserveNullAndEmptyArrays: true } }
+  ];
+
+  // Filter by category if categoryId is provided
+  if (categoryId) {
+    pipeline.push({
+      $match: {
+        "providerInfo.serviceCategories": new mongoose.Types.ObjectId(categoryId)
+      }
+    });
+  }
+
+  pipeline.push(
     {
       $lookup: {
         from: "users",
@@ -190,7 +201,8 @@ export const getTopRatedProviders = async (limit: number = 4) => {
         serviceCategories: "$categories"
       }
     }
-  ]);
+  );
 
+  const topProviders = await FeedbackModel.aggregate(pipeline);
   return topProviders;
 };
