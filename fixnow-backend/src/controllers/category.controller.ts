@@ -36,6 +36,23 @@ export const getCategories = async (req: Request, res: Response) => {
   }
 };
 
+// GET WITH STATS
+export const getCategoriesWithStats = async (req: Request, res: Response) => {
+  try {
+    const categories = await categoryService.getCategoriesWithStats();
+
+    return res.json({
+      success: true,
+      data: categories,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // GET BY ID
 export const getCategoryById = async (req: Request, res: Response) => {
   try {

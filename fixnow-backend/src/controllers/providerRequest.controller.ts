@@ -50,7 +50,7 @@ export const getProviderRequests = async (
     );
 
     if (result.requests && result.requests.length > 0) {
-      console.log("[GET PROVIDER REQUESTS] First request specialties:", JSON.stringify(result.requests[0].specialties, null, 2));
+      console.log("[GET PROVIDER REQUESTS] First request serviceCategories:", JSON.stringify(result.requests[0].serviceCategories, null, 2));
     }
 
     return res.json({

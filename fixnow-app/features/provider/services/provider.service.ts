@@ -25,7 +25,7 @@ interface ProviderApplicationApiResponse {
     fullName: string;
     phone: string;
     experience: string;
-    specialties: string[];
+    serviceCategories: string[];
     serviceArea: string;
     idCard: string;
     motivation?: string;
@@ -54,7 +54,7 @@ const mapProviderApplication = (raw: ProviderApplicationApiResponse['data']): Pr
   reviewed_at: raw.reviewedAt,
   fullName: raw.fullName,
   phone: raw.phone,
-  specialties: raw.specialties as any, // TODO: type properly
+  specialties: (raw.serviceCategories || (raw as any).specialties) as any, // Handle both names during transition
   experience: raw.experience,
   serviceArea: raw.serviceArea,
   idCard: raw.idCard,

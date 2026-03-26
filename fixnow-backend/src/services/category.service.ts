@@ -12,6 +12,27 @@ export const getCategories = async () => {
   return categories;
 };
 
+// GET WITH STATS (Provider count)
+export const getCategoriesWithStats = async () => {
+  const categories = await Category.find().sort({ name: 1 });
+  
+  // Aggregate provider counts from Provider model
+  const providerCounts = await (require("../models/provider.model").Provider).aggregate([
+    { $unwind: "$serviceCategories" },
+    { $group: { _id: "$serviceCategories", count: { $sum: 1 } } }
+  ]);
+
+  const countMap = providerCounts.reduce((acc: any, curr: any) => {
+    acc[curr._id.toString()] = curr.count;
+    return acc;
+  }, {});
+
+  return categories.map(cat => ({
+    ...cat.toObject(),
+    providerCount: countMap[cat._id.toString()] || 0
+  }));
+};
+
 // GET BY ID
 export const getCategoryById = async (id: string) => {
   const category = await Category.findById(id);

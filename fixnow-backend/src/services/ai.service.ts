@@ -127,8 +127,10 @@ export const chatWithGemini = async (
         const keywordRegex = new RegExp(args.keyword, "i");
         const foundServices = await Service.find({
           name: keywordRegex,
-          isApproved: true,
+          status: "APPROVED",
         }).limit(5).select("name price unit description");
+
+        console.log(`[AI] Tìm thấy ${foundServices.length} dịch vụ. Đang chờ Gemini tổng hợp...`);
 
         const functionResponseResult = await chat.sendMessage([
           {
@@ -163,6 +165,8 @@ export const chatWithGemini = async (
           .find(query)
           .populate("userId", "fullName avatar phone")
           .limit(3);
+
+        console.log(`[AI] Tìm thấy ${providers.length} thợ. Đang chờ Gemini tổng hợp...`);
 
         const functionResponseResult = await chat.sendMessage([
           {
@@ -203,6 +207,8 @@ export const chatWithGemini = async (
         }
 
         const topProviders = await getTopRatedProviders(3, categoryId);
+
+        console.log(`[AI] Tìm thấy ${topProviders.length} thợ đánh giá cao. Đang chờ Gemini tổng hợp...`);
 
         const functionResponseResult = await chat.sendMessage([
           {

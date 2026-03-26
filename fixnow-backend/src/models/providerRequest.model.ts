@@ -11,7 +11,7 @@ export interface IProviderRequest extends Document {
   fullName: string;
   phone: string;
   experience: string;
-  specialties: string[];
+  serviceCategories: Types.ObjectId[];
   serviceArea: string;
   idCard: string;
   motivation?: string;
@@ -42,7 +42,7 @@ const providerRequestSchema = new Schema<IProviderRequest>(
       type: String,
       required: true,
     },
-    specialties: [
+    serviceCategories: [
       {
         type: Schema.Types.ObjectId,
         ref: "Category",

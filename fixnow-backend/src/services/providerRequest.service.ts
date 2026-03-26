@@ -21,7 +21,7 @@ export const createProviderRequest = async (userId: string, data: any) => {
     fullName: data.fullName,
     phone: data.phone,
     experience: data.experience,
-    specialties: data.specialties,
+    serviceCategories: data.serviceCategories || data.specialties,
     serviceArea: data.serviceArea,
     idCard: data.idCard,
     motivation: data.motivation,
@@ -76,7 +76,7 @@ export const getProviderRequests = async (status?: string, page: number = 1, lim
   const [requests, total, pendingCount, approvedCount, rejectedCount] = await Promise.all([
     ProviderRequest.find(filter)
       .populate("userId", "fullName email phone")
-      .populate("specialties", "name")
+      .populate("serviceCategories", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
@@ -120,8 +120,8 @@ export const approveProviderRequest = async (
 
   await request.save();
 
-  // Look up real Category ObjectIds matching the specialty IDs
-  const categories = await Category.find({ _id: { $in: request.specialties } });
+  // Look up real Category ObjectIds matching the IDs
+  const categories = await Category.find({ _id: { $in: request.serviceCategories } });
 
   // Use findOneAndUpdate with upsert to avoid duplicate userId error
   const provider = await Provider.findOneAndUpdate(
