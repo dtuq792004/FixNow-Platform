@@ -56,7 +56,7 @@ export const canJoinRequestLocationRoom = async (
   userId: string,
 ) => {
   const request = await Request.findById(requestId).select(
-    "customerId providerId",
+    "customerId providerId status",
   );
 
   if (!request) {

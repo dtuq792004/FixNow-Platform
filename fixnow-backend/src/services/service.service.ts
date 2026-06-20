@@ -42,6 +42,12 @@ export const getServicesByCategory = async (categoryId: string) => {
   return services;
 };
 
+export const getProviderServices = async (providerId: string) => {
+  return Service.find({ providerId })
+    .populate("categoryId", "name type")
+    .sort({ createdAt: -1 });
+};
+
 
 export const updateService = async (
   serviceId: string,

@@ -32,7 +32,9 @@ export const getMyNotifications = async (req: Request, res: Response) => {
 
 export const readNotification = async (req: Request, res: Response) => {
   try {
-    const notification = await notificationService.markAsRead(req.params.id as string);
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const notification = await notificationService.markAsRead(req.params.id as string, req.user.id);
+    if (!notification) return res.status(404).json({ message: "Notification not found" });
 
     res.json(notification);
   } catch {
@@ -53,5 +55,25 @@ export const readAllNotifications = async (req: Request, res: Response) => {
     res.status(500).json({
       message: "Update notifications failed"
     });
+  }
+};
+
+export const getAuthenticatedNotifications = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const notifications = await notificationService.getUserNotifications(req.user.id);
+    return res.json({ data: notifications });
+  } catch {
+    return res.status(500).json({ message: "Fetch notifications failed" });
+  }
+};
+
+export const readAllAuthenticatedNotifications = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    await notificationService.markAllAsRead(req.user.id);
+    return res.json({ message: "All notifications read" });
+  } catch {
+    return res.status(500).json({ message: "Update notifications failed" });
   }
 };

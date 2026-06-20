@@ -30,3 +30,17 @@ export const updateProfile = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const avatar = (req as any).imageUrl;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    if (!avatar) return res.status(400).json({ message: "Avatar upload failed" });
+
+    const user = await updateProfileService(userId, { avatar });
+    return res.json({ message: "Avatar updated", data: user });
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message });
+  }
+};

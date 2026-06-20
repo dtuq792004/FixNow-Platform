@@ -69,7 +69,8 @@ export const cancelRequestController = async (req: Request, res: Response) => {
 //provider
 export const getAvailableRequestsController = async (req: Request, res: Response) => {
   try {
-    const requests = await requestService.getAvailableRequests();
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const requests = await requestService.getAvailableRequests(req.user.id);
     return res.json({ data: requests });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
@@ -81,6 +82,23 @@ export const getMyProviderJobsController = async (req: Request, res: Response) =
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     const providerId = req.user.id;
     const jobs = await requestService.getMyProviderJobs(providerId);
+    return res.json({ data: jobs });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getProviderJobsController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const status = String(req.query.status ?? "ALL").toUpperCase();
+    const allowedStatuses = ["ALL", "PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid job status" });
+    }
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 9));
+    const jobs = await requestService.getProviderJobs(req.user.id, status, page, limit);
     return res.json({ data: jobs });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
@@ -184,4 +202,10 @@ export const payLaterController = async (req: Request, res: Response) => {
     const status = error.message === "Request not found" ? 404 : 400;
     return res.status(status).json({ message: error.message });
   }
+};
+
+export const uploadRequestImageController = async (req: Request, res: Response) => {
+  const imageUrl = (req as any).imageUrl;
+  if (!imageUrl) return res.status(400).json({ message: "Image upload failed" });
+  return res.json({ imageUrl });
 };

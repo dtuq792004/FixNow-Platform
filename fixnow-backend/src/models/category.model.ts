@@ -22,6 +22,12 @@ const categorySchema = new mongoose.Schema(
       default: "",
     },
 
+    iconUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

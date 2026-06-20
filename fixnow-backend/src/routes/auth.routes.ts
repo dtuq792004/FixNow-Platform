@@ -7,7 +7,9 @@ import {
   verifyOtp,
   resetPassword,
   refreshToken,
-  changePassword 
+  changePassword,
+  resendVerificationOtp,
+  verifyEmail,
 } from "../controllers/auth.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -15,6 +17,8 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 const router = express.Router();
 
 router.post("/register", register);
+router.post("/verify-email", verifyEmail);
+router.post("/resend-verification-otp", resendVerificationOtp);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/forgot-password", forgotPassword);

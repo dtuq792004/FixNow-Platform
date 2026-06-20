@@ -10,11 +10,8 @@ export const getFeedbacks = async (page: number, limit: number, filter: any) => 
             { path: "requestId",
               select: "name description"},
             { path: "customerId",
-              select: "fullName email phone role avatar socialLogin",
-            populate: {
-              path: "socialLogin",
-              select: "socialId provider"
-            }},
+              select: "fullName email phone role avatar"
+            },
             { path: "providerId",
               select: "userId experienceYears activeStatus verified serviceCategories workingAreas",
               populate: {
@@ -104,6 +101,20 @@ export const updateFeedback = async (
         console.error("Lỗi không cập nhật được feedback:", error);
         throw error;
     }
+};
+
+export const replyToProviderFeedback = async (
+  feedbackId: mongoose.Types.ObjectId,
+  providerId: mongoose.Types.ObjectId,
+  providerReply: string,
+) => {
+  const feedback = await FeedbackModel.findOneAndUpdate(
+    { _id: feedbackId, providerId },
+    { $set: { providerReply } },
+    { new: true, runValidators: true },
+  );
+  if (!feedback) throw new Error("Feedback không tồn tại hoặc không thuộc provider");
+  return feedback;
 };
 
 /**

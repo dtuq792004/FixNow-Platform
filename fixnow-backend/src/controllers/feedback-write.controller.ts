@@ -43,6 +43,7 @@ export const createFeedback = async (req: Request, res: Response) => {
 
 export const replyFeedback = async (req: Request, res: Response) => {
   try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     const feedbackId = new mongoose.Types.ObjectId(req.params.id as string);
     const { providerReply } = req.body;
 
@@ -53,7 +54,13 @@ export const replyFeedback = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Thiếu nội dung phản hồi" });
     }
 
-    const updatedFeedback = await FeedbackService.updateFeedback(feedbackId, { providerReply });
+    const provider = await Provider.findOne({ userId: req.user.id }).select("_id");
+    if (!provider) return res.status(403).json({ message: "Provider account required" });
+    const updatedFeedback = await FeedbackService.replyToProviderFeedback(
+      feedbackId,
+      provider._id,
+      providerReply,
+    );
     return res.status(200).json({ message: "Phản hồi feedback thành công", data: updatedFeedback });
   } catch (error: any) {
     console.error("Reply feedback error:", error);

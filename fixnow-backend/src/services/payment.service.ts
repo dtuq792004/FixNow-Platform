@@ -4,6 +4,8 @@ import { Payment } from "../models/payment.model";
 import { Wallet } from "../models/wallet.model";
 import { Promotion } from "../models/promotion.model";
 import { calculatePayment } from "../utils/calculate.util";
+import { sendNewRequestToMatchingProviders } from "../sockets/notification.socket";
+import { ensureConversation } from "./chat.service";
 
 export class PaymentService {
 
@@ -20,7 +22,7 @@ export class PaymentService {
 
     // Nếu request chưa có giá chốt (trường hợp cũ), mới thực hiện tính toán lại
     if (amountToPay === undefined || amountToPay === null) {
-      const calculation = await calculatePayment(request.price, promoCode);
+      const calculation = await calculatePayment(request.totalPrice, promoCode);
       amountToPay = calculation.finalAmount;
       discountCode = calculation.discountCode;
       discountAmount = calculation.discountAmount;
@@ -79,6 +81,7 @@ export class PaymentService {
 
     const session = await mongoose.startSession();
     session.startTransaction();
+    let availableRequestId: string | undefined;
 
     try {
 
@@ -108,6 +111,16 @@ export class PaymentService {
           // Nếu chưa có (đặt công khai), chuyển sang PENDING để hiện lên chợ việc
           const nextStatus = request.providerId ? "ACCEPTED" : "PENDING";
           request.status = nextStatus;
+          if (nextStatus === "PENDING") {
+            availableRequestId = request._id.toString();
+          } else {
+            const conversation = await ensureConversation(
+              request.providerId.toString(),
+              request.customerId.toString(),
+              session,
+            );
+            request.conversationId = conversation._id;
+          }
           await request.save({ session });
         }
 
@@ -128,6 +141,9 @@ export class PaymentService {
       }
 
       await session.commitTransaction();
+      if (availableRequestId) {
+        await sendNewRequestToMatchingProviders(availableRequestId);
+      }
 
     } catch (error) {
       await session.abortTransaction();

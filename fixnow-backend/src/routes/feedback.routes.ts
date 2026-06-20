@@ -5,6 +5,7 @@ import {
   getFeedbackByCustomerId,
   getFeedbackByRequestId,
   searchFeedbacks,
+  getMyProviderFeedbacks,
 } from '../controllers/feedback-query.controller';
 import {
   createFeedback,
@@ -17,6 +18,7 @@ const router = Router();
 // ── Read ──────────────────────────────────────────────────────────────────────
 router.get('/', getAllFeedbacks);
 router.get('/search', searchFeedbacks);
+router.get('/provider/me', authMiddleware, getMyProviderFeedbacks);
 router.get('/provider/:id', getFeedbackByProviderId);
 router.get('/customer/:id', getFeedbackByCustomerId);
 router.get('/request/:id', getFeedbackByRequestId);

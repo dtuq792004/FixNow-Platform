@@ -31,6 +31,8 @@ export const updateProfileService = async (
     {
       returnDocument: "after"
     }
+  ).select(
+    "-passwordHash -resetPasswordOtp -resetPasswordOtpExpire -resetPasswordTokenHash -resetPasswordExpire -emailVerificationOtpHash -emailVerificationOtpExpire",
   );
 
   if (!user) {

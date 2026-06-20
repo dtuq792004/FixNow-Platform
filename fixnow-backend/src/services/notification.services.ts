@@ -17,9 +17,9 @@ export const getUserNotifications = async (userId: string) => {
     .sort({ createdAt: -1 });
 };
 
-export const markAsRead = async (id: string) => {
-  return await Notification.findByIdAndUpdate(
-    id,
+export const markAsRead = async (id: string, userId: string) => {
+  return await Notification.findOneAndUpdate(
+    { _id: id, recipientId: userId },
     { isRead: true },
     { new: true }
   );

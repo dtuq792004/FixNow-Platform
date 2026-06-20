@@ -8,6 +8,8 @@ import {
   resetPasswordService,
   verifyOtpService,
   changePasswordService,
+  resendVerificationOtpService,
+  verifyEmailService,
 } from "../services/auth.service";
 import Session from "../models/session.model";
 
@@ -15,23 +17,55 @@ const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 ngày
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { password, fullName, email, phone, role } = req.body;
+    const { password, fullName, email, phone } = req.body;
     if (!password || !fullName || !email || !phone) {
       return res.status(400).json({
         message: "Vui lòng cung cấp đầy đủ thông tin",
       });
     }
 
-    const user = await registerService(password, fullName, email, phone, role);
+    const user = await registerService(password, fullName, email, phone);
 
     return res.status(201).json({
-      message: "Đăng ký thành công",
+      message: "Đăng ký thành công. OTP đã được gửi đến email của bạn",
       user,
     });
   } catch (error: any) {
     console.error("Register error:", error);
     return res.status(400).json({
       message: error.message || "Lỗi máy chủ nội bộ",
+    });
+  }
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email và OTP là bắt buộc" });
+    }
+
+    const result = await verifyEmailService(email, otp);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message || "Xác thực email thất bại",
+    });
+  }
+};
+
+export const resendVerificationOtp = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email là bắt buộc" });
+    }
+
+    const result = await resendVerificationOtpService(email);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message || "Không thể gửi lại OTP",
     });
   }
 };
@@ -63,6 +97,12 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Login error:", error);
+    if (error.message === "EMAIL_NOT_VERIFIED") {
+      return res.status(403).json({
+        code: "EMAIL_NOT_VERIFIED",
+        message: "Email chưa được xác thực",
+      });
+    }
     return res.status(401).json({ message: error.message || "Lỗi máy chủ nội bộ" });
   }
 };
@@ -96,8 +136,8 @@ export const logout = async (req: Request, res: Response) => {
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
     return res.status(200).json({ message: "Đăng xuất thành công" });

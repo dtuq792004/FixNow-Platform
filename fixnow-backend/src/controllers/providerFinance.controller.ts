@@ -99,3 +99,23 @@ export const getMyWallet = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getMyRevenue = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id as string;
+    const range = String(req.query.range || "day");
+    if (!["day", "month", "year"].includes(range)) {
+      return res.status(400).json({
+        success: false,
+        message: "Range must be day, month or year",
+      });
+    }
+    const revenue = await revenueService.getRevenueByProvider(
+      userId,
+      range as revenueService.RevenueRange,
+    );
+    return res.json({ success: true, data: revenue });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -1,0 +1,351 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --color-tertiary-fixed: #72fe88;
+  --color-on-primary-container: #f8f7ff;
+  --color-on-background: #191c1e;
+  --color-surface-variant: #e0e3e6;
+  --color-tertiary: #006825;
+  --color-surface-bright: #f7f9fc;
+  --color-background: #f7f9fc;
+  --color-surface-dim: #d8dadd;
+  --color-surface-container-high: #e6e8eb;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-surface-tint: #0054d6;
+  --color-surface: #f7f9fc;
+  --color-on-tertiary: #ffffff;
+  --color-secondary-fixed: #ffdcbf;
+  --color-primary: #2563EB;
+  --color-on-secondary-container: #633700;
+  --color-surface-container-highest: #e0e3e6;
+  --color-on-surface-variant: #424656;
+  --color-surface-container-lowest: #ffffff;
+  --color-tertiary-fixed-dim: #53e16f;
+  --color-tertiary-container: #008432;
+  --color-error: #ba1a1a;
+  --color-on-primary: #ffffff;
+  --color-secondary: #8c5000;
+  --color-surface-container-low: #f2f4f7;
+  --color-inverse-primary: #b3c5ff;
+  --color-primary-fixed-dim: #b3c5ff;
+  --color-outline-variant: #E2E8F0;
+  --color-outline: #E2E8F0;
+  --color-surface-container: #eceef1;
+  --color-primary-fixed: #dae1ff;
+  --color-inverse-on-surface: #eff1f4;
+  --color-on-surface: #191c1e;
+  --color-primary-container: #0066ff;
+  --color-on-secondary: #ffffff;
+  --color-inverse-surface: #2d3133;
+  --color-secondary-container: #fe9400;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-base: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-gutter: 20px;
+  --spacing-container-max: 1200px;
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 28px;
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 60px;
+
+  --background-image-header-gradient: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+  --background-image-main-gradient: linear-gradient(135deg, #FFFFFF 0%, #F7FAFF 55%, #F2FBFF 100%);
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: #0f172a;
+  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --primary: #2563EB;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+@utility bg-header-gradient {
+  background-image: var(--background-image-header-gradient);
+}
+
+@utility bg-main-gradient {
+  background-image: var(--background-image-main-gradient);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.5;
+  background-image: var(--background-image-main-gradient);
+  background-attachment: fixed;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  color: #0f172a;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+select {
+  cursor: pointer;
+}
+
+textarea {
+  line-height: 1.6;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgb(37 99 235 / 45%);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: #bfdbfe;
+  color: #1e3a8a;
+}
+
+.material-symbols-outlined {
+  display: inline-block;
+  direction: ltr;
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: normal;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  font-feature-settings: "liga";
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-outlined.filled-icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.auth-card {
+  box-shadow: 0 4px 20px rgb(0 0 0 / 8%);
+  backdrop-filter: blur(8px);
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+}
+
+.card-modern {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease;
+}
+
+.card-modern:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.auth-flow {
+  width: 100%;
+  min-height: 100dvh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+  .auth-flow {
+    min-height: 100dvh;
+  }
+
+  .auth-flow .auth-footer {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 760px) {
+  .auth-flow .auth-footer {
+    display: none;
+  }
+
+  .auth-flow .auth-card {
+    gap: 10px;
+    padding: 14px 20px;
+  }
+}
+
+.glass-input {
+  border-radius: 12px;
+  background-color: #fff;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 10%);
+}
+
+.otp-input::-webkit-outer-spin-button,
+.otp-input::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.guest-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 12px;
+  background: var(--color-surface-container-lowest);
+  padding: 12px 16px;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guest-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+}
+
+.profile-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #fff;
+  padding: 11px 14px;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 24px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 10%);
+}
+
+.profile-input:disabled,
+.guest-input:disabled,
+.glass-input:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+@media (max-width: 639px) {
+  body {
+    font-size: 15px;
+  }
+
+  .auth-card {
+    border-radius: 16px;
+  }
+}
+
+/* Fix Tailwind v4 width collapse caused by spacing overrides */
+.max-w-xs {
+  max-width: 20rem !important;
+}
+
+.max-w-sm {
+  max-width: 24rem !important;
+}
+
+.max-w-md {
+  max-width: 28rem !important;
+}
+
+.max-w-lg {
+  max-width: 32rem !important;
+}
+
+.max-w-xl {
+  max-width: 36rem !important;
+}
+
+.max-w-2xl {
+  max-width: 42rem !important;
+}
+
+.max-w-3xl {
+  max-width: 48rem !important;
+}
+
+.max-w-4xl {
+  max-width: 56rem !important;
+}
+
+.max-w-5xl {
+  max-width: 64rem !important;
+}
+
+.max-w-6xl {
+  max-width: 72rem !important;
+}
+
+.max-w-7xl {
+  max-width: 80rem !important;
+}

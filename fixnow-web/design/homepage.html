@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FixNow - Dashboard Khách Hàng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e0e3e6; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#0066ff",
+                        "tertiary-container": "#008432",
+                        "on-tertiary-fixed-variant": "#00531c",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-tint": "#0054d6",
+                        "surface": "#f7f9fc",
+                        "surface-container-low": "#f2f4f7",
+                        "on-background": "#191c1e",
+                        "on-surface": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#2d1600",
+                        "secondary-fixed-dim": "#ffb874",
+                        "surface-container-high": "#e6e8eb",
+                        "on-primary-fixed-variant": "#003fa4",
+                        "surface-variant": "#e0e3e6",
+                        "on-primary-container": "#f8f7ff",
+                        "tertiary": "#006825",
+                        "outline-variant": "#c2c6d8",
+                        "surface-dim": "#d8dadd",
+                        "secondary": "#8c5000",
+                        "secondary-fixed": "#ffdcbf",
+                        "inverse-primary": "#b3c5ff",
+                        "primary-fixed": "#dae1ff",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "on-surface-variant": "#424656",
+                        "surface-container-highest": "#e0e3e6",
+                        "tertiary-fixed": "#72fe88",
+                        "primary": "#0050cb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef1",
+                        "secondary-container": "#fe9400",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#001849",
+                        "surface-bright": "#f7f9fc",
+                        "on-secondary-fixed-variant": "#6a3b00",
+                        "background": "#f7f9fc",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-container": "#633700",
+                        "outline": "#727687",
+                        "on-tertiary-container": "#e6ffe1",
+                        "on-tertiary-fixed": "#002107",
+                        "tertiary-fixed-dim": "#53e16f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter": "20px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "container-max": "1200px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "xxl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-xl">
+<span class="font-display-lg text-headline-md font-bold text-primary dark:text-inverse-primary">FixNow</span>
+<nav class="hidden md:flex gap-lg">
+<a class="font-title-lg text-title-lg text-primary dark:text-inverse-primary border-b-2 border-primary font-bold pb-1" href="#">Trang chủ</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors" href="#">Dịch vụ</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors" href="#">Lịch hẹn</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors" href="#">Hỗ trợ</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined p-2 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">notifications</button>
+<button class="material-symbols-outlined p-2 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">account_circle</button>
+<button class="hidden md:block bg-primary text-on-primary px-lg py-sm rounded-full font-label-md text-label-md active:scale-95 duration-150 shadow-md">Đặt lịch ngay</button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-gutter py-xl">
+<!-- Welcome Header -->
+<section class="mb-xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Xin chào, Nguyễn Văn A!</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Chúc bạn một ngày tốt lành. Hôm nay FixNow có thể giúp gì cho bạn?</p>
+</section>
+<div class="grid grid-cols-12 gap-lg">
+<!-- Left & Center Content (Main Dashboard) -->
+<div class="col-span-12 lg:col-span-8 space-y-xl">
+<!-- Statistics Bento Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-primary mb-md">inventory_2</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tổng đơn</p>
+<h3 class="font-headline-md text-headline-md mt-xs">12</h3>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-secondary-container mb-md">pending_actions</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Đang thực hiện</p>
+<h3 class="font-headline-md text-headline-md mt-xs">02</h3>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-tertiary mb-md">check_circle</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Đã hoàn thành</p>
+<h3 class="font-headline-md text-headline-md mt-xs">10</h3>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-primary-container mb-md">payments</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tổng chi tiêu</p>
+<h3 class="font-headline-md text-headline-md mt-xs">4.2M</h3>
+</div>
+</div>
+<!-- Popular Services Icons -->
+<section>
+<div class="flex justify-between items-end mb-md">
+<h2 class="font-title-lg text-title-lg">Danh mục phổ biến</h2>
+<a class="text-primary font-label-md text-label-md hover:underline" href="#">Xem tất cả</a>
+</div>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-md">
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">bolt</span>
+</div>
+<span class="font-label-md text-label-md text-center">Điện</span>
+</button>
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-cyan-50 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">water_drop</span>
+</div>
+<span class="font-label-md text-label-md text-center">Nước</span>
+</button>
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">ac_unit</span>
+</div>
+<span class="font-label-md text-label-md text-center">Máy lạnh</span>
+</button>
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">format_paint</span>
+</div>
+<span class="font-label-md text-label-md text-center">Sơn sửa</span>
+</button>
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">kitchen</span>
+</div>
+<span class="font-label-md text-label-md text-center">Gia dụng</span>
+</button>
+<button class="group flex flex-col items-center gap-sm p-md bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary hover:shadow-lg transition-all active:scale-95">
+<div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 group-hover:bg-slate-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">videocam</span>
+</div>
+<span class="font-label-md text-label-md text-center">Camera</span>
+</button>
+</div>
+</section>
+<!-- Recommended Services (Horizontal Scroll/Grid) -->
+<section>
+<h2 class="font-title-lg text-title-lg mb-md">Dịch vụ đề xuất</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="group cursor-pointer bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant hover:shadow-lg transition-all">
+<div class="h-40 bg-cover bg-center" data-alt="A professional technician in a clean blue uniform meticulously repairing a high-end wall-mounted air conditioning unit in a bright, modern living room. The scene is well-lit with natural sunlight streaming through large windows, creating a clean and trustworthy atmosphere. Minimalist interior design with neutral colors. Professional photography style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBKBBIoh9XKOY3x4s2MZZ5CHEUGWsF8sa7MGsGKYzmdzL4-ie_HccQXjdYa2U2OGyRRmo9MvoSi96NcpV0UiO2iZVXbNbajAGm3v0kxli_rd8FRJy2VdsSzTxQS-ndYV-EV7h8NIKPaYpL-VgDEEilzxrFBJ5N1SxA4zLzRnigGm6UA6iBj5m1Cvm1uhqbnNYNPPYb7TaPpqPyDgvQQ03OGjVCYmrI1x4MBvMpz8FJNQz_uS_yMPVk3Hp6Al3VNbiGwy72lH4buNM')"></div>
+<div class="p-md">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Vệ sinh máy lạnh chuyên sâu</h3>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant px-sm py-1 rounded-full text-label-sm font-label-sm">Hot</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mb-md">Bao gồm diệt khuẩn bằng tia UV và kiểm tra gas miễn phí.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-bold text-lg">250.000đ</span>
+<button class="bg-primary text-on-primary px-md py-1.5 rounded-lg text-label-md font-label-md">Đặt ngay</button>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant hover:shadow-lg transition-all">
+<div class="h-40 bg-cover bg-center" data-alt="A skilled plumber fixing a modern chrome faucet in a luxurious, white marble-tiled bathroom. The image is captured in a high-key lighting style, emphasizing cleanliness and professional precision. Crystal clear water droplets and shiny surfaces. High-end modern lifestyle photography, soft shadows." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAa5iZ1BnJqIpanjs5OxwD-7TMClZL2TjRcHN8AyDR8Gb8IDPErcW83QSxdmxUv36S6XcbsdNIDbrYnTlzcHX9wxS6WfeanELMx01lNL8-7Q16v_6p3yf81YJRMh5DnHeHTZ_i9aV5dHnwgb33DXRiMO6z8CY6ZzJ9JPOuj9h9U2ud0Q5TND8ihlCHLgvXFQ1PU7mmqUl7ppp38rUHmUuEp7cgMdYjLOfpwHzZll5feASOv6MbAndW8NQZ9O5BqcdWnsKWQIsMqzro')"></div>
+<div class="p-md">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Sửa vòi nước rò rỉ</h3>
+<span class="bg-surface-container-high text-on-surface-variant px-sm py-1 rounded-full text-label-sm font-label-sm">Thường dùng</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mb-md">Khắc phục triệt để rò rỉ, thay thế phụ kiện chính hãng.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-bold text-lg">150.000đ</span>
+<button class="bg-primary text-on-primary px-md py-1.5 rounded-lg text-label-md font-label-md">Đặt ngay</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Pros Nearby (Horizontal Scroll) -->
+<section>
+<div class="flex justify-between items-end mb-md">
+<h2 class="font-title-lg text-title-lg">Thợ gần bạn</h2>
+<a class="text-primary font-label-md text-label-md hover:underline" href="#">Tìm trên bản đồ</a>
+</div>
+<div class="flex gap-md overflow-x-auto pb-4 custom-scrollbar">
+<!-- Pro Card 1 -->
+<div class="min-w-[280px] bg-surface-container-lowest p-md rounded-xl border border-outline-variant flex gap-md items-center">
+<div class="relative">
+<img class="w-16 h-16 rounded-full object-cover border-2 border-primary/20" data-alt="Professional headshot of a friendly Vietnamese handyman in a professional work shirt, smiling at the camera. He is in his 30s, looks reliable and experienced. Blurred background of a tool organized workshop. Warm and trustworthy lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD049u5v0Y8fbGGaFSL2J_IBzeTTxrND-KbXs6lzPtFRgpAWxy2Z9IDso01JNAX9Zvj2IQKtxtCmanycKcjxs-edBUGH_mNKoYEYppX7aOXFzIRi3gwKgGFYLUza0k1NGW9UrLVJxcmAoE2itpxoP5Q69z0e9WjPokgvk_-EfqfYqpmUIKEkbpn8repmi1c9GEHeTnpJGyTzdMkwhhTdyA__Nr1Crlgb7GW6KBTmef8JkK274oixX8UyG5ISQEM-OPT3R2X4axlY9o"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-tertiary border-2 border-white rounded-full"></div>
+</div>
+<div class="flex-1">
+<h4 class="font-title-lg text-[16px] leading-tight">Trần Anh Tuấn</h4>
+<div class="flex items-center gap-xs mt-xs">
+<span class="material-symbols-outlined text-secondary-container text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-sm font-label-sm">4.9 (120+)</span>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-xs">Chuyên điện, máy lạnh</p>
+<p class="text-label-sm text-primary font-bold mt-xs">Cách bạn 1.2km</p>
+</div>
+</div>
+<!-- Pro Card 2 -->
+<div class="min-w-[280px] bg-surface-container-lowest p-md rounded-xl border border-outline-variant flex gap-md items-center">
+<div class="relative">
+<img class="w-16 h-16 rounded-full object-cover border-2 border-primary/20" data-alt="Close-up portrait of a professional female appliance repair technician with a confident expression. She is wearing a grey uniform with a logo. The background is a clean modern kitchen. High quality editorial lighting, clean and professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOQGc_GtkN03O6KbOJj76mtSSBrQTRi_TzUq3o1aBWpBoNI0ZgOaDxwmwNiQ-EuMGDWUEuNPeZPnW45B_PUE05U19Q2Kegt5RvplxJZVXZB2EGkl49BPKLY7zy_SJsbyI3zG3vXsAjMkdMNtpsNBhszzNQRT6E7SKZLtRWXAdRcnKTxE3nr7CQ33e8Z2Lam5a-GB1OkzyHHaNW0OPvocaDsp1eglrHAUBhxCo0JOm6ftbEjSu-dvEXHC9eWeW_Ir1CELNtROc9yhg"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-tertiary border-2 border-white rounded-full"></div>
+</div>
+<div class="flex-1">
+<h4 class="font-title-lg text-[16px] leading-tight">Lê Thị Mai</h4>
+<div class="flex items-center gap-xs mt-xs">
+<span class="material-symbols-outlined text-secondary-container text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-sm font-label-sm">4.8 (85+)</span>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-xs">Chuyên gia dụng, lọc nước</p>
+<p class="text-label-sm text-primary font-bold mt-xs">Cách bạn 0.8km</p>
+</div>
+</div>
+<!-- Pro Card 3 -->
+<div class="min-w-[280px] bg-surface-container-lowest p-md rounded-xl border border-outline-variant flex gap-md items-center">
+<div class="relative">
+<img class="w-16 h-16 rounded-full object-cover border-2 border-primary/20" data-alt="Portrait of an experienced senior locksmith with a kind face, wearing a professional work vest. He has a toolbox partially visible. The setting is a bright suburban street. Soft natural morning light. Trustworthy and professional vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAHdm2COBPgpqUaZqpjRY2W-sKu3aB5FWmfwhn5aAXkBVvUZP4ZOCJspsp_hOJQ4IRbq7z_JmXqf1-59vsRY4zkdcVpBr8OZXEjkcdgZJgn5HyeOhXU0V4We_Hdfw3ylFkrDfIfm9cKv9a0tfxGI2BO6b2ucdezkXKev9sTaGEsEDLIieRKxJgROJUfSeYr6wa3LvZOtWppJjAHhbaU5QTKxIrH6_Sm_4DlQ_lMcv6lUhBzwvPq6rYHenRaPQfNZ2C8MmACUamQ2Y"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-tertiary border-2 border-white rounded-full"></div>
+</div>
+<div class="flex-1">
+<h4 class="font-title-lg text-[16px] leading-tight">Phạm Hoàng Nam</h4>
+<div class="flex items-center gap-xs mt-xs">
+<span class="material-symbols-outlined text-secondary-container text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-sm font-label-sm">5.0 (210+)</span>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-xs">Khóa, Camera an ninh</p>
+<p class="text-label-sm text-primary font-bold mt-xs">Cách bạn 2.5km</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Notifications & Recent Orders) -->
+<div class="col-span-12 lg:col-span-4 space-y-lg">
+<!-- Notification Center -->
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-title-lg text-title-lg">Thông báo mới</h2>
+<span class="w-6 h-6 bg-error text-white rounded-full text-[12px] flex items-center justify-center font-bold">2</span>
+</div>
+<div class="p-md space-y-md max-h-[320px] overflow-y-auto custom-scrollbar">
+<div class="flex gap-md p-md rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer border-l-4 border-primary bg-primary/5">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<div>
+<p class="font-label-md text-label-md">Thợ đã đến nơi!</p>
+<p class="font-body-sm text-[13px] text-on-surface-variant mt-xs">Thợ Trần Anh Tuấn đã có mặt tại điểm hẹn.</p>
+<span class="text-[11px] text-outline mt-xs block">Vừa xong</span>
+</div>
+</div>
+<div class="flex gap-md p-md rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer border-l-4 border-transparent">
+<span class="material-symbols-outlined text-tertiary">check_circle</span>
+<div>
+<p class="font-label-md text-label-md">Thanh toán thành công</p>
+<p class="font-body-sm text-[13px] text-on-surface-variant mt-xs">Hóa đơn #FN12304 đã được thanh toán.</p>
+<span class="text-[11px] text-outline mt-xs block">2 giờ trước</span>
+</div>
+</div>
+<div class="flex gap-md p-md rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer border-l-4 border-transparent">
+<span class="material-symbols-outlined text-secondary-container">local_offer</span>
+<div>
+<p class="font-label-md text-label-md">Khuyến mãi 20%</p>
+<p class="font-body-sm text-[13px] text-on-surface-variant mt-xs">Dành riêng cho dịch vụ sơn sửa nhà cửa.</p>
+<span class="text-[11px] text-outline mt-xs block">5 giờ trước</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Orders List -->
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden">
+<div class="p-lg border-b border-outline-variant">
+<h2 class="font-title-lg text-title-lg">Đơn hàng gần đây</h2>
+</div>
+<div class="p-md space-y-md">
+<div class="p-md border border-outline-variant rounded-xl">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+<span class="material-symbols-outlined">ac_unit</span>
+</div>
+<div>
+<p class="font-label-md text-label-md">Vệ sinh máy lạnh</p>
+<p class="text-[12px] text-on-surface-variant">#FN12308</p>
+</div>
+</div>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant px-sm py-1 rounded-full text-label-sm font-label-sm">Đang đến</span>
+</div>
+<div class="flex justify-between items-center pt-md border-t border-outline-variant/30">
+<span class="text-label-sm font-label-sm text-on-surface-variant">20/05/2024 - 14:00</span>
+<a class="text-primary font-bold text-label-sm hover:underline" href="#">Chi tiết</a>
+</div>
+</div>
+<div class="p-md border border-outline-variant rounded-xl">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined">plumbing</span>
+</div>
+<div>
+<p class="font-label-md text-label-md">Sửa ống nước</p>
+<p class="text-[12px] text-on-surface-variant">#FN12304</p>
+</div>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-sm py-1 rounded-full text-label-sm font-label-sm">Hoàn thành</span>
+</div>
+<div class="flex justify-between items-center pt-md border-t border-outline-variant/30">
+<span class="text-label-sm font-label-sm text-on-surface-variant">18/05/2024 - 09:30</span>
+<a class="text-primary font-bold text-label-sm hover:underline" href="#">Đánh giá</a>
+</div>
+</div>
+<button class="w-full py-md text-primary font-bold text-label-md border-2 border-dashed border-outline-variant rounded-xl hover:bg-primary/5 transition-colors">
+                            Xem tất cả lịch sử đơn hàng
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-high dark:bg-inverse-surface border-t border-outline-variant dark:border-outline mt-xxl">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-gutter py-xl max-w-container-max mx-auto gap-md">
+<div class="flex flex-col gap-xs items-center md:items-start">
+<span class="font-headline-md text-headline-md font-black text-on-surface dark:text-inverse-on-surface">FixNow</span>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 FixNow - Dịch vụ sửa chữa nhà cửa chuyên nghiệp</p>
+</div>
+<div class="flex flex-wrap justify-center gap-lg">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all font-body-md text-body-md" href="#">Về chúng tôi</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all font-body-md text-body-md" href="#">Điều khoản sử dụng</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all font-body-md text-body-md" href="#">Chính sách bảo mật</a>
+<span class="text-primary font-bold font-body-md text-body-md">Liên hệ hỗ trợ: 1900 1234</span>
+</div>
+</div>
+</footer>
+<!-- Mobile Floating Action Button -->
+<div class="fixed bottom-6 right-6 md:hidden">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+</div>
+<script>
+        // Micro-interactions and effects
+        document.querySelectorAll('.group').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                // Subtle lift or active state logic if needed
+            });
+        });
+
+        // Simple scroll reveal simulation
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-4');
+            observer.observe(section);
+        });
+    </script>
+</body></html>

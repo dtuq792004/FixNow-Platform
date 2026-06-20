@@ -1,4 +1,5 @@
 import Request from "../models/request.model";
+import { sendNewRequestToMatchingProviders } from "../sockets/notification.socket";
 
 /**
  * Cho phép customer chọn thanh toán khi provider hoàn thành (cash).
@@ -20,6 +21,7 @@ export const payLater = async (requestId: string, customerId: string) => {
 
   request.status = "PENDING";
   await request.save();
+  await sendNewRequestToMatchingProviders(request._id.toString());
 
   return request;
 };

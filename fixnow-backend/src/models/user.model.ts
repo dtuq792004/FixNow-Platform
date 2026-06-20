@@ -10,10 +10,11 @@ export interface IUser extends Document {
   avatar?: string | null;
   role: UserRole;
   status: "ACTIVE" | "INACTIVE" | "BANNED";
-
+  isEmailVerified: boolean;
+  emailVerificationOtpHash?: string;
+  emailVerificationOtpExpire?: Date;
   resetPasswordTokenHash?: string;
   resetPasswordExpire?: Date;
-
   resetPasswordOtp?: string;
   resetPasswordOtpExpire?: Date;
 }
@@ -23,7 +24,9 @@ const UserSchema = new Schema<IUser>(
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      lowercase: true,
+      trim: true
     },
 
     passwordHash: {
@@ -52,6 +55,12 @@ const UserSchema = new Schema<IUser>(
       enum: ["ACTIVE", "INACTIVE", "BANNED"],
       default: "ACTIVE"
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: true
+    },
+    emailVerificationOtpHash: String,
+    emailVerificationOtpExpire: Date,
     resetPasswordTokenHash: String,
     resetPasswordExpire: Date,
 
