@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { generateOtp } from "../utils/generateOtp";
-import { hashToken } from "../utils/hashToken";
 import { sendOtpEmail } from "../utils/sendEmail";
+import { hashOtp, verifyOtp as verifyHashedOtp } from "../utils/otp.util";
 
 const ACCESS_TOKEN_TTL = "60m";
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 ngày
@@ -19,7 +19,7 @@ if (!ACCESS_SECRET) {
 }
 
 export const loginService = async (email: string, password: string) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
 
   if (!user || user.status !== "ACTIVE") {
     throw new Error("Thông tin đăng nhập không hợp lệ");
@@ -28,6 +28,10 @@ export const loginService = async (email: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.passwordHash);
   if (!isMatch) {
     throw new Error("Thông tin đăng nhập không hợp lệ");
+  }
+
+  if (user.isEmailVerified === false) {
+    throw new Error("EMAIL_NOT_VERIFIED");
   }
 
   const accessToken = jwt.sign(
@@ -60,11 +64,11 @@ export const registerService = async (
   password: string,
   fullName: string,
   email: string,
-  phone?: string,
-  role?: string
+  phone?: string
 ) => {
+  const normalizedEmail = email.trim().toLowerCase();
   const existedUser = await User.findOne({
-    $or: [{ email }, { phone }],
+    $or: [{ email: normalizedEmail }, { phone }],
   });
 
   if (existedUser) {
@@ -72,25 +76,85 @@ export const registerService = async (
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
+  const otp = generateOtp();
 
   const newUser = await User.create({
     passwordHash,
     fullName,
-    email,
+    email: normalizedEmail,
     phone,
-    role: role || "CUSTOMER",
+    role: "CUSTOMER",
+    isEmailVerified: false,
+    emailVerificationOtpHash: hashOtp(otp),
+    emailVerificationOtpExpire: new Date(Date.now() + 15 * 60 * 1000),
   });
+
+  try {
+    await sendOtpEmail(normalizedEmail, otp);
+  } catch {
+    await User.deleteOne({ _id: newUser._id });
+    throw new Error("Không thể gửi OTP xác thực email, vui lòng thử lại");
+  }
 
   return {
     id: newUser._id,
     fullName: newUser.fullName,
     email: newUser.email,
     role: newUser.role,
+    isEmailVerified: newUser.isEmailVerified,
   };
 };
 
+export const verifyEmailService = async (email: string, otp: string) => {
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+  if (!user) {
+    throw new Error("Không tìm thấy tài khoản");
+  }
+
+  if (user.isEmailVerified) {
+    return { message: "Email đã được xác thực" };
+  }
+
+  if (
+    !user.emailVerificationOtpHash ||
+    !user.emailVerificationOtpExpire ||
+    user.emailVerificationOtpExpire < new Date() ||
+    !verifyHashedOtp(otp, user.emailVerificationOtpHash)
+  ) {
+    throw new Error("OTP không hợp lệ hoặc đã hết hạn");
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationOtpHash = undefined;
+  user.emailVerificationOtpExpire = undefined;
+  await user.save();
+
+  return { message: "Xác thực email thành công" };
+};
+
+export const resendVerificationOtpService = async (email: string) => {
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+  if (!user) {
+    throw new Error("Không tìm thấy tài khoản");
+  }
+
+  if (user.isEmailVerified) {
+    throw new Error("Email đã được xác thực");
+  }
+
+  const otp = generateOtp();
+  user.emailVerificationOtpHash = hashOtp(otp);
+  user.emailVerificationOtpExpire = new Date(Date.now() + 15 * 60 * 1000);
+  await user.save();
+  await sendOtpEmail(user.email, otp);
+
+  return { message: "OTP xác thực đã được gửi lại" };
+};
+
 export const forgotPasswordService = async (email: string) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
 
   if (!user) {
     throw new Error("Email không tồn tại trong hệ thống");

@@ -13,6 +13,8 @@ export type RequestType = "NORMAL" | "URGENT" | "RECURRING";
 export interface IRequest extends Document {
   customerId: mongoose.Types.ObjectId;
   providerId?: mongoose.Types.ObjectId;
+  conversationId?: mongoose.Types.ObjectId;
+  rejectedProviderIds: mongoose.Types.ObjectId[];
 
   // ── Service selection ─────────────────────────────────────────────────────
   categoryId?: mongoose.Types.ObjectId; // category selected by customer
@@ -58,6 +60,16 @@ const requestSchema = new Schema<IRequest>(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    conversationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Conversation",
+    },
+    rejectedProviderIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     // ── Service selection ───────────────────────────────────────────────────
     categoryId: {
@@ -146,6 +158,9 @@ const requestSchema = new Schema<IRequest>(
   },
   { timestamps: true },
 );
+
+requestSchema.index({ status: 1, categoryId: 1, createdAt: -1 });
+requestSchema.index({ providerId: 1, status: 1, updatedAt: -1 });
 
 const Request =
   mongoose.models.Request ||

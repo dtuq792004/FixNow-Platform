@@ -1,6 +1,7 @@
 import express from "express";
 import * as financeController from "../controllers/providerFinance.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { roleMiddleware } from "../middlewares/role.middleware";
 
 const router = express.Router();
 
@@ -12,8 +13,10 @@ const router = express.Router();
 router.get(
   "/my-wallet",
   authMiddleware,
+  roleMiddleware("PROVIDER"),
   financeController.getMyWallet
 );
+router.get("/my-revenue", authMiddleware, roleMiddleware("PROVIDER"), financeController.getMyRevenue);
 
 router.get(
   "/providers/:providerId/revenue",

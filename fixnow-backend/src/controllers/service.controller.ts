@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import * as serviceService from "../services/service.service";
 
+export const uploadServiceImageController = async (req: Request, res: Response) => {
+  const imageUrl = (req as any).imageUrl;
+  if (!imageUrl) {
+    return res.status(400).json({ message: "Không thể tải ảnh dịch vụ lên" });
+  }
+
+  return res.json({ imageUrl });
+};
+
 export const createServiceController = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
@@ -60,6 +69,16 @@ export const getServicesByCategoryController = async (req: Request, res: Respons
   }
 };
 
+export const getMyServicesController = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const services = await serviceService.getProviderServices(req.user.id);
+    return res.json({ data: services });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 
 // UPDATE (provider only)
 export const updateServiceController = async (
@@ -71,7 +90,7 @@ export const updateServiceController = async (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const providerId = req.user._id;
+    const providerId = req.user.id;
     const { id } = req.params;
 
     const service = await serviceService.updateService(
@@ -102,7 +121,7 @@ export const deleteServiceController = async (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const providerId = req.user._id;
+    const providerId = req.user.id;
     const { id } = req.params;
 
     await serviceService.deleteService(id, providerId);

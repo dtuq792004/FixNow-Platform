@@ -64,7 +64,7 @@ export const sendOtpEmail = async (to: string, otp: string) => {
     subject: "Mã xác thực OTP",
     html: `
       <h2>Mã OTP của bạn: <b>${otp}</b></h2>
-      <p>Mã có hiệu lực trong <b>5 phút</b>.</p>
+      <p>Mã có hiệu lực trong <b>15 phút</b>.</p>
       <p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>
     `,
   });

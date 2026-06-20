@@ -11,7 +11,7 @@ export interface IService extends Document {
   price: number;
   unit: ServiceUnit;
   status: ServiceStatus;
-  image?: string;
+  image?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

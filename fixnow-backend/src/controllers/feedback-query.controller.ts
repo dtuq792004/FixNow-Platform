@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as FeedbackService from "../services/feedback.services";
+import { Provider } from "../models/provider.model";
 
 export const getAllFeedbacks = async (req: Request, res: Response) => {
   try {
@@ -48,6 +49,23 @@ export const getFeedbackByProviderId = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("Get feedback by provider id error:", error);
     return res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
+  }
+};
+
+export const getMyProviderFeedbacks = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const provider = await Provider.findOne({ userId: req.user.id }).select("_id");
+    if (!provider) return res.status(404).json({ message: "Provider not found" });
+    const { page = 1, limit = 10 } = req.query;
+    const feedbacks = await FeedbackService.getFeedbacks(
+      Number(page),
+      Number(limit),
+      { providerId: provider._id },
+    );
+    return res.json({ data: feedbacks });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
   }
 };
 

@@ -2,41 +2,49 @@ import { Server, Socket } from "socket.io";
 import { MessageType } from "../models/message.model";
 import { sendChatMessage } from "../services/chat.service";
 
+type SendMessageAck = (response: {
+  ok: boolean;
+  message?: unknown;
+  error?: string;
+}) => void;
+
 export const registerChatHandlers = (io: Server, socket: Socket) => {
   const user = (socket as any).user;
 
   socket.on(
     "send_message",
-    async (data: {
-      conversationId: string;
-      content: string;
-      type?: MessageType;
-    }) => {
+    async (
+      data: {
+        conversationId: string;
+        content: string;
+        type?: MessageType;
+      },
+      ack?: SendMessageAck,
+    ) => {
       try {
-        const { conversationId, content, type } = data;
-        const senderId = user.id;
         const { message, recipientId } = await sendChatMessage({
-          conversationId,
-          senderId,
-          content,
-          type,
+          conversationId: data.conversationId,
+          senderId: user.id,
+          content: data.content,
+          type: data.type,
         });
 
-        // Gửi cho chính người gửi (để đồng bộ)
-        socket.emit("message_sent", message);
-
-        // Gửi cho người nhận
+        io.to(user.id).emit("message_sent", message);
         if (recipientId) {
-          io.to(recipientId).emit("new_message", message);
+          io.to(recipientId).emit("chat:new_message", message);
         }
+
+        ack?.({ ok: true, message });
       } catch (error) {
         console.error("Error sending message via socket:", error);
-        socket.emit("chat_error", { message: "Failed to send message" });
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to send message";
+        socket.emit("chat_error", { message: errorMessage });
+        ack?.({ ok: false, error: errorMessage });
       }
     },
   );
 
-  // Xử lý báo "đang soạn tin" (typing)
   socket.on(
     "typing",
     (data: { conversationId: string; recipientId: string }) => {

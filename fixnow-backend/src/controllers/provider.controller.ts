@@ -36,6 +36,17 @@ export const updateWorkingArea = async (req: Request, res: Response) => {
   }
 };
 
+export const updateProviderProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+    const provider = await providerService.updateProviderProfile(userId, req.body);
+    return res.json({ success: true, data: provider, message: "Provider profile updated" });
+  } catch (error: any) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 export const searchProviders = async (req: Request, res: Response) => {
   try {
     const { keyword } = req.query;

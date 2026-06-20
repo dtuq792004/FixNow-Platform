@@ -2,6 +2,7 @@ import Service from "../models/service.model";
 import Request from "../models/request.model";
 import { PaymentService } from "./payment.service";
 import { calculatePayment } from "../utils/calculate.util";
+import { sendNewRequestToMatchingProviders } from "../sockets/notification.socket";
 
 interface CreateRequestDto {
   categoryId?: string;
@@ -14,17 +15,20 @@ interface CreateRequestDto {
   media?: string[];
   requestType?: "NORMAL" | "URGENT" | "RECURRING";
   promoCode?: string;
+  promotionCode?: string;
   startAt?: Date;
 }
 
 export const createRequest = async (customerId: string, data: CreateRequestDto) => {
-  const { services, promoCode } = data;
+  const promoCode = data.promoCode || data.promotionCode;
+  const { services } = data;
 
   let totalPrice = 0;
   let discountAmount = 0;
   let finalPrice = 0;
   let appliedPromoCode = "";
   let resolvedServices: string[] = [];
+  let resolvedCategoryId = data.categoryId;
 
   // Pricing: only when specific services are selected
   if (services && services.length > 0) {
@@ -34,6 +38,17 @@ export const createRequest = async (customerId: string, data: CreateRequestDto) 
       throw new Error("Some services not found");
     }
 
+    const serviceCategoryIds = [
+      ...new Set(serviceDocs.map((service) => service.categoryId.toString())),
+    ];
+    if (serviceCategoryIds.length !== 1) {
+      throw new Error("All services must belong to the same category");
+    }
+    if (data.categoryId && serviceCategoryIds[0] !== data.categoryId) {
+      throw new Error("Selected services do not belong to the request category");
+    }
+
+    resolvedCategoryId = serviceCategoryIds[0];
     resolvedServices = services;
     totalPrice = serviceDocs.reduce((sum, s) => sum + s.price, 0);
     finalPrice = totalPrice;
@@ -51,7 +66,7 @@ export const createRequest = async (customerId: string, data: CreateRequestDto) 
 
   const request = await Request.create({
     customerId,
-    categoryId: data.categoryId,
+    categoryId: resolvedCategoryId,
     addressId: data.addressId,
     addressText: data.addressText,
     title: data.title,
@@ -71,6 +86,8 @@ export const createRequest = async (customerId: string, data: CreateRequestDto) 
   let checkoutUrl: string | undefined;
   if (finalPrice > 0) {
     checkoutUrl = await PaymentService.createPayment(request);
+  } else {
+    await sendNewRequestToMatchingProviders(request._id.toString());
   }
 
   return { request, checkoutUrl };

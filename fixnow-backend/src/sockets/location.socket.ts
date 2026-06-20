@@ -92,6 +92,18 @@ export const registerLocationHandlers = (io: Server, socket: Socket) => {
         return;
       }
 
+      if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng) ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
+      ) {
+        socket.emit("location:error", { message: "Invalid coordinates" });
+        return;
+      }
+
       const membership = await canJoinRequestLocationRoom(requestId, user.id);
       if (!membership.allowed || !membership.request) {
         socket.emit("location:error", { message: "Forbidden" });
@@ -101,6 +113,13 @@ export const registerLocationHandlers = (io: Server, socket: Socket) => {
       if (membership.request.providerId?.toString() !== user.id) {
         socket.emit("location:error", {
           message: "Only assigned provider can update location",
+        });
+        return;
+      }
+
+      if (!["ACCEPTED", "IN_PROGRESS"].includes(membership.request.status)) {
+        socket.emit("location:error", {
+          message: "Location updates are only allowed for active jobs",
         });
         return;
       }

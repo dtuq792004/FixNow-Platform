@@ -1,0 +1,50 @@
+import { Link } from 'react-router-dom'
+
+export function LandingFooter() {
+  return (
+    <footer className="border-t border-slate-200 bg-white">
+      <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-md px-gutter py-xl md:flex-row">
+        <div className="flex flex-col items-center gap-sm md:items-start">
+          <Link className="text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient" to="/">
+            FixNow
+          </Link>
+          <p className="text-center text-body-md text-slate-500 md:text-left">
+            © 2024 FixNow - Dịch vụ sửa chữa nhà cửa chuyên nghiệp
+          </p>
+        </div>
+
+        <nav className="flex flex-wrap justify-center gap-md" aria-label="Điều hướng chân trang">
+          <Link className="text-body-md text-slate-600 transition-all hover:text-primary" to="/about">
+            Về chúng tôi
+          </Link>
+          <span className="text-body-md text-slate-600 cursor-pointer hover:text-primary transition-colors">Điều khoản sử dụng</span>
+          <span className="text-body-md text-slate-600 cursor-pointer hover:text-primary transition-colors">Chính sách bảo mật</span>
+          <Link className="text-body-md font-bold text-primary" to="/support">
+            Liên hệ hỗ trợ: 1900 1234
+          </Link>
+        </nav>
+
+        <div className="flex gap-md">
+          <SocialIcon type="facebook" />
+          <SocialIcon type="youtube" />
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+function SocialIcon({ type }: { type: 'facebook' | 'youtube' }) {
+  return (
+    <a className="p-xs transition-colors hover:text-primary" href="#" aria-label={type}>
+      {type === 'facebook' ? (
+        <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+      ) : (
+        <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+      )}
+    </a>
+  )
+}
