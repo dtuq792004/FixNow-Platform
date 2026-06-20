@@ -29,12 +29,27 @@ const allowedOrigins = [
   "http://localhost:8081",
   "http://localhost:19006",
   "https://fixnow-platform.vercel.app",
+  "https://fix-now-platform.vercel.app",
 ];
+
+const isVercelOrigin = (origin: string) => {
+  return /^https:\/\/fix-?now-platform.*\.vercel\.app$/.test(origin);
+};
 
 app.use(
   cors({
-    // Allow all in dev (mobile devices use dynamic IPs); restrict to allowedOrigins in prod
-    origin: process.env.NODE_ENV === "production" ? allowedOrigins : true,
+    origin: (origin, callback) => {
+      // Allow if no origin (like mobile apps or curl) or if in development
+      if (!origin || process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin) || isVercelOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
