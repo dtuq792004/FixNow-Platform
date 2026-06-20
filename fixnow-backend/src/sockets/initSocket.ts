@@ -9,10 +9,30 @@ const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
 let io: Server;
 
 export const initSocket = (server: any) => {
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:8081",
+    "http://localhost:19006",
+    "https://fixnow-platform.vercel.app",
+    "https://fix-now-platform.vercel.app",
+  ];
+
   io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: (origin, callback) => {
+        if (!origin || process.env.NODE_ENV !== "production") {
+          return callback(null, true);
+        }
+        if (
+          allowedOrigins.includes(origin) ||
+          /^https:\/\/fix-?now-platform.*\.vercel\.app$/.test(origin)
+        ) {
+          return callback(null, true);
+        }
+        callback(new Error("Not allowed by CORS"));
+      },
       methods: ["GET", "POST"],
+      credentials: true,
     },
   });
 
