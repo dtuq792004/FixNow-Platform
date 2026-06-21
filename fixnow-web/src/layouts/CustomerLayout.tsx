@@ -11,9 +11,13 @@ import {
   Wrench,
 } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useLogoutMutation } from '../modules/auth/hooks/useAuth'
 import { AppButton } from '../shared/components/AppButton'
 import { cn } from '../shared/utils/cn'
+import { useAuthStore } from '../modules/auth/store/authStore'
+import { requestKeys } from '../modules/request/hooks/useRequests'
+import { getAuthenticatedSocket } from '../shared/services/socketClient'
 
 const navItems = [
   { to: '/customer/home', label: 'Trang chủ' },
@@ -24,7 +28,25 @@ const navItems = [
 
 export function CustomerLayout() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((state) => state.accessToken)
   const logoutMutation = useLogoutMutation()
+
+  useEffect(() => {
+    if (!accessToken) return
+    const socket = getAuthenticatedSocket(accessToken)
+    const handleRequestUpdated = (payload: { requestId?: string }) => {
+      queryClient.invalidateQueries({ queryKey: requestKeys.all })
+      if (payload.requestId) {
+        queryClient.invalidateQueries({ queryKey: requestKeys.detail(payload.requestId) })
+      }
+    }
+
+    socket.on('request:updated', handleRequestUpdated)
+    return () => {
+      socket.off('request:updated', handleRequestUpdated)
+    }
+  }, [accessToken, queryClient])
 
   const logout = async () => {
     await logoutMutation.mutateAsync().catch(() => undefined)
@@ -113,3 +135,4 @@ export function CustomerLayout() {
     </div>
   )
 }
+import { useQueryClient } from '@tanstack/react-query'

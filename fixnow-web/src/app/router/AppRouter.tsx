@@ -1,6 +1,21 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { CustomerLayout } from '../../layouts/CustomerLayout'
+import { AdminLayout } from '../../layouts/AdminLayout'
 import { ProviderLayout } from '../../layouts/ProviderLayout'
+import { AdminAnalyticsPage } from '../../modules/admin/pages/AdminAnalyticsPage'
+import { AdminCategoriesPage } from '../../modules/admin/pages/AdminCategoriesPage'
+import { AdminComplaintsPage } from '../../modules/admin/pages/AdminComplaintsPage'
+import { AdminDashboardPage } from '../../modules/admin/pages/AdminDashboardPage'
+import { AdminProvidersPage } from '../../modules/admin/pages/AdminProvidersPage'
+import { AdminReviewsPage } from '../../modules/admin/pages/AdminReviewsPage'
+import { AdminServicesPage } from '../../modules/admin/pages/AdminServicesPage'
+import { AdminSettingsPage } from '../../modules/admin/pages/AdminSettingsPage'
+import { AdminTransactionsPage } from '../../modules/admin/pages/AdminTransactionsPage'
+import { AdminUsersPage } from '../../modules/admin/pages/AdminUsersPage'
+import { AdminWithdrawalsPage } from '../../modules/admin/pages/AdminWithdrawalsPage'
+import { AdminBlogsPage } from '../../modules/admin/pages/AdminBlogsPage'
+import { AdminBlogDetailPage } from '../../modules/admin/pages/AdminBlogDetailPage'
+import { AdminBlogEditorPage } from '../../modules/admin/pages/AdminBlogEditorPage'
 import { ProtectedRoute } from '../../modules/auth/components/ProtectedRoute'
 import { ForgotPasswordPage } from '../../modules/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '../../modules/auth/pages/LoginPage'
@@ -11,10 +26,12 @@ import { ChattingPage } from '../../modules/chat/pages/ChattingPage'
 import { CustomerHomePage } from '../../modules/customer/pages/CustomerHomePage'
 import { GuestAboutPage } from '../../modules/guest/pages/GuestAboutPage'
 import { GuestBlogPage } from '../../modules/guest/pages/GuestBlogPage'
+import { GuestBlogDetailPage } from '../../modules/guest/pages/GuestBlogDetailPage'
 import { GuestServicesPage } from '../../modules/guest/pages/GuestServicesPage'
 import { GuestSupportPage } from '../../modules/guest/pages/GuestSupportPage'
 import { LandingPage } from '../../modules/guest/pages/LandingPage'
 import { PaymentPage } from '../../modules/payment/pages/PaymentPage'
+import { PaymentResultPage } from '../../modules/payment/pages/PaymentResultPage'
 import { ProviderDashboardPage } from '../../modules/provider/pages/ProviderDashboardPage'
 import { ProviderCompleteJobPage } from '../../modules/provider/pages/ProviderCompleteJobPage'
 import { ProviderJobDetailPage } from '../../modules/provider/pages/ProviderJobDetailPage'
@@ -40,6 +57,7 @@ export const appRouter = createBrowserRouter([
   { path: '/services', element: <GuestServicesPage /> },
   { path: '/about', element: <GuestAboutPage /> },
   { path: '/blog', element: <GuestBlogPage /> },
+  { path: '/blog/:slug', element: <GuestBlogDetailPage /> },
   { path: '/support', element: <GuestSupportPage /> },
   { path: '/auth/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
@@ -50,6 +68,8 @@ export const appRouter = createBrowserRouter([
   { path: '/signup', element: <Navigate to="/auth/signup" replace /> },
   { path: '/forgot-password', element: <Navigate to="/auth/forgot-password" replace /> },
   { path: '/verification', element: <Navigate to="/auth/verification" replace /> },
+  { path: '/payment/success', element: <PaymentResultPage result="success" /> },
+  { path: '/payment/cancel', element: <PaymentResultPage result="cancel" /> },
   {
     path: '/customer',
     element: (
@@ -91,6 +111,33 @@ export const appRouter = createBrowserRouter([
       { path: 'messages', element: <ProviderMessagesPage /> },
       { path: 'notifications', element: <ProviderNotificationsPage /> },
       { path: 'profile', element: <ProviderProfilePage /> },
+      { path: '*', element: <Navigate to="dashboard" replace /> },
+    ],
+  },
+  {
+    path: '/admin',
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard', element: <AdminDashboardPage /> },
+      { path: 'users', element: <AdminUsersPage /> },
+      { path: 'providers', element: <AdminProvidersPage /> },
+      { path: 'categories', element: <AdminCategoriesPage /> },
+      { path: 'services', element: <AdminServicesPage /> },
+      { path: 'transactions', element: <AdminTransactionsPage /> },
+      { path: 'withdrawals', element: <AdminWithdrawalsPage /> },
+      { path: 'reviews', element: <AdminReviewsPage /> },
+      { path: 'complaints', element: <AdminComplaintsPage /> },
+      { path: 'analytics', element: <AdminAnalyticsPage /> },
+      { path: 'blogs', element: <AdminBlogsPage /> },
+      { path: 'blogs/new', element: <AdminBlogEditorPage /> },
+      { path: 'blogs/:blogId', element: <AdminBlogDetailPage /> },
+      { path: 'blogs/:blogId/edit', element: <AdminBlogEditorPage /> },
+      { path: 'settings', element: <AdminSettingsPage /> },
       { path: '*', element: <Navigate to="dashboard" replace /> },
     ],
   },

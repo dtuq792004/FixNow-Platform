@@ -1,5 +1,82 @@
 @import "tailwindcss";
 
+.rich-text-editor:empty::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.rich-text-editor h2,
+.rich-text-content h2 {
+  margin: 1.25rem 0 0.65rem;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.rich-text-editor h3,
+.rich-text-content h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.rich-text-editor p,
+.rich-text-content p {
+  margin: 0.65rem 0;
+}
+
+.rich-text-editor strong,
+.rich-text-editor b,
+.rich-text-content strong,
+.rich-text-content b {
+  font-weight: 700;
+}
+
+.rich-text-editor em,
+.rich-text-editor i,
+.rich-text-content em,
+.rich-text-content i {
+  font-style: italic;
+}
+
+.rich-text-editor u,
+.rich-text-content u {
+  text-decoration: underline;
+}
+
+.rich-text-editor ul,
+.rich-text-content ul {
+  margin: 0.75rem 0;
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.rich-text-editor ol,
+.rich-text-content ol {
+  margin: 0.75rem 0;
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.rich-text-editor blockquote,
+.rich-text-content blockquote {
+  margin: 1rem 0;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: #eff6ff;
+  padding: 0.85rem 1rem;
+  color: #1e3a8a;
+  font-style: italic;
+}
+
+.rich-text-content a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
@@ -305,6 +382,51 @@ button:disabled {
   }
 }
 
+.payment-result-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+}
+
+.payment-result-enter {
+  animation: payment-result-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.payment-result-icon {
+  animation: payment-result-icon 0.7s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes payment-result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes payment-result-icon {
+  from {
+    opacity: 0;
+    transform: scale(0.72) rotate(-8deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-result-enter,
+  .payment-result-icon {
+    animation: none;
+  }
+}
+
 /* Fix Tailwind v4 width collapse caused by spacing overrides */
 .max-w-xs {
   max-width: 20rem !important;
@@ -348,4 +470,116 @@ button:disabled {
 
 .max-w-7xl {
   max-width: 80rem !important;
+}
+
+/* Admin visual system */
+.admin-shell {
+  background:
+    radial-gradient(circle at 85% 0%, rgb(219 234 254 / 55%), transparent 28rem),
+    #f4f7fb;
+}
+
+.admin-shell main > div > div {
+  width: 100%;
+}
+
+.admin-shell main section[class*="bg-white"],
+.admin-shell main article[class*="bg-white"],
+.admin-shell main div[class*="bg-white"][class*="border"][class*="rounded-2xl"] {
+  border-color: #e5eaf1;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 3%), 0 8px 24px rgb(15 23 42 / 4%);
+}
+
+.admin-shell .admin-stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-shell .admin-stat-card::after {
+  position: absolute;
+  right: -28px;
+  bottom: -42px;
+  width: 110px;
+  height: 110px;
+  border-radius: 999px;
+  background: rgb(37 99 235 / 4%);
+  content: "";
+}
+
+.admin-shell .admin-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 8%);
+}
+
+.admin-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-shell thead {
+  background: #f8fafc;
+}
+
+.admin-shell th {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-shell tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-shell tbody tr:hover {
+  background: #f8fbff;
+}
+
+.admin-shell td {
+  border-color: #edf0f4;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-shell select,
+.admin-shell textarea {
+  border-color: #dce3ec;
+  background-color: #fff;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.admin-shell select:focus,
+.admin-shell textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 9%);
+  outline: none;
+}
+
+.admin-shell label > span:first-child {
+  color: #475569;
+}
+
+.admin-shell button {
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.admin-shell main button[class*="bg-blue-600"]:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 7px 18px rgb(37 99 235 / 20%);
+}
+
+.admin-shell .admin-toolbar {
+  background: linear-gradient(180deg, #fff, #fbfdff);
+}
+
+@media (max-width: 639px) {
+  .admin-shell main > div > div {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }

@@ -6,6 +6,8 @@ export interface IPlatformSetting extends Document {
 
   minWithdrawAmount: number;
 
+  terms: string;
+
   updatedBy?: mongoose.Types.ObjectId;
 
   createdAt: Date;
@@ -25,6 +27,11 @@ const platformSettingSchema = new Schema<IPlatformSetting>(
     minWithdrawAmount: {
       type: Number,
       default: 100000
+    },
+
+    terms: {
+      type: String,
+      default: "FixNow kết nối khách hàng với Provider và bảo vệ thanh toán trong suốt quá trình cung cấp dịch vụ."
     },
 
     updatedBy: {

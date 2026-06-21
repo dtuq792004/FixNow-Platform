@@ -45,6 +45,14 @@ export const sendMessageRealtime = (userId: string, data: any) => {
   io.to(userId).emit("new_message", data);
 };
 
+export const sendRequestUpdatedRealtime = (
+  userId: string,
+  payload: { requestId: string; status: string; providerId?: string },
+) => {
+  if (!io) return;
+  io.to(userId).emit("request:updated", payload);
+};
+
 export const sendNewRequestToMatchingProviders = async (requestId: string) => {
   try {
     if (!io) return;

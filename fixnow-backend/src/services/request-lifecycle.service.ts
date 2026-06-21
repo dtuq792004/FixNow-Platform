@@ -4,6 +4,7 @@ import { Payment } from "../models/payment.model";
 import { PaymentService } from "./payment.service";
 import { Provider } from "../models/provider.model";
 import { ensureConversation } from "./chat.service";
+import { sendRequestUpdatedRealtime } from "../sockets/notification.socket";
 
 const assertProviderSupportsCategory = async (
   providerId: string,
@@ -114,6 +115,11 @@ export const respondRequest = async (
 
     await acceptedRequest.save({ session });
     await session.commitTransaction();
+    sendRequestUpdatedRealtime(acceptedRequest.customerId.toString(), {
+      requestId: acceptedRequest._id.toString(),
+      status: acceptedRequest.status,
+      providerId: acceptedRequest.providerId?.toString(),
+    });
     return acceptedRequest;
   } catch (error) {
     await session.abortTransaction();
@@ -131,6 +137,11 @@ export const startService = async (requestId: string, providerId: string) => {
 
   request.status = "IN_PROGRESS";
   await request.save();
+  sendRequestUpdatedRealtime(request.customerId.toString(), {
+    requestId: request._id.toString(),
+    status: request.status,
+    providerId: request.providerId?.toString(),
+  });
   return request;
 };
 
@@ -151,5 +162,10 @@ export const completeService = async (
   if (note) request.completionNote = note;
 
   await request.save();
+  sendRequestUpdatedRealtime(request.customerId.toString(), {
+    requestId: request._id.toString(),
+    status: request.status,
+    providerId: request.providerId?.toString(),
+  });
   return request;
 };

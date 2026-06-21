@@ -47,6 +47,7 @@ export function ProfileAddressPanel() {
   const [isLocating, setIsLocating] = useState(false)
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null)
   const [locationMessage, setLocationMessage] = useState<string | null>(null)
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const addressesQuery = useAddressesQuery()
   const createMutation = useCreateAddressMutation()
   const updateMutation = useUpdateAddressMutation()
@@ -57,7 +58,13 @@ export function ProfileAddressPanel() {
   })
 
   const submit = async (data: AddressForm) => {
-    await createMutation.mutateAsync({ ...data, ...coordinates })
+    const response = await createMutation.mutateAsync({ ...data, ...coordinates })
+    const hasCoordinates =
+      typeof response.data.latitude === 'number' &&
+      typeof response.data.longitude === 'number'
+    setSaveMessage(hasCoordinates
+      ? 'Đã lưu địa chỉ và tọa độ để hiển thị bản đồ.'
+      : 'Đã lưu địa chỉ nhưng chưa tìm được tọa độ. Hãy kiểm tra lại địa chỉ hoặc dùng GPS.')
     form.reset()
     setCoordinates(null)
     setLocationMessage(null)
@@ -102,6 +109,12 @@ export function ProfileAddressPanel() {
         }
       />
 
+      {saveMessage && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
+          {saveMessage}
+        </div>
+      )}
+
       {showForm && (
         <form onSubmit={form.handleSubmit(submit)} className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -117,7 +130,7 @@ export function ProfileAddressPanel() {
               {isLocating ? 'Đang lấy vị trí...' : 'Lấy vị trí hiện tại'}
             </AppButton>
             <p className="mt-2 text-xs text-slate-600">
-              {locationMessage ?? 'Tọa độ giúp Provider xem đúng vị trí của bạn trên bản đồ.'}
+              {locationMessage ?? 'Nếu không dùng GPS, hệ thống sẽ tự tìm tọa độ từ địa chỉ bạn nhập khi lưu.'}
             </p>
           </div>
           <label className="mt-4 flex items-center gap-2 text-sm">
@@ -148,6 +161,9 @@ export function ProfileAddressPanel() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-bold">{address.label}</h3>
                   {address.isDefault && <span className="rounded-full bg-blue-100 px-2 py-1 text-[11px] font-semibold text-blue-700">Mặc định</span>}
+                  {typeof address.latitude === 'number' && typeof address.longitude === 'number'
+                    ? <span className="rounded-full bg-green-100 px-2 py-1 text-[11px] font-semibold text-green-700">Có tọa độ</span>
+                    : <span className="rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-700">Thiếu tọa độ</span>}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   {[address.addressLine, address.ward, address.district, address.city].filter(Boolean).join(', ')}
@@ -163,6 +179,34 @@ export function ProfileAddressPanel() {
                 disabled={updateMutation.isPending}
               >
                 Đặt làm mặc định
+              </AppButton>
+            )}
+            {(typeof address.latitude !== 'number' || typeof address.longitude !== 'number') && (
+              <AppButton
+                type="button"
+                variant="outline"
+                className="mt-3 w-full"
+                onClick={async () => {
+                  const response = await updateMutation.mutateAsync({
+                    id: address._id,
+                    payload: {
+                      addressLine: address.addressLine,
+                      ward: address.ward,
+                      district: address.district,
+                      city: address.city,
+                    },
+                  })
+                  const found =
+                    typeof response.data.latitude === 'number' &&
+                    typeof response.data.longitude === 'number'
+                  setSaveMessage(found
+                    ? `Đã tìm và lưu tọa độ cho địa chỉ “${address.label}”.`
+                    : `Không tìm thấy tọa độ cho địa chỉ “${address.label}”. Hãy kiểm tra thông tin hoặc dùng GPS.`)
+                }}
+                disabled={updateMutation.isPending}
+              >
+                <LocateFixed size={16} />
+                {updateMutation.isPending ? 'Đang tìm tọa độ...' : 'Tìm tọa độ từ địa chỉ'}
               </AppButton>
             )}
             <AppButton

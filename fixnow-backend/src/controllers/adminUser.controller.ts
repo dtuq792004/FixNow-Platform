@@ -3,7 +3,7 @@ import * as adminUserService from "../services/adminUser.service";
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const { role, status, search, page = 1, limit = 5 } = req.query;
+    const { role, status, search, page = 1, limit = 10 } = req.query;
 
     const result = await adminUserService.getUsers(
       role as string,
