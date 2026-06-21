@@ -11,8 +11,8 @@ export type RequestStatus =
 
 export type RequestItem = {
   _id: string
-  categoryId?: Category | string
-  addressId?: Address | string
+  categoryId?: Category | string | null
+  addressId?: Address | string | null
   addressText?: string
   providerId?: {
     _id: string

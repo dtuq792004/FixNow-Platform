@@ -1,6 +1,21 @@
 import { Request, Response } from "express";
 import * as categoryService from "../services/category.service";
 
+export const uploadCategoryIcon = (req: Request, res: Response) => {
+  const imageUrl = (req as Request & { imageUrl?: string }).imageUrl;
+  if (!imageUrl) {
+    return res.status(400).json({
+      success: false,
+      message: "Không thể tải biểu tượng lên",
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: { imageUrl },
+  });
+};
+
 // CREATE
 export const createCategory = async (req: Request, res: Response) => {
   try {

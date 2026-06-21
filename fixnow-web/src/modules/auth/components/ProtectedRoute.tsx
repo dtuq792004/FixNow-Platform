@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { UserRole } from '../../../shared/constants/roles'
 import { useAuthStore } from '../store/authStore'
+import { getPostLoginPath } from '../utils/getPostLoginPath'
 
 export function ProtectedRoute({
   children,
@@ -24,7 +25,7 @@ export function ProtectedRoute({
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate replace to="/" />
+    return <Navigate replace to={getPostLoginPath(user.role)} />
   }
 
   return children

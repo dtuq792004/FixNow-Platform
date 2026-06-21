@@ -33,8 +33,8 @@ export function ServiceHistoryPage() {
       {!requestsQuery.isPending && !requestsQuery.isError && !requests.length && <EmptyState message="Chưa có yêu cầu phù hợp." />}
       <div className="space-y-4">
         {requests.map((item) => {
-          const category = typeof item.categoryId === 'object' ? item.categoryId.name : undefined
-          const address = typeof item.addressId === 'object'
+          const category = item.categoryId && typeof item.categoryId === 'object' ? item.categoryId.name : undefined
+          const address = item.addressId && typeof item.addressId === 'object'
             ? [item.addressId.addressLine, item.addressId.ward, item.addressId.district, item.addressId.city].filter(Boolean).join(', ')
             : item.addressText
           return (

@@ -16,7 +16,9 @@ export const createAddress = async (req: Request, res: Response) => {
     return res.json({
       success: true,
       data: address,
-      message: "Address created successfully",
+      message: typeof address.latitude === "number" && typeof address.longitude === "number"
+        ? "Đã lưu địa chỉ và tự động xác định tọa độ"
+        : "Đã lưu địa chỉ nhưng chưa thể tự động xác định tọa độ",
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -43,7 +45,9 @@ export const updateAddress = async (req: Request, res: Response) => {
     return res.json({
       success: true,
       data: address,
-      message: "Address updated successfully",
+      message: address && typeof address.latitude === "number" && typeof address.longitude === "number"
+        ? "Đã cập nhật địa chỉ và tọa độ"
+        : "Đã cập nhật địa chỉ nhưng chưa thể xác định tọa độ",
     });
   } catch (error: any) {
     return res.status(500).json({

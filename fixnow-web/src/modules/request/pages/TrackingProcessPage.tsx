@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check, MapPin, MessageCircle, Phone, ShieldCheck } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppButton } from '../../../shared/components/AppButton'
@@ -8,8 +8,9 @@ import { StatusBadge } from '../../../shared/components/StatusBadge'
 import { useConfirm } from '../../../shared/store/confirmStore'
 import { formatCurrency, formatDateTime } from '../../../shared/utils/format'
 import { chatService } from '../../chat/services/chatService'
+import { addressService } from '../../profile/services/addressService'
 import { CustomerProviderTracking } from '../components/CustomerProviderTracking'
-import { useCancelRequestMutation, useRequestQuery } from '../hooks/useRequests'
+import { requestKeys, useCancelRequestMutation, useRequestQuery } from '../hooks/useRequests'
 import type { RequestStatus } from '../types/requestTypes'
 
 const lifecycle: Array<{ status: RequestStatus; title: string }> = [
@@ -22,9 +23,31 @@ const lifecycle: Array<{ status: RequestStatus; title: string }> = [
 export function TrackingProcessPage() {
   const { requestId } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const confirm = useConfirm()
   const requestQuery = useRequestQuery(requestId)
   const cancelMutation = useCancelRequestMutation()
+  const geocodeMutation = useMutation({
+    mutationFn: async () => {
+      const savedAddress = requestQuery.data?.addressId
+      if (!savedAddress || typeof savedAddress !== 'object') {
+        throw new Error('Booking không còn liên kết với địa chỉ đã lưu.')
+      }
+      const response = await addressService.update(savedAddress._id, {
+        addressLine: savedAddress.addressLine,
+        ward: savedAddress.ward,
+        district: savedAddress.district,
+        city: savedAddress.city,
+      })
+      if (typeof response.data.latitude !== 'number' || typeof response.data.longitude !== 'number') {
+        throw new Error('Không tìm thấy tọa độ. Hãy kiểm tra lại địa chỉ hoặc dùng GPS trong hồ sơ.')
+      }
+      return response
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: requestKeys.detail(requestId ?? '') })
+    },
+  })
   const chatMutation = useMutation({
     mutationFn: async () => {
       if (requestQuery.data?.conversationId) return requestQuery.data.conversationId
@@ -45,9 +68,9 @@ export function TrackingProcessPage() {
   if (requestQuery.isError || !requestQuery.data) return <PageShell title="Theo dõi tiến độ" description="Không thể tải yêu cầu."><ErrorState message={requestQuery.error?.message} /></PageShell>
 
   const request = requestQuery.data
-  const provider = typeof request.providerId === 'object' ? request.providerId : undefined
-  const category = typeof request.categoryId === 'object' ? request.categoryId.name : 'Dịch vụ'
-  const address = typeof request.addressId === 'object'
+  const provider = request.providerId && typeof request.providerId === 'object' ? request.providerId : undefined
+  const category = request.categoryId && typeof request.categoryId === 'object' ? request.categoryId.name : 'Dịch vụ'
+  const address = request.addressId && typeof request.addressId === 'object'
     ? [request.addressId.addressLine, request.addressId.ward, request.addressId.district, request.addressId.city].filter(Boolean).join(', ')
     : request.addressText
   const currentIndex = lifecycle.findIndex((item) => item.status === request.status)
@@ -89,9 +112,13 @@ export function TrackingProcessPage() {
               requestId={request._id}
               status={request.status}
               address={address || 'Địa chỉ khách hàng'}
-              latitude={typeof request.addressId === 'object' ? request.addressId.latitude : undefined}
-              longitude={typeof request.addressId === 'object' ? request.addressId.longitude : undefined}
+              latitude={request.addressId && typeof request.addressId === 'object' ? request.addressId.latitude : undefined}
+              longitude={request.addressId && typeof request.addressId === 'object' ? request.addressId.longitude : undefined}
               hasProvider={Boolean(provider)}
+              canGeocodeAddress={Boolean(request.addressId && typeof request.addressId === 'object')}
+              isGeocoding={geocodeMutation.isPending}
+              geocodingError={geocodeMutation.error?.message}
+              onGeocodeAddress={() => geocodeMutation.mutate()}
             />
             </div>
           </section>

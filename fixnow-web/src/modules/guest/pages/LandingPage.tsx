@@ -5,12 +5,6 @@ import { LandingNavbar } from '../components/LandingNavbar'
 const heroImage =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDMapYLhCX3SjaK6lw5dpMP6F3aqXmZJ_yHTF2gQCYR9DhNCaUtgbzBcUXK-5BlDMajFgQzidYRe7Kxt15ps6mFjrpPMKUtkO2w8KGicCu7yqgjgPyHOPz9clWWsivJrGuzStRkikHhUA8UaIN7JVmqKC_b-S-uPaTKtgtIfNb_tndbJ5Pw4Q_dQITvPBxQeSm5rgE-_7_MLbwy_geAFMC23xz6WdSpREZ6b1QieP6Y8VS2J1FwoFJU9mVHMmeaQWuwGQySOnaP0_U'
 
-const customerImages = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuC-fb8hE-k0buWEEbSW32w3Qh7TSfNjrJH7PBuyjWWZGP9_dnginOEkq6IsuCvwhvlNCIXSFhUTd5AKKrYYa6A2GRUi7SAA79BNm7ZcUy6QtW_fuoyb0JPD94XgJX_DTqcmE4ybMIl2Zufd8qKpqMdFMZHVvk6I6EBScQzELD_5qEwEiWwAmu4slosvsbcxoJ-sUg2j3ExsT7VR4RwnFl5Ou2xeNEOWrFSPG_2VnxVHFM89QBSu8ChEZxQ1p8t2dNH3Bwakwct-xbk',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuDuEmNJSbm_zzMAouhrK4UMnBGX1MUhQe1LgEZ3aGeHnQblstc8hzdEox9LujM4zaDQpucBI0mu2hqahkJFViyNy-j5BmJQrF6Md_k4hwDPFuh49jVKyDfh8HLIgRZGNh6nNGxr-4XxSzBjdXSdL9RdbpD4csGJT9cNdEe64VjDrtYbS2p2qsEyCZB5VdBs17MxiH8LYS_aXqwk1Vo1a1DIqa1zrztbcdxyfdTc2PPkIkge7y5KVQ4zz587T4pUaQSpjDUtx6ukX6w',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuB40XGwFq1mIg7J336wjFBuGtbkJpgazIRKt8f6NBDBg6Gna9DjF3wD01wV0q-h_nwhp2kWSyN1Z4T_1ikW_q_uP26VGUaSJgVdLyr9Etq6C4pd8mTBPxUVsHuKzPXbm2x6lBDRiIoBB3333D6ejWOpYrlp8BRShuhVXcTLAgGlu2-kqSc3F1zk0en2zQ9J0CaZ3o4bLPB3POLtvU8DGLP2uSY_S_Xw97_-HRFICDXsghP-zgOmdjJWi0cY8VT0HKHKYOhWjJx4NC0',
-]
-
 const services = [
   ['bolt', 'Điện', 'Sửa điện, lắp đèn', 'bg-primary-fixed', 'text-primary'],
   ['water_drop', 'Nước', 'Ống nước, vòi sen', 'bg-secondary-fixed', 'text-secondary'],
@@ -23,7 +17,7 @@ const services = [
 const benefits = [
   ['verified_user', 'Thợ chuyên nghiệp', 'Đội ngũ thợ được tuyển chọn kỹ lưỡng và đào tạo bài bản.'],
   ['payments', 'Giá cả minh bạch', 'Báo giá rõ ràng trước khi làm, không phát sinh chi phí.'],
-  ['speed', 'Có mặt sau 30 phút', 'Phục vụ nhanh chóng, đáp ứng mọi nhu cầu khẩn cấp.'],
+  ['speed', 'Phản hồi nhanh chóng', 'Tiếp nhận và điều phối yêu cầu dịch vụ thuận tiện.'],
   ['handyman', 'Bảo hành dài hạn', 'An tâm với chính sách bảo hành uy tín cho mọi dịch vụ.'],
 ]
 
@@ -69,12 +63,6 @@ export function LandingPage() {
                   <input className="w-full border-none bg-transparent text-body-md outline-none" placeholder="Bạn cần sửa gì hôm nay?" />
                 </div>
                 <button onClick={book} className="rounded-lg bg-header-gradient px-xl py-md text-title-lg text-white transition-all hover:opacity-90 active:scale-95 shadow-md">Đặt lịch ngay</button>
-              </div>
-              <div className="mt-lg flex items-center gap-md">
-                <div className="flex -space-x-2">
-                  {customerImages.map((image, index) => <img key={image} className="h-10 w-10 rounded-full border-2 border-white object-cover" src={image} alt={`Khách hàng FixNow ${index + 1}`} />)}
-                </div>
-                <p className="text-label-md text-on-surface-variant"><span className="font-bold text-on-surface">10,000+</span> người tin dùng tại Việt Nam</p>
               </div>
             </div>
           </div>
@@ -128,15 +116,11 @@ export function LandingPage() {
 
         <section id="blog" className="py-xxl">
           <div className="mx-auto max-w-container-max px-gutter">
-            <div className="grid grid-cols-1 gap-xl lg:grid-cols-12">
-              <div className="flex flex-col items-center justify-center rounded-3xl bg-surface-container-low p-xl text-center lg:col-span-4"><div className="mb-sm text-display-lg text-primary">4.9/5</div><div className="mb-md flex gap-xs">{[1, 2, 3, 4, 5].map((star) => <MaterialIcon key={star} className="filled-icon text-secondary-container">star</MaterialIcon>)}</div><p className="text-body-md text-on-surface-variant">Dựa trên 20,000+ đánh giá từ khách hàng hài lòng</p></div>
-              <div className="grid grid-cols-1 gap-lg md:grid-cols-2 lg:col-span-8">
+            <div className="grid grid-cols-1 gap-xl">
+              <div className="grid grid-cols-1 gap-lg md:grid-cols-2">
                 <Testimonial image="https://lh3.googleusercontent.com/aida-public/AB6AXuC9KaY1SnapWmPVcnrXNtx5G5jJtp3e36H8gS_WZcjC7d_4VRxTQYACx-xM5U7foDZxr-8O3hPvQKMC-Kzqrrf_ZWC4MgKTgWenS2t2QT-aYMqHsPHUpbAglkSNOvko9m1hWb5KZHURpulwSgvssS6P50PEGAZcH7iaun9aZuOpCLTrQ0xo8fsgJZfqVd1TbeRsK_WHL5Gh2BWXVmN0qqSexR0eWX37cFIyc_2QaEyn4_PIT3RZh06tLkXDxzXXI9AC3lVc7iNzscY" name="Chị Lan Anh" location="Quận 7, TP.HCM">“Dịch vụ cực kỳ nhanh. Thợ đến sau đúng 20 phút, sửa ống nước rò rỉ rất chuyên nghiệp. Giá cả lại rất hợp lý!”</Testimonial>
                 <Testimonial image="https://lh3.googleusercontent.com/aida-public/AB6AXuDprs56AHYpbXuWqKZf9w7DCCmYZM3onYYfqYSZqkbs05MzXwbigJZwEXjb2h-DHPvDdSDo9Xv9ZBUvNvBSnLxotaOAC_jn7ulL0R-s8_H0wtIqYi48abb_oG4aqMMEda3gzR0Vf1UbElnWgW_FiuBx_Ue2py9-oY_c6ueQvzJrOLiXtKmgoQZgcweDQpNcxwH1FTNeqA6YItqyeD6BOEEgwpE2MH0jC6AVDHoeItCr5dYAe0ou9t2__Qz_TwSy1aPkxRu1EaogEAY" name="Anh Minh Đức" location="Quận Hoàn Kiếm, Hà Nội">“Lần đầu tiên thấy một app sửa chữa tiện lợi như vậy. Thợ sửa máy lạnh rất kỹ, có cả hóa đơn điện tử gửi về mail.”</Testimonial>
               </div>
-            </div>
-            <div className="mt-xl grid grid-cols-2 gap-lg border-t border-outline-variant pt-xl text-center md:grid-cols-4">
-              {[['10,000+', 'Khách hàng tin dùng'], ['500+', 'Kỹ thuật viên'], ['25,000+', 'Công việc hoàn thành'], ['63+', 'Tỉnh thành phủ sóng']].map(([value, label]) => <div key={label}><div className="text-headline-lg font-bold text-primary">{value}</div><p className="text-label-md text-on-surface-variant">{label}</p></div>)}
             </div>
           </div>
         </section>

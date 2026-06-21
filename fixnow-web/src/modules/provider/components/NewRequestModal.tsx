@@ -1,8 +1,11 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { BellRing, Clock3, MapPin, UserRound, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { formatCurrency, formatDateTime } from '../../../shared/utils/format'
+import { providerKeys } from '../hooks/useProvider'
+import { providerService } from '../services/providerService'
 import type { ProviderJob } from '../types/providerTypes'
 
 type NewRequestModalProps = {
@@ -15,10 +18,21 @@ const NOTICE_DURATION_SECONDS = 60
 
 export function NewRequestModal({ job, expiresAt, onClose }: NewRequestModalProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const expiryTime = useMemo(() => new Date(expiresAt).getTime(), [expiresAt])
   const [secondsLeft, setSecondsLeft] = useState(() =>
     Number.isFinite(expiryTime) ? Math.max(0, Math.ceil((expiryTime - Date.now()) / 1000)) : NOTICE_DURATION_SECONDS,
   )
+  const acceptMutation = useMutation({
+    mutationFn: () => providerService.respondJob(job._id, 'ACCEPT'),
+    onSuccess: (acceptedJob) => {
+      queryClient.setQueryData(providerKeys.job(job._id), acceptedJob)
+      queryClient.invalidateQueries({ queryKey: providerKeys.availableJobs })
+      queryClient.invalidateQueries({ queryKey: providerKeys.jobs })
+      onClose()
+      navigate(`/provider/jobs/${job._id}`)
+    },
+  })
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -146,12 +160,25 @@ export function NewRequestModal({ job, expiresAt, onClose }: NewRequestModalProp
             </div>
           </div>
 
-          <div className="grid shrink-0 grid-cols-1 gap-3 border-t border-slate-100 bg-white p-4 sm:grid-cols-2 sm:p-5">
-            <button type="button" onClick={onClose} className="order-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:order-1">
+          {acceptMutation.isError && (
+            <p className="border-t border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-600">
+              {acceptMutation.error.message || 'Không thể nhận đơn. Đơn có thể đã được Provider khác nhận.'}
+            </p>
+          )}
+          <div className="grid shrink-0 grid-cols-1 gap-3 border-t border-slate-100 bg-white p-4 sm:grid-cols-3 sm:p-5">
+            <button type="button" disabled={acceptMutation.isPending} onClick={onClose} className="order-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 sm:order-1">
               Để sau
             </button>
-            <button type="button" onClick={openJob} className="order-1 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:brightness-105 active:scale-[0.99] sm:order-2">
+            <button type="button" disabled={acceptMutation.isPending} onClick={openJob} className="order-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60">
               Xem chi tiết đơn
+            </button>
+            <button
+              type="button"
+              disabled={acceptMutation.isPending || secondsLeft <= 0 || job.status !== 'PENDING'}
+              onClick={() => acceptMutation.mutate()}
+              className="order-1 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:order-3"
+            >
+              {acceptMutation.isPending ? 'Đang nhận đơn...' : 'Nhận đơn'}
             </button>
           </div>
         </section>

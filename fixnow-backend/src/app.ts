@@ -21,6 +21,7 @@ import financeRoutes from "./routes/providerFinance.routes";
 import chatRoutes from "./routes/chat.routes";
 import aiRoutes from "./routes/ai.routes";
 import notificationRoutes from "./routes/notification.routes";
+import blogRoutes from "./routes/blog.routes";
 
 const app: Application = express();
 
@@ -96,6 +97,7 @@ app.use("/finance", financeRoutes);
 app.use("/chat", chatRoutes);
 app.use("/ai", aiRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/blogs", blogRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);

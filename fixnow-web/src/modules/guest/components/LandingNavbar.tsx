@@ -4,7 +4,7 @@ const navigationItems = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Dịch vụ', to: '/services' },
   { label: 'Về chúng tôi', to: '/about' },
-  { label: 'Diễn đàn', to: '/blog' },
+  { label: 'Cẩm nang', to: '/blog' },
   { label: 'Hỗ trợ', to: '/support' },
 ]
 
@@ -26,8 +26,8 @@ export function LandingNavbar() {
               <NavLink
                 className={({ isActive }) =>
                   isActive
-                    ? 'border-b-2 border-white pb-1 text-title-lg font-bold text-white'
-                    : 'text-title-lg text-white/80 transition-colors hover:text-white'
+                    ? 'border-b-2 border-white pb-1 text-sm font-bold text-white'
+                    : 'text-sm font-medium text-white/80 transition-colors hover:text-white'
                 }
                 end={item.to === '/'}
                 key={item.label}

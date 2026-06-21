@@ -1,0 +1,11 @@
+import { useQuery } from '@tanstack/react-query'
+import { HandCoins, Landmark, WalletCards } from 'lucide-react'
+import { useState } from 'react'
+import { adminService } from '../services/adminService'
+import { AdminBadge, AdminError, AdminLoading, AdminPageHeader, AdminPagination, AdminStatCard, AdminToolbar } from '../components/AdminUi'
+const money = (value = 0) => value.toLocaleString('vi-VN') + ' ₫'
+export function AdminTransactionsPage() {
+  const [page, setPage] = useState(1); const [search, setSearch] = useState('')
+  const query = useQuery({ queryKey: ['admin', 'payments', page, search], queryFn: () => adminService.getPayments({ page, limit: 10, search }) })
+  return <div className="space-y-6 p-4 sm:p-6 lg:p-8"><AdminPageHeader title="Sổ cái tài chính" description="Theo dõi thanh toán và doanh thu trên nền tảng." /><section className="grid gap-4 sm:grid-cols-3"><AdminStatCard label="Tổng giao dịch" value={money(query.data?.summary.total)} icon={HandCoins} /><AdminStatCard label="Đã thanh toán" value={money(query.data?.summary.paid)} icon={Landmark} tone="green" /><AdminStatCard label="Đang tạm giữ" value={money(query.data?.summary.pending)} icon={WalletCards} tone="amber" /></section><section className="overflow-hidden rounded-2xl border bg-white shadow-sm"><AdminToolbar value={search} onChange={setSearch} placeholder="Tìm mã giao dịch..." />{query.isLoading ? <AdminLoading /> : query.error || !query.data ? <AdminError /> : <><div className="overflow-x-auto"><table className="w-full min-w-[820px] text-left text-sm"><thead className="bg-slate-50"><tr>{['Mã giao dịch', 'Ngày', 'Số tiền', 'Phí nền tảng', 'Trạng thái'].map((h) => <th className="px-6 py-4" key={h}>{h}</th>)}</tr></thead><tbody>{query.data.items.map((item) => <tr className="border-t" key={item._id}><td className="px-6 py-4 font-bold text-blue-600">{item.transactionRef || `#${item.orderCode}`}</td><td className="px-6 py-4">{new Date(item.createdAt).toLocaleString('vi-VN')}</td><td className="px-6 py-4 font-bold">{money(item.amount)}</td><td className="px-6 py-4">{money(item.platformFee)}</td><td className="px-6 py-4"><AdminBadge tone={item.status === 'SUCCESS' ? 'green' : item.status === 'FAILED' ? 'red' : 'amber'}>{item.status}</AdminBadge></td></tr>)}</tbody></table></div><AdminPagination {...query.data} onPageChange={setPage} /></>}</section></div>
+}

@@ -1,5 +1,7 @@
 import User from "../models/user.model";
 
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const getUsers = async (
   role?: string,
   status?: string,
@@ -17,8 +19,8 @@ export const getUsers = async (
     filter.status = status;
   }
 
-  if (search) {
-    const searchRegex = new RegExp(search, "i");
+  if (search?.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
     filter.$or = [
       { fullName: searchRegex },
       { email: searchRegex },
@@ -26,23 +28,26 @@ export const getUsers = async (
     ];
   }
 
-  const skip = (page - 1) * limit;
+  const safePage = Math.max(1, page || 1);
+  const safeLimit = Math.min(100, Math.max(1, limit || 10));
+  const skip = (safePage - 1) * safeLimit;
 
   const [users, total] = await Promise.all([
     User.find(filter)
       .select("-passwordHash")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(safeLimit)
+      .lean(),
     User.countDocuments(filter)
   ]);
 
   return {
     users,
     total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit)
+    page: safePage,
+    limit: safeLimit,
+    totalPages: Math.max(1, Math.ceil(total / safeLimit))
   };
 };
 

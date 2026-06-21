@@ -37,7 +37,7 @@ router.put("/:id", authMiddleware, roleMiddleware("PROVIDER"), updateServiceCont
 router.delete("/:id", authMiddleware, roleMiddleware("PROVIDER"), deleteServiceController);
 
 // admin
-router.patch("/:id", authMiddleware, approveServiceController);
-router.patch("/:id/reject", authMiddleware, rejectServiceController);
+router.patch("/:id", authMiddleware, roleMiddleware("ADMIN"), approveServiceController);
+router.patch("/:id/reject", authMiddleware, roleMiddleware("ADMIN"), rejectServiceController);
 
 export default router;

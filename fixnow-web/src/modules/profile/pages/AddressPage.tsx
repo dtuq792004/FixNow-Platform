@@ -33,6 +33,7 @@ export function AddressPage() {
   const [showForm, setShowForm] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [locationMessage, setLocationMessage] = useState<string | null>(null)
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const addressesQuery = useAddressesQuery()
   const createMutation = useCreateAddressMutation()
   const updateMutation = useUpdateAddressMutation()
@@ -73,7 +74,13 @@ export function AddressPage() {
   }
 
   const submit = async (data: AddressForm) => {
-    await createMutation.mutateAsync(data)
+    const response = await createMutation.mutateAsync(data)
+    const hasCoordinates =
+      typeof response.data.latitude === 'number' &&
+      typeof response.data.longitude === 'number'
+    setSaveMessage(hasCoordinates
+      ? 'Đã lưu địa chỉ và tự động xác định tọa độ để hiển thị bản đồ.'
+      : 'Đã lưu địa chỉ nhưng chưa tìm được tọa độ. Hãy dùng nút “Lấy vị trí hiện tại” nếu cần vị trí chính xác.')
     form.reset()
     setLocationMessage(null)
     setShowForm(false)
@@ -90,6 +97,11 @@ export function AddressPage() {
         </AppButton>
       }
     >
+      {saveMessage && (
+        <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
+          {saveMessage}
+        </div>
+      )}
       {showForm && (
         <form onSubmit={form.handleSubmit(submit)} className="mb-7 rounded-2xl border border-slate-200 bg-white p-6">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -105,7 +117,7 @@ export function AddressPage() {
               {isLocating ? 'Đang lấy vị trí...' : 'Lấy vị trí hiện tại'}
             </AppButton>
             <p className="mt-2 text-xs text-slate-600">
-              {locationMessage ?? 'Tọa độ giúp Provider xem đúng vị trí của bạn trên bản đồ.'}
+              {locationMessage ?? 'Nếu không dùng GPS, hệ thống sẽ tự tìm tọa độ từ địa chỉ bạn nhập khi lưu.'}
             </p>
           </div>
           <label className="mt-4 flex gap-2 text-sm">
@@ -151,6 +163,33 @@ export function AddressPage() {
                 disabled={updateMutation.isPending}
               >
                 Đặt làm mặc định
+              </AppButton>
+            )}
+            {(typeof address.latitude !== 'number' || typeof address.longitude !== 'number') && (
+              <AppButton
+                variant="outline"
+                className="mt-3 w-full"
+                onClick={async () => {
+                  const response = await updateMutation.mutateAsync({
+                    id: address._id,
+                    payload: {
+                      addressLine: address.addressLine,
+                      ward: address.ward,
+                      district: address.district,
+                      city: address.city,
+                    },
+                  })
+                  const found =
+                    typeof response.data.latitude === 'number' &&
+                    typeof response.data.longitude === 'number'
+                  setSaveMessage(found
+                    ? `Đã tìm và lưu tọa độ cho địa chỉ “${address.label}”.`
+                    : `Không tìm thấy tọa độ cho địa chỉ “${address.label}”. Hãy kiểm tra lại thông tin hoặc dùng GPS.`)
+                }}
+                disabled={updateMutation.isPending}
+              >
+                <LocateFixed size={16} />
+                {updateMutation.isPending ? 'Đang tìm tọa độ...' : 'Tìm tọa độ từ địa chỉ'}
               </AppButton>
             )}
             <AppButton

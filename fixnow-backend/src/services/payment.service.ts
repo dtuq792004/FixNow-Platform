@@ -55,8 +55,8 @@ export class PaymentService {
       orderCode: orderCode,
       amount: amountToPay,
       description: `Thanh toan SR ${String(request._id).slice(-6)}`,
-      returnUrl: process.env.PAYOS_RETURN_URL!,
-      cancelUrl: process.env.PAYOS_CANCEL_URL!
+      returnUrl: process.env.PAYOS_RETURN_URL_WEB!,
+      cancelUrl: process.env.PAYOS_CANCEL_URL_WEB!
     });
 
     return response.checkoutUrl;
