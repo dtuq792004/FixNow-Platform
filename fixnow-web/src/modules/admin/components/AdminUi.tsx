@@ -11,7 +11,7 @@ export function AdminPageHeader({ title, description, actions }: { title: string
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-[28px]">{title}</h1>
         <p className="mt-1.5 text-sm text-slate-500">{description}</p>
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">{actions}</div>}
     </div>
   )
 }
@@ -64,9 +64,9 @@ export function AdminPagination({ page = 1, total = 0, limit = 10, totalPages = 
   const start = total ? (page - 1) * limit + 1 : 0
   const end = Math.min(page * limit, total)
   return (
-    <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50/50 px-4 py-3">
       <p className="hidden text-sm text-slate-500 sm:block">Hiển thị {start}–{end} trong {total} kết quả</p>
-      <div className="ml-auto flex items-center gap-2">
+      <div className="mx-auto flex items-center gap-2 sm:ml-auto sm:mr-0">
         <button disabled={page <= 1} onClick={() => onPageChange?.(page - 1)} type="button" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:border-blue-200 hover:text-blue-600 disabled:opacity-40"><ChevronLeft size={16} /></button>
         <span className="min-w-12 text-center text-sm font-bold">{page}/{Math.max(1, totalPages)}</span>
         <button disabled={page >= totalPages} onClick={() => onPageChange?.(page + 1)} type="button" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:border-blue-200 hover:text-blue-600 disabled:opacity-40"><ChevronRight size={16} /></button>

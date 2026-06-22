@@ -176,7 +176,7 @@ export function ProviderProfilePage() {
               {profile.verified && <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"><BadgeCheck size={15} /> Đã xác minh</span>}
             </div>
             <p className="mt-2 text-slate-500">{categories.map((item) => item.name).filter(Boolean).join(' · ') || 'Provider FixNow'}</p>
-            <div className="mt-6 grid grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:max-w-xl sm:gap-4">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Stat value={`${profile.experienceYears}+`} label="Năm kinh nghiệm" />
               <Stat value={profile.stats.completedJobs.toLocaleString('vi-VN')} label="Đơn hoàn thành" />
               <Stat value={profile.stats.averageRating ? profile.stats.averageRating.toFixed(1) : '—'} label={`${profile.stats.totalReviews} đánh giá`} star />
@@ -296,14 +296,10 @@ export function ProviderProfilePage() {
 
 function Stat({ value, label, star }: { value: string; label: string; star?: boolean }) {
   return (
-    <div className="min-w-0 flex-1 rounded-2xl border border-blue-100 bg-blue-50/70 p-3 text-center transition-all hover:bg-blue-100/50 sm:p-4">
-      <div className="flex items-center justify-center gap-1 text-lg font-bold text-blue-700">
-        <span>{value}</span>
-        {star && <Star size={16} className="shrink-0 fill-amber-400 text-amber-400" />}
-      </div>
-      <p className="mt-1 text-[11px] font-medium leading-tight text-slate-500 sm:text-xs">
-        {label}
-      </p>
+    <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-2.5 transition-all hover:bg-blue-100/50">
+      {star && <Star size={14} className="shrink-0 fill-amber-400 text-amber-400" />}
+      <span className="text-lg font-bold text-blue-700">{value}</span>
+      <span className="text-[11px] font-medium text-slate-500 sm:text-xs">{label}</span>
     </div>
   )
 }

@@ -177,6 +177,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -187,6 +188,35 @@ body {
   line-height: 1.5;
   background-image: var(--background-image-main-gradient);
   background-attachment: fixed;
+  overflow-x: clip;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+form,
+div {
+  min-width: 0;
+}
+
+.leaflet-container {
+  max-width: 100%;
 }
 
 button,
@@ -379,6 +409,40 @@ button:disabled {
 
   .auth-card {
     border-radius: 16px;
+  }
+
+  .landing-page section {
+    scroll-margin-top: 64px;
+  }
+
+  .landing-page .text-display-lg,
+  .guest-page .text-display-lg {
+    font-size: clamp(2rem, 10vw, 3rem);
+    line-height: 1.12;
+  }
+
+  .landing-page .text-headline-lg,
+  .guest-page .text-headline-lg {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+    line-height: 1.25;
+  }
+
+  .landing-page .py-xxl,
+  .guest-page .py-xxl {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .landing-page .px-gutter,
+  .guest-page .px-gutter {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-shell table th,
+  .admin-shell table td {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
@@ -581,5 +645,18 @@ button:disabled {
   .admin-shell main > div > div {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  .admin-shell .admin-toolbar > * {
+    width: 100%;
+  }
+
+  .admin-shell main section,
+  .admin-shell main article {
+    border-radius: 1rem;
+  }
+
+  .rich-text-content {
+    overflow-wrap: anywhere;
   }
 }

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowLeft, ArrowUp, ImagePlus, Plus, Save, Send, Trash2, Upload } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -7,20 +7,29 @@ import { RichTextEditor } from '../components/RichTextEditor'
 import { hasRichTextContent } from '../utils/richText'
 import { blogService } from '../services/blogService'
 import type { Blog, BlogImage, BlogPayload, BlogSection, BlogStatus } from '../types/blogTypes'
+import { useCategoriesQuery, useServicesQuery } from '../../service/hooks/useServices'
 
 const emptyImage = (): BlogImage => ({ url: '', alt: '', caption: '' })
 const emptySection = (): BlogSection => ({ label: '', heading: '', content: '', images: [], quote: '', tips: [] })
+const todayInputValue = () => {
+  const now = new Date()
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
+}
 const initialPayload: BlogPayload = {
   title: '',
   slug: '',
   excerpt: '',
   category: '',
+  categoryId: '',
+  serviceName: '',
   tags: [],
   coverImage: emptyImage(),
   sections: [emptySection()],
   status: 'DRAFT',
   isFeatured: false,
   readTimeMinutes: 5,
+  viewCount: 0,
+  publishedAt: todayInputValue(),
   seoTitle: '',
   seoDescription: '',
 }
@@ -89,20 +98,51 @@ export function AdminBlogEditorPage() {
 
 function toPayload(blog?: Blog): BlogPayload {
   if (!blog) return initialPayload
-  const { title, slug, excerpt, category, tags, coverImage, sections, status, isFeatured, readTimeMinutes, seoTitle, seoDescription } = blog
-  return { title, slug, excerpt, category, tags, coverImage, sections, status, isFeatured, readTimeMinutes, seoTitle, seoDescription }
+  const { title, slug, excerpt, category, categoryId, serviceName, tags, coverImage, sections, status, isFeatured, readTimeMinutes, viewCount, publishedAt, seoTitle, seoDescription } = blog
+  return {
+    title,
+    slug,
+    excerpt,
+    category,
+    categoryId: typeof categoryId === 'object' && categoryId ? categoryId._id : categoryId || '',
+    serviceName: serviceName || '',
+    tags,
+    coverImage,
+    sections,
+    status,
+    isFeatured,
+    readTimeMinutes,
+    viewCount,
+    publishedAt,
+    seoTitle,
+    seoDescription,
+  }
 }
 
 function AdminBlogEditorForm({ blogId, initialBlog }: { blogId?: string; initialBlog?: Blog }) {
   const isEditing = Boolean(blogId)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [form, setForm] = useState<BlogPayload>(() => toPayload(initialBlog))
   const [tagInput, setTagInput] = useState('')
   const [error, setError] = useState('')
+  const categoriesQuery = useCategoriesQuery()
+  const selectedCategoryId = typeof form.categoryId === 'string' ? form.categoryId : form.categoryId?._id || ''
+  const servicesQuery = useServicesQuery(selectedCategoryId || undefined)
+  const serviceNames = [...new Set((servicesQuery.data ?? []).map((service) => service.name.trim()).filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, 'vi'))
 
   const save = useMutation({
     mutationFn: (payload: BlogPayload) => isEditing ? blogService.update(blogId!, payload) : blogService.create(payload),
-    onSuccess: (blog) => navigate(`/admin/blogs/${blog._id}`),
+    onSuccess: async (blog) => {
+      queryClient.setQueryData(['admin', 'blog', blog._id], blog)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin', 'blogs'] }),
+        queryClient.invalidateQueries({ queryKey: ['public', 'blogs'] }),
+        queryClient.invalidateQueries({ queryKey: ['public', 'blog'] }),
+      ])
+      navigate(`/admin/blogs/${blog._id}`)
+    },
     onError: (reason: Error) => setError(reason.message),
   })
 
@@ -134,9 +174,12 @@ function AdminBlogEditorForm({ blogId, initialBlog }: { blogId?: string; initial
       title: form.title.trim(),
       excerpt: form.excerpt.trim(),
       category: form.category.trim(),
+      categoryId: selectedCategoryId,
+      serviceName: form.serviceName?.trim(),
       tags: tagInput.trim() ? [...form.tags, ...tagInput.split(',').map((tag) => tag.trim()).filter(Boolean)] : form.tags,
     }
-    if (!payload.title || !payload.excerpt || !payload.category || !payload.coverImage.url) return setError('Vui lòng nhập tiêu đề, mô tả, danh mục và ảnh bìa.')
+    if (!payload.title || !payload.excerpt || !payload.category || !payload.categoryId || !payload.serviceName || !payload.coverImage.url) return setError('Vui lòng nhập tiêu đề, mô tả, chọn danh mục, dịch vụ và ảnh bìa.')
+    if (status === 'PUBLISHED' && !payload.publishedAt) return setError('Vui lòng chọn ngày đăng trước khi xuất bản.')
     if (payload.sections.some((section) => !hasRichTextContent(section.content))) return setError('Mỗi khối cần có nội dung chi tiết.')
     save.mutate(payload)
   }
@@ -153,8 +196,37 @@ function AdminBlogEditorForm({ blogId, initialBlog }: { blogId?: string; initial
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <label className="sm:col-span-2"><span className="mb-1.5 block text-sm font-bold">Tiêu đề *</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-blue-400" placeholder="Ví dụ: 7 bước bảo dưỡng máy lạnh tại nhà" /></label>
               <label className="sm:col-span-2"><span className="mb-1.5 block text-sm font-bold">Slug</span><input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" placeholder="Tự tạo từ tiêu đề nếu để trống" /></label>
-              <label><span className="mb-1.5 block text-sm font-bold">Danh mục *</span><input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" placeholder="Mẹo gia đình" /></label>
-              <label><span className="mb-1.5 block text-sm font-bold">Thời gian đọc</span><input type="number" min={1} value={form.readTimeMinutes} onChange={(event) => setForm({ ...form, readTimeMinutes: Math.max(1, Number(event.target.value)) })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" /></label>
+              <label>
+                <span className="mb-1.5 block text-sm font-bold">Danh mục dịch vụ *</span>
+                <select
+                  value={selectedCategoryId}
+                  onChange={(event) => {
+                    const category = categoriesQuery.data?.find((item) => item._id === event.target.value)
+                    setForm({ ...form, categoryId: event.target.value, category: category?.name || '', serviceName: '' })
+                  }}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-400"
+                >
+                  <option value="">Chọn danh mục</option>
+                  {categoriesQuery.data?.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}
+                </select>
+              </label>
+              <label>
+                <span className="mb-1.5 block text-sm font-bold">Dịch vụ của bài viết *</span>
+                <select
+                  value={form.serviceName || ''}
+                  disabled={!selectedCategoryId || servicesQuery.isLoading}
+                  onChange={(event) => setForm({ ...form, serviceName: event.target.value })}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-400 disabled:bg-slate-100"
+                >
+                  <option value="">{servicesQuery.isLoading ? 'Đang tải dịch vụ...' : 'Chọn dịch vụ'}</option>
+                  {serviceNames.map((serviceName) => <option key={serviceName} value={serviceName}>{serviceName}</option>)}
+                </select>
+              </label>
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+                <label><span className="mb-1.5 block text-sm font-bold">Thời gian đọc</span><input type="number" min={1} value={form.readTimeMinutes} onChange={(event) => setForm({ ...form, readTimeMinutes: Math.max(1, Number(event.target.value)) })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" /></label>
+                <label><span className="mb-1.5 block text-sm font-bold">Số lượt xem</span><input type="number" min={0} step={1} value={form.viewCount} onChange={(event) => setForm({ ...form, viewCount: Math.max(0, Math.floor(Number(event.target.value) || 0)) })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" /></label>
+                <label><span className="mb-1.5 block text-sm font-bold">Ngày đăng</span><input type="date" value={form.publishedAt?.slice(0, 10) || ''} onChange={(event) => setForm({ ...form, publishedAt: event.target.value || null })} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-400" /></label>
+              </div>
               <label className="sm:col-span-2"><span className="mb-1.5 block text-sm font-bold">Mô tả ngắn *</span><textarea value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} rows={4} maxLength={500} className="w-full rounded-xl border border-slate-200 p-4 text-sm outline-none focus:border-blue-400" placeholder="Tóm tắt giá trị người đọc nhận được..." /></label>
             </div>
             <div className="mt-6 border-t border-slate-200 pt-5">
@@ -163,13 +235,13 @@ function AdminBlogEditorForm({ blogId, initialBlog }: { blogId?: string; initial
             </div>
           </section>
           <section className="space-y-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <div><h2 className="text-xl font-extrabold">Các khối nội dung</h2><p className="text-sm text-slate-500">Tự đặt nhãn như “Phần 1”, “Đoạn 1” hoặc để trống tùy cấu trúc bài viết.</p></div>
-              <button type="button" onClick={() => setForm({ ...form, sections: [...form.sections, emptySection()] })} className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700"><Plus size={17} />Thêm khối</button>
+              <button type="button" onClick={() => setForm({ ...form, sections: [...form.sections, emptySection()] })} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 sm:w-auto"><Plus size={17} />Thêm khối</button>
             </div>
             {form.sections.map((section, index) => (
               <article key={section._id || index} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <h3 className="font-extrabold text-blue-700">Khối nội dung {index + 1}</h3>
                   <div className="flex gap-1">
                     <button type="button" onClick={() => moveSection(index, -1)} disabled={index === 0} className="rounded-lg p-2 text-slate-500 disabled:opacity-30"><ArrowUp size={17} /></button>

@@ -10,7 +10,7 @@ export function AdminLayout() {
     <div className="admin-shell min-h-screen bg-[#f4f7fb] text-slate-900">
       <AdminHeader onOpenSidebar={() => setIsSidebarOpen(true)} />
       <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <main className="min-h-screen pt-[72px] lg:pl-[264px]">
+      <main className="min-h-screen min-w-0 overflow-x-hidden pt-[72px] lg:pl-[264px]">
         <div className="mx-auto w-full max-w-[1600px]">
           <Outlet />
         </div>

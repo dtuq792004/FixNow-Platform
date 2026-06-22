@@ -44,7 +44,7 @@ export const blogService = {
     })
     return response.data.imageUrl
   },
-  listPublic: async (params: { page: number; limit?: number; search?: string; category?: string }) =>
+  listPublic: async (params: { page: number; limit?: number; search?: string; category?: string; categoryId?: string; serviceName?: string }) =>
     (await apiRequest<DataResponse<BlogPage>>(`/blogs${queryString(params)}`)).data,
   getPublic: async (slug: string) =>
     (await apiRequest<DataResponse<Blog>>(`/blogs/${slug}`)).data,
