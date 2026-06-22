@@ -29,9 +29,9 @@ export function GuestBlogPage() {
         <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-slate-950/70" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-20 text-white sm:px-8">
-          <span className="inline-block rounded-full bg-blue-600 px-4 py-2 text-xs font-black uppercase tracking-widest">Cẩm nang FixNow</span>
+          <span className="inline-block rounded-full bg-blue-600 px-4 py-2 text-xs font-black uppercase tracking-widest">Cẩm nang FIXNOW</span>
           <h1 className="mt-5 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">Chăm sóc ngôi nhà dễ dàng hơn mỗi ngày</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">Kinh nghiệm sửa chữa, bảo trì và mẹo sử dụng thiết bị an toàn từ đội ngũ FixNow.</p>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">Kinh nghiệm sửa chữa, bảo trì và mẹo sử dụng thiết bị an toàn từ đội ngũ FIXNOW.</p>
         </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">

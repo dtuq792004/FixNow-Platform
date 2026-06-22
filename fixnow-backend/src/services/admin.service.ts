@@ -9,6 +9,8 @@ import Service from "../models/service.model";
 import User from "../models/user.model";
 import { Provider } from "../models/provider.model";
 import { WithdrawRequest } from "../models/withdrawRequest.model";
+import { Blog } from "../models/blog.model";
+import { BlogView } from "../models/blogView.model";
 
 const pagination = (page = 1, limit = 10) => ({
   page: Math.max(1, page),
@@ -269,6 +271,151 @@ export const getAnalytics = async () => {
     WithdrawRequest.aggregate([{ $group: { _id: "$status", amount: { $sum: "$amount" }, count: { $sum: 1 } } }]),
   ]);
   return { revenueByMonth, categoryUsage, completedJobs, averageRating: ratings[0]?.average ?? 0, newUsers, withdrawals };
+};
+
+const REPORT_TIME_ZONE = "Asia/Bangkok";
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const dateKey = (date: Date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: REPORT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+
+const getWeekRange = (weekOffset = 0) => {
+  const safeOffset = Math.min(0, Math.max(-520, Math.trunc(weekOffset)));
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: REPORT_TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(values.weekday);
+  const daysSinceMonday = (weekday + 6) % 7;
+  const localMidnightMarker = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day));
+  const startMarker = new Date(localMidnightMarker - daysSinceMonday * DAY_MS + safeOffset * 7 * DAY_MS);
+  const keys = Array.from({ length: 7 }, (_, index) => dateKey(new Date(startMarker.getTime() + index * DAY_MS)));
+  return {
+    start: new Date(`${keys[0]}T00:00:00+07:00`),
+    end: new Date(`${keys[6]}T23:59:59.999+07:00`),
+    keys,
+    weekOffset: safeOffset,
+  };
+};
+
+const dayLabel = (key: string) =>
+  new Intl.DateTimeFormat("vi-VN", {
+    timeZone: REPORT_TIME_ZONE,
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(new Date(`${key}T12:00:00+07:00`));
+
+export const getBlogViewReport = async (weekOffset = 0) => {
+  const range = getWeekRange(weekOffset);
+  const [dailyRows, topBlogs, publishedBlogs] = await Promise.all([
+    BlogView.aggregate([
+      { $match: { date: { $gte: range.keys[0], $lte: range.keys[6] } } },
+      { $group: { _id: "$date", value: { $sum: "$count" } } },
+      { $sort: { _id: 1 } },
+    ]),
+    BlogView.aggregate([
+      { $match: { date: { $gte: range.keys[0], $lte: range.keys[6] } } },
+      { $group: { _id: "$blogId", views: { $sum: "$count" } } },
+      { $sort: { views: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: "blogs", localField: "_id", foreignField: "_id", as: "blog" } },
+      { $project: { title: { $ifNull: [{ $arrayElemAt: ["$blog.title", 0] }, "Bài viết đã xóa"] }, views: 1 } },
+    ]),
+    Blog.countDocuments({ status: "PUBLISHED" }),
+  ]);
+  const values = new Map(dailyRows.map((row) => [row._id, row.value]));
+  const daily = range.keys.map((date) => ({ date, label: dayLabel(date), value: values.get(date) ?? 0 }));
+  return {
+    weekOffset: range.weekOffset,
+    startDate: range.keys[0],
+    endDate: range.keys[6],
+    daily,
+    totalViews: daily.reduce((sum, item) => sum + item.value, 0),
+    publishedBlogs,
+    topBlogs,
+  };
+};
+
+export const getRevenueReport = async (weekOffset = 0) => {
+  const range = getWeekRange(weekOffset);
+  const rows = await Payment.aggregate([
+    { $match: { status: "SUCCESS", createdAt: { $gte: range.start, $lte: range.end } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: REPORT_TIME_ZONE } },
+        grossRevenue: { $sum: "$amount" },
+        platformRevenue: { $sum: "$platformFee" },
+        transactions: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+  const values = new Map(rows.map((row) => [row._id, row]));
+  const daily = range.keys.map((date) => ({
+    date,
+    label: dayLabel(date),
+    grossRevenue: values.get(date)?.grossRevenue ?? 0,
+    platformRevenue: values.get(date)?.platformRevenue ?? 0,
+    transactions: values.get(date)?.transactions ?? 0,
+  }));
+  return {
+    weekOffset: range.weekOffset,
+    startDate: range.keys[0],
+    endDate: range.keys[6],
+    daily,
+    totalGrossRevenue: daily.reduce((sum, item) => sum + item.grossRevenue, 0),
+    totalPlatformRevenue: daily.reduce((sum, item) => sum + item.platformRevenue, 0),
+    totalTransactions: daily.reduce((sum, item) => sum + item.transactions, 0),
+  };
+};
+
+export const getCatalogReport = async () => {
+  const [categories, serviceStatuses] = await Promise.all([
+    Category.aggregate([
+      { $lookup: { from: "services", localField: "_id", foreignField: "categoryId", as: "services" } },
+      {
+        $project: {
+          name: 1,
+          isActive: 1,
+          totalServices: { $size: "$services" },
+          approvedServices: {
+            $size: {
+              $filter: { input: "$services", as: "service", cond: { $eq: ["$$service.status", "APPROVED"] } },
+            },
+          },
+        },
+      },
+      { $sort: { totalServices: -1, name: 1 } },
+    ]),
+    Service.aggregate([
+      { $group: { _id: "$status", value: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]),
+  ]);
+  const statusMap = new Map(serviceStatuses.map((item) => [item._id, item.value]));
+  return {
+    totalCategories: categories.length,
+    activeCategories: categories.filter((item) => item.isActive).length,
+    totalServices: serviceStatuses.reduce((sum, item) => sum + item.value, 0),
+    approvedServices: statusMap.get("APPROVED") ?? 0,
+    categories,
+    serviceStatuses: [
+      { status: "APPROVED", label: "Đã duyệt", value: statusMap.get("APPROVED") ?? 0 },
+      { status: "PENDING", label: "Chờ duyệt", value: statusMap.get("PENDING") ?? 0 },
+      { status: "REJECTED", label: "Từ chối", value: statusMap.get("REJECTED") ?? 0 },
+    ],
+  };
 };
 
 export const getSettings = async () => {

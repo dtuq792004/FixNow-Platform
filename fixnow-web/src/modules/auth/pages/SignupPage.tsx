@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import signupBackground from '../../../assets/background_authen/screen1.png'
-import { AuthFooter } from '../components/AuthFooter'
 import { MaterialIcon } from '../components/MaterialIcon'
 import { SocialAuthButtons } from '../components/SocialAuthButtons'
 import { useRegisterMutation } from '../hooks/useAuth'
@@ -51,7 +50,7 @@ export function SignupPage() {
   }
 
   return (
-    <div className="auth-flow relative flex min-h-dvh w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-surface px-4 pb-8 pt-20 sm:px-md sm:py-md">
+    <div className="auth-flow relative flex h-dvh w-full items-center justify-center overflow-hidden bg-surface px-4 py-3 sm:px-md">
       <div
         className="absolute inset-0 z-0 scale-105 bg-cover bg-center"
         style={{ backgroundImage: `url('${signupBackground}')` }}
@@ -59,15 +58,15 @@ export function SignupPage() {
       <div className="absolute inset-0 z-10 bg-black/30" />
 
       <main className="relative z-20 w-full max-w-[440px]">
-        <div className="auth-card flex flex-col gap-md rounded-2xl border border-slate-200 bg-white p-lg shadow-2xl">
+        <div className="auth-card flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-2xl sm:px-lg">
           <div className="flex flex-col items-center gap-xs text-center">
             <div className="flex items-center gap-xs">
               <MaterialIcon className="text-headline-lg text-transparent bg-clip-text bg-header-gradient" filled>tools_power_drill</MaterialIcon>
-              <span className="text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient">FixNow</span>
+              <span className="text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient">FIXNOW</span>
             </div>
             <h1 className="text-headline-md font-semibold text-on-surface">Tạo tài khoản mới</h1>
             <p className="text-body-md text-on-surface-variant">
-              Tham gia cùng hàng nghìn khách hàng tin dùng FixNow cho mọi dịch vụ sửa chữa.
+              Tham gia cùng hàng nghìn khách hàng tin dùng FIXNOW cho mọi dịch vụ sửa chữa.
             </p>
           </div>
 
@@ -112,7 +111,7 @@ export function SignupPage() {
             <div className="flex items-start gap-sm">
               <input className="mt-1 h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary" id="terms" type="checkbox" {...register('terms')} />
               <label className="text-label-md leading-tight text-on-surface-variant" htmlFor="terms">
-                Tôi đồng ý với <Link className="text-primary hover:underline" to="/terms">Điều khoản &amp; Chính sách</Link> của FixNow.
+                Tôi đồng ý với <Link className="text-primary hover:underline" to="/terms">Điều khoản &amp; Chính sách</Link> của FIXNOW.
               </label>
             </div>
             {errors.terms && <p className="text-label-sm text-error">{errors.terms.message}</p>}
@@ -136,7 +135,6 @@ export function SignupPage() {
           </p>
         </div>
       </main>
-      <AuthFooter />
     </div>
   )
 }

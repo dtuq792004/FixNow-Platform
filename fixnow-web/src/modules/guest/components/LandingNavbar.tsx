@@ -7,6 +7,7 @@ import { cn } from '../../../shared/utils/cn'
 const navigationItems = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Dịch vụ', to: '/services' },
+  { label: 'Giá tham khảo', to: '/pricing' },
   { label: 'Về chúng tôi', to: '/about' },
   { label: 'Hỗ trợ', to: '/support' },
 ]
@@ -49,11 +50,11 @@ export function LandingNavbar() {
     <header className="sticky top-0 z-50 bg-header-gradient shadow-md">
       <div className="mx-auto flex min-h-16 w-full max-w-container-max items-center gap-3 px-4 py-2 sm:px-6 lg:px-gutter">
         <Link className="shrink-0 text-xl font-extrabold tracking-tight text-white sm:text-2xl" to="/">
-          FixNow
+          FIXNOW
         </Link>
 
-        <nav className="ml-5 hidden items-center gap-5 lg:flex" aria-label="Điều hướng chính">
-          {navigationItems.slice(0, 3).map((item) => (
+        <nav className="ml-5 hidden items-center gap-5 xl:flex" aria-label="Điều hướng chính">
+          {navigationItems.slice(0, 4).map((item) => (
             <NavigationLink key={item.label} {...item} />
           ))}
 
@@ -131,7 +132,7 @@ export function LandingNavbar() {
             </div>
           </div>
 
-          <NavigationLink {...navigationItems[3]} />
+          <NavigationLink {...navigationItems[4]} />
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
@@ -156,7 +157,7 @@ export function LandingNavbar() {
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? 'Đóng menu' : 'Mở menu'}
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-white/10 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-white/10 xl:hidden"
           >
             {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -164,9 +165,9 @@ export function LandingNavbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="max-h-[calc(100vh-64px)] overflow-y-auto border-t border-white/15 bg-blue-950/95 px-4 py-4 shadow-xl backdrop-blur lg:hidden">
+        <div className="max-h-[calc(100vh-64px)] overflow-y-auto border-t border-white/15 bg-blue-950/95 px-4 py-4 shadow-xl backdrop-blur xl:hidden">
           <nav className="mx-auto grid max-w-container-max gap-1" aria-label="Điều hướng di động">
-            {navigationItems.slice(0, 3).map((item) => (
+            {navigationItems.slice(0, 4).map((item) => (
               <MobileNavigationLink key={item.label} {...item} onClick={closeMobileMenu} />
             ))}
 
@@ -229,7 +230,7 @@ export function LandingNavbar() {
               </div>
             )}
 
-            <MobileNavigationLink {...navigationItems[3]} onClick={closeMobileMenu} />
+            <MobileNavigationLink {...navigationItems[4]} onClick={closeMobileMenu} />
             <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/15 pt-3 md:hidden">
               <Link className="rounded-xl border border-white/25 px-4 py-3 text-center text-sm font-bold text-white" onClick={closeMobileMenu} to="/auth/login">
                 Đăng nhập

@@ -1,5 +1,5 @@
 import { authenticatedRequest } from '../../auth/services/authService'
-import type { AdminCategory, AdminComplaint, AdminDashboard, AdminFeedback, AdminPayment, AdminReport, AdminRequest, AdminService, AdminSettings, AdminUser, AdminWithdrawal, Paginated, ProviderApplication } from '../types/adminTypes'
+import type { AdminCategory, AdminComplaint, AdminDashboard, AdminFeedback, AdminPayment, AdminReport, AdminRequest, AdminService, AdminSettings, AdminUser, AdminWithdrawal, BlogViewReport, CatalogReport, Paginated, ProviderApplication, RevenueReport } from '../types/adminTypes'
 
 type DataResponse<T> = { data: T; success?: boolean; message?: string }
 const query = (params: Record<string, string | number | undefined>) => {
@@ -45,6 +45,9 @@ export const adminService = {
   getComplaints: async (params: { page: number; limit?: number; status?: string }) => (await authenticatedRequest<DataResponse<Paginated<AdminComplaint>>>(`/admin/complaints${query(params)}`)).data,
   updateComplaintStatus: (id: string, status: AdminComplaint['status']) => authenticatedRequest(`/admin/complaints/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   getReport: async () => (await authenticatedRequest<DataResponse<AdminReport>>('/admin/reports')).data,
+  getBlogViewReport: async (weekOffset: number) => (await authenticatedRequest<DataResponse<BlogViewReport>>(`/admin/reports/blog-views${query({ weekOffset })}`)).data,
+  getRevenueReport: async (weekOffset: number) => (await authenticatedRequest<DataResponse<RevenueReport>>(`/admin/reports/revenue${query({ weekOffset })}`)).data,
+  getCatalogReport: async () => (await authenticatedRequest<DataResponse<CatalogReport>>('/admin/reports/catalog')).data,
   getSettings: async () => (await authenticatedRequest<DataResponse<AdminSettings>>('/admin/settings')).data,
   updateSettings: async (payload: AdminSettings) => (await authenticatedRequest<DataResponse<AdminSettings>>('/admin/settings', { method: 'PATCH', body: JSON.stringify(payload) })).data,
   createAdmin: async (payload: { fullName: string; email: string }) => (await authenticatedRequest<DataResponse<{ temporaryPassword: string }>>('/admin/admins', { method: 'POST', body: JSON.stringify(payload) })).data,

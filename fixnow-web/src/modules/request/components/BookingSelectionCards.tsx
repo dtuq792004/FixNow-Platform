@@ -116,7 +116,7 @@ export function ServiceSelectionCard({
             {service.name}
           </strong>
           <strong className="shrink-0 text-sm text-blue-600">
-            {formatCurrency(service.price)}
+            {service.price > 0 ? formatCurrency(service.price) : 'Báo giá sau'}
           </strong>
         </span>
         <span className="mt-2 line-clamp-2 block text-xs leading-5 text-slate-500 sm:text-sm">

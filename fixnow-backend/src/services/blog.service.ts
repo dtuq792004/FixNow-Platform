@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { Blog, BlogStatus, IBlog } from "../models/blog.model";
 import { BlogReview } from "../models/blogReview.model";
+import { BlogView } from "../models/blogView.model";
 
 type ListParams = {
   page?: string | number;
@@ -163,6 +164,17 @@ export async function getPublishedBlog(slug: string) {
     .populate("authorId", "fullName avatar")
     .populate("categoryId", "name type iconUrl");
   if (!blog) throw new Error("Không tìm thấy bài viết");
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  await BlogView.updateOne(
+    { blogId: blog._id, date },
+    { $inc: { count: 1 } },
+    { upsert: true },
+  );
   return blog;
 }
 

@@ -178,13 +178,13 @@ export function RequestBookingPage() {
           <dl className="mt-5 space-y-4 text-sm">
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Danh mục</dt><dd className="font-semibold">{selectedCategory?.name ?? 'Chưa chọn'}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Dịch vụ</dt><dd className="text-right font-semibold">{selectedService?.name ?? 'Provider báo giá'}</dd></div>
-            <div className="flex justify-between border-t pt-4 text-base"><dt className="font-bold">Tạm tính</dt><dd className="font-bold text-blue-600">{selectedService ? formatCurrency(selectedService.price) : 'Chờ báo giá'}</dd></div>
+            <div className="flex justify-between border-t pt-4 text-base"><dt className="font-bold">Tạm tính</dt><dd className="font-bold text-blue-600">{selectedService?.price ? formatCurrency(selectedService.price) : 'Chờ báo giá'}</dd></div>
           </dl>
           <label className="mt-5 flex items-start gap-3 text-sm text-slate-600"><input type="checkbox" className="mt-1 accent-blue-600" {...form.register('terms')} /><span>Tôi đồng ý với điều khoản dịch vụ của FixNow.</span></label>
           {form.formState.errors.terms && <p className="mt-2 text-xs text-red-600">{form.formState.errors.terms.message}</p>}
           {form.formState.errors.root && <p className="mt-3 text-sm text-red-600">{form.formState.errors.root.message}</p>}
           <AppButton type="submit" size="lg" className="mt-5 w-full" disabled={createMutation.isPending || !addressesQuery.data?.length}>
-            {createMutation.isPending ? 'Đang tạo yêu cầu...' : selectedService ? 'Tiếp tục thanh toán' : 'Gửi yêu cầu'}
+            {createMutation.isPending ? 'Đang tạo yêu cầu...' : selectedService?.price ? 'Tiếp tục thanh toán' : 'Gửi yêu cầu báo giá'}
           </AppButton>
         </aside>
       </form>

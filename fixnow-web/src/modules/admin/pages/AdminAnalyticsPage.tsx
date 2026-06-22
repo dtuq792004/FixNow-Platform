@@ -1,12 +1,45 @@
-import { useQuery } from '@tanstack/react-query'
-import { BriefcaseBusiness, HandCoins, Star, UserPlus } from 'lucide-react'
-import { adminService } from '../services/adminService'
-import { AdminError, AdminLoading, AdminPageHeader, AdminStatCard } from '../components/AdminUi'
-const money = (value = 0) => value.toLocaleString('vi-VN') + ' ₫'
+import { ArrowRight, BookOpenText, HandCoins, Layers3 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AdminPageHeader } from '../components/AdminUi'
+
+const reports = [
+  {
+    to: '/admin/analytics/blog-views',
+    title: 'Lượt xem blog',
+    description: 'Theo dõi lượt đọc từng ngày trong tuần và các bài viết được quan tâm nhất.',
+    icon: BookOpenText,
+    tone: 'bg-violet-50 text-violet-600',
+  },
+  {
+    to: '/admin/analytics/revenue',
+    title: 'Doanh thu hệ thống',
+    description: 'Phân tích tổng giao dịch và phần doanh thu nền tảng theo từng ngày.',
+    icon: HandCoins,
+    tone: 'bg-emerald-50 text-emerald-600',
+  },
+  {
+    to: '/admin/analytics/catalog',
+    title: 'Danh mục & dịch vụ',
+    description: 'Thống kê quy mô danh mục, dịch vụ và trạng thái kiểm duyệt.',
+    icon: Layers3,
+    tone: 'bg-blue-50 text-blue-600',
+  },
+]
+
 export function AdminAnalyticsPage() {
-  const query = useQuery({ queryKey: ['admin', 'reports'], queryFn: adminService.getReport })
-  if (query.isLoading) return <div className="p-8"><AdminLoading /></div>
-  if (query.error || !query.data) return <div className="p-8"><AdminError /></div>
-  const totalRevenue = query.data.revenueByMonth.reduce((sum, item) => sum + item.revenue, 0); const max = Math.max(...query.data.revenueByMonth.map((x) => x.revenue), 1); const categoryTotal = query.data.categoryUsage.reduce((s, x) => s + x.total, 0) || 1
-  return <div className="space-y-6 p-4 sm:p-6 lg:p-8"><AdminPageHeader title="Phân tích & báo cáo" description="Dữ liệu tăng trưởng và chất lượng dịch vụ." /><section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><AdminStatCard label="Doanh thu nền tảng" value={money(totalRevenue)} icon={HandCoins} tone="green" /><AdminStatCard label="Người dùng mới" value={String(query.data.newUsers)} icon={UserPlus} /><AdminStatCard label="Công việc hoàn thành" value={String(query.data.completedJobs)} icon={BriefcaseBusiness} tone="amber" /><AdminStatCard label="Đánh giá trung bình" value={query.data.averageRating.toFixed(2)} icon={Star} tone="purple" /></section><section className="grid gap-6 xl:grid-cols-2"><div className="rounded-2xl border bg-white p-6"><h2 className="font-bold">Doanh thu theo tháng</h2><div className="mt-8 flex h-64 items-end gap-2 border-b">{query.data.revenueByMonth.map((x) => <div title={`${x._id}: ${money(x.revenue)}`} key={x._id} className="flex h-full flex-1 items-end"><div className="w-full rounded-t bg-blue-500" style={{ height: `${Math.max(3, x.revenue / max * 100)}%` }} /></div>)}</div></div><div className="rounded-2xl border bg-white p-6"><h2 className="font-bold">Danh mục phổ biến</h2><div className="mt-6 space-y-5">{query.data.categoryUsage.map((x) => <div key={x.name}><div className="mb-2 flex justify-between text-sm"><span className="font-bold">{x.name}</span><span>{Math.round(x.total / categoryTotal * 100)}%</span></div><div className="h-2 rounded bg-slate-100"><div className="h-full rounded bg-blue-600" style={{ width: `${x.total / categoryTotal * 100}%` }} /></div></div>)}</div></div></section></div>
+  return (
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <AdminPageHeader title="Phân tích & báo cáo" description="Chọn nhóm dữ liệu cần theo dõi từ hệ thống." />
+      <section className="grid gap-5 lg:grid-cols-3">
+        {reports.map(({ to, title, description, icon: Icon, tone }) => (
+          <Link key={to} to={to} className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
+            <span className={`flex h-12 w-12 items-center justify-center rounded-xl ${tone}`}><Icon size={23} /></span>
+            <h2 className="mt-5 text-lg font-extrabold text-slate-950">{title}</h2>
+            <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{description}</p>
+            <span className="mt-6 flex items-center gap-2 text-sm font-bold text-blue-600">Xem báo cáo <ArrowRight size={16} className="transition group-hover:translate-x-1" /></span>
+          </Link>
+        ))}
+      </section>
+    </div>
+  )
 }

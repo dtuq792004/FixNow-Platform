@@ -1,9 +1,20 @@
 import Service from "../models/service.model";
 
+const normalizeServicePrice = (data: any) => {
+  if (data.price === undefined) return data;
+
+  const price = Number(data.price);
+  if (!Number.isFinite(price) || price < 0) {
+    throw new Error("Giá dịch vụ phải là số lớn hơn hoặc bằng 0");
+  }
+
+  return { ...data, price };
+};
+
 export const createService = async (providerId: string, data: any) => {
 
   const service = await Service.create({
-    ...data,
+    ...normalizeServicePrice(data),
     providerId,
     status: "PENDING"
   });
@@ -60,8 +71,8 @@ export const updateService = async (
       _id: serviceId,
       providerId
     },
-    data,
-    { new: true }
+    normalizeServicePrice(data),
+    { new: true, runValidators: true }
   );
 
   if (!service) {

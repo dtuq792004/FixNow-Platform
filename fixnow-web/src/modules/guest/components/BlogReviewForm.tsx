@@ -39,7 +39,7 @@ export function BlogReviewForm({ slug }: { slug: string }) {
         <div>
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white"><MessageSquareText size={23} /></span>
           <h2 className="mt-5 text-2xl font-black text-slate-950">Bài viết này có hữu ích?</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Đánh giá của bạn giúp FixNow cải thiện nội dung cẩm nang.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Đánh giá của bạn giúp FIXNOW cải thiện nội dung cẩm nang.</p>
           {summary && summary.totalReviews > 0 && (
             <div className="mt-6 rounded-2xl bg-white/80 p-4">
               <p className="text-3xl font-black text-blue-700">{summary.averageRating.toFixed(1)}<span className="text-base text-slate-400">/5</span></p>
