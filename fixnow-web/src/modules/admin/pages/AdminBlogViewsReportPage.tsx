@@ -23,7 +23,8 @@ export function AdminBlogViewsReportPage() {
           <div className="flex justify-end">
             <WeekNavigator startDate={query.data.startDate} endDate={query.data.endDate} weekOffset={weekOffset} onChange={setWeekOffset} />
           </div>
-          <section className="grid gap-4 sm:grid-cols-3">
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <AdminStatCard label="Tổng lượt xem toàn hệ thống" value={query.data.allTimeViews.toLocaleString('vi-VN')} icon={Eye} />
             <AdminStatCard label="Lượt xem trong tuần" value={query.data.totalViews.toLocaleString('vi-VN')} icon={Eye} />
             <AdminStatCard label="Bài viết đã xuất bản" value={query.data.publishedBlogs.toLocaleString('vi-VN')} icon={BookOpenText} tone="purple" />
             <AdminStatCard label="Trung bình mỗi ngày" value={Math.round(query.data.totalViews / 7).toLocaleString('vi-VN')} icon={TrendingUp} tone="green" />
