@@ -87,8 +87,11 @@ export const providerService = {
   deleteService: (id: string) => authenticatedRequest<{ message: string }>(`/services/${id}`, { method: 'DELETE' }),
 
   getWallet: async () => (await authenticatedRequest<DataResponse<Wallet>>('/finance/my-wallet')).data,
-  getRevenue: async (range: 'day' | 'month' | 'year' = 'day') =>
-    (await authenticatedRequest<DataResponse<RevenuePoint[]>>(`/finance/my-revenue?range=${range}`)).data,
+  getRevenue: async (range: 'day' | 'month' | 'year' = 'day', weekStart?: string) => {
+    const params = new URLSearchParams({ range })
+    if (weekStart) params.set('weekStart', weekStart)
+    return (await authenticatedRequest<DataResponse<RevenuePoint[]>>(`/finance/my-revenue?${params}`)).data
+  },
   getWithdraws: () => authenticatedRequest<WithdrawRequest[]>('/withdraw/provider/withdraws'),
   withdraw: (payload: { amount: number; bankName: string; accountNumber: string; accountHolder: string }) =>
     authenticatedRequest<DataResponse<WithdrawRequest>>('/withdraw/provider/withdraw', {

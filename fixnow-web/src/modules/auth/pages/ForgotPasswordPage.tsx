@@ -37,7 +37,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="auth-flow relative flex h-dvh w-full items-center justify-center overflow-hidden bg-background p-md text-on-background">
+    <div className="auth-flow relative flex min-h-dvh w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-background px-4 pb-8 pt-20 text-on-background sm:p-md">
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${forgotPasswordBackground}')` }} />
         <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px]" />

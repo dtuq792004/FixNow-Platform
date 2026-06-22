@@ -48,14 +48,14 @@ export function LandingPage() {
       <LandingNavbar />
 
       <main>
-        <section className="relative flex min-h-[600px] items-center overflow-hidden">
+        <section className="relative flex min-h-[520px] items-center overflow-hidden sm:min-h-[600px]">
           <div className="absolute inset-0 z-0">
             <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url("${heroImage}")` }} />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
           </div>
-          <div className="relative z-10 mx-auto w-full max-w-container-max px-gutter py-xxl">
+          <div className="relative z-10 mx-auto w-full max-w-container-max px-4 py-12 sm:px-6 sm:py-16 lg:px-gutter">
             <div className="max-w-2xl">
-              <h1 className="mb-md text-display-lg font-bold leading-tight text-on-background">Giải pháp sửa chữa nhà cửa toàn diện, tin cậy</h1>
+              <h1 className="mb-md text-4xl font-bold leading-tight text-on-background sm:text-5xl lg:text-display-lg">Giải pháp sửa chữa nhà cửa toàn diện, tin cậy</h1>
               <p className="mb-xl text-body-lg text-on-surface-variant">Kết nối ngay với đội ngũ kỹ thuật viên chuyên nghiệp, sẵn sàng hỗ trợ 24/7 cho mọi nhu cầu sửa chữa của bạn.</p>
               <div className="flex max-w-xl flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-sm shadow-lg md:flex-row">
                 <div className="flex flex-1 items-center gap-xs border-b border-outline-variant px-sm py-xs md:border-r md:border-b-0">
@@ -70,15 +70,15 @@ export function LandingPage() {
 
         <section id="services" className="py-xxl">
           <div className="mx-auto max-w-container-max px-gutter">
-            <div className="mb-xl flex items-end justify-between">
+            <div className="mb-xl flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
               <div><h2 className="mb-xs text-headline-lg text-on-surface">Dịch vụ phổ biến</h2><p className="text-body-md text-on-surface-variant">Mọi giải pháp cho ngôi nhà của bạn chỉ trong vài lần chạm</p></div>
               <a className="flex items-center text-label-md text-primary hover:underline" href="#">Tất cả dịch vụ <MaterialIcon className="ml-xs text-[18px]">arrow_forward</MaterialIcon></a>
             </div>
-            <div className="grid grid-cols-2 gap-md md:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-md md:grid-cols-3 lg:grid-cols-6">
               {services.map(([icon, title, description, background, color]) => (
-                <div key={title} onClick={book} className="group cursor-pointer rounded-2xl border border-outline-variant bg-white p-lg text-center transition-all hover:border-primary hover:shadow-xl hover:-translate-y-1">
+                <div key={title} onClick={book} className="group cursor-pointer rounded-2xl border border-outline-variant bg-white p-4 text-center transition-all hover:-translate-y-1 hover:border-primary hover:shadow-xl sm:p-lg">
                   <div className={`mx-auto mb-md flex h-16 w-16 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${background}`}><MaterialIcon className={`text-[32px] ${color}`}>{icon}</MaterialIcon></div>
-                  <h3 className="mb-xs text-title-lg text-on-surface">{title}</h3><p className="mb-md text-label-sm text-on-surface-variant">{description}</p><span className="text-label-sm text-primary opacity-0 transition-opacity group-hover:opacity-100">Xem thêm</span>
+                  <h3 className="mb-xs text-base font-semibold text-on-surface sm:text-title-lg">{title}</h3><p className="mb-2 text-label-sm text-on-surface-variant sm:mb-md">{description}</p><span className="hidden text-label-sm text-primary transition-opacity group-hover:opacity-100 sm:inline sm:opacity-0">Xem thêm</span>
                 </div>
               ))}
             </div>
@@ -126,7 +126,7 @@ export function LandingPage() {
         </section>
 
         <section className="bg-surface-bright py-xxl">
-          <div className="relative mx-auto flex max-w-container-max flex-col items-center gap-xl overflow-hidden rounded-[40px] bg-header-gradient p-xl px-gutter lg:flex-row lg:p-xxl shadow-2xl">
+          <div className="relative mx-4 flex max-w-container-max flex-col items-center gap-xl overflow-hidden rounded-3xl bg-header-gradient p-6 shadow-2xl sm:mx-6 sm:p-8 lg:mx-auto lg:flex-row lg:rounded-[40px] lg:p-xxl">
             <div className="pointer-events-none absolute top-0 left-0 h-full w-full opacity-10"><svg height="100%" preserveAspectRatio="none" viewBox="0 0 100 100" width="100%"><path d="M0 100 C 20 0 50 0 100 100" fill="none" stroke="white" strokeWidth=".5" /><path d="M0 80 C 20 -20 50 -20 100 80" fill="none" stroke="white" strokeWidth=".5" /></svg></div>
             <div className="z-10 text-center lg:w-1/2 lg:text-left"><h2 className="mb-md text-headline-lg font-bold text-white">Trải nghiệm FixNow trên điện thoại</h2><p className="mb-xl text-body-lg text-white/80">Đặt lịch sửa chữa mọi lúc mọi nơi, theo dõi hành trình thợ và nhận ưu đãi độc quyền hàng ngày.</p><div className="flex flex-wrap justify-center gap-md lg:justify-start"><StoreButton icon="smartphone" store="App Store" /><StoreButton icon="shop" store="Google Play" /></div></div>
             <div className="relative z-10 lg:w-1/2"><div className="relative mx-auto w-full max-w-[300px]"><div className="relative rounded-[3rem] border-[8px] border-on-background bg-on-background p-sm shadow-2xl"><div className="aspect-[9/19.5] w-full rounded-[2.5rem] bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCakHS4FcZfO508IJ81GEDUv6Nd-p5N-nXtMFwVWCq0w3XVg-ev1981ZKeMZ7IpMLL7EaWYs8SiWmwFLH1Smrnc0Zc0RUsRyR2kSghGuSvT1w94grHurmCwGXAh1M5CYmAWCyAyGzorHu_7g5Zfd3icGvgQs7NigiWq_p-_oQLTGHGQNj376FGKaaY3fbdKBjMnUd14snyGnkBn88BWbZXvPJozh3-2t5QGJB52jhtyi34B9DNv5RHpwc8WBWgCpargz1FEVjTxAfE")' }} /><div className="absolute top-0 left-1/2 h-6 w-1/3 -translate-x-1/2 rounded-b-2xl bg-on-background" /></div><div className="absolute top-1/4 -right-8 animate-bounce rounded-xl border border-outline-variant bg-white p-sm shadow-lg"><MaterialIcon className="text-tertiary">check_circle</MaterialIcon></div><div className="absolute bottom-1/4 -left-12 flex items-center gap-sm rounded-2xl border border-outline-variant bg-white p-md shadow-xl"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary"><MaterialIcon className="text-[18px] text-white">bolt</MaterialIcon></div><span className="text-label-sm font-bold">Thợ đã đến!</span></div></div></div>

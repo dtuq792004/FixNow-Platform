@@ -51,7 +51,7 @@ export function SignupPage() {
   }
 
   return (
-    <div className="auth-flow relative flex h-dvh w-full items-center justify-center overflow-hidden bg-surface px-md py-md">
+    <div className="auth-flow relative flex min-h-dvh w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-surface px-4 pb-8 pt-20 sm:px-md sm:py-md">
       <div
         className="absolute inset-0 z-0 scale-105 bg-cover bg-center"
         style={{ backgroundImage: `url('${signupBackground}')` }}

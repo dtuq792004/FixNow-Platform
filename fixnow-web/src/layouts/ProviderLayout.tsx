@@ -116,7 +116,7 @@ export function ProviderLayout() {
         onToggleOnline={() => statusMutation.mutate()}
         isStatusPending={statusMutation.isPending}
       />
-      <main className="min-h-screen pt-16 lg:pl-68">
+      <main className="min-h-screen min-w-0 overflow-x-hidden pt-16 lg:pl-68">
         <Outlet context={{ isOnline, profile: profileQuery.data }} />
       </main>
       {newRequest && (

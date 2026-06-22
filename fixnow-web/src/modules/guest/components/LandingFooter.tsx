@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export function LandingFooter() {
   return (
     <footer className="border-t border-blue-800 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white">
-      <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-lg px-gutter py-xl md:flex-row">
+      <div className="mx-auto grid w-full max-w-container-max gap-6 px-4 py-8 text-center sm:px-6 md:grid-cols-[1fr_auto] md:text-left lg:grid-cols-[1fr_2fr_auto] lg:items-center lg:px-gutter">
         <div className="flex flex-col items-center gap-sm md:items-start">
           <Link className="text-headline-md font-extrabold tracking-tight text-blue-300" to="/">
             FixNow
@@ -13,14 +13,14 @@ export function LandingFooter() {
           </p>
         </div>
 
-        <nav className="flex flex-wrap justify-center gap-md" aria-label="Điều hướng chân trang">
+        <nav className="flex flex-wrap justify-center gap-x-5 gap-y-3 md:justify-end lg:justify-center" aria-label="Điều hướng chân trang">
           <Link className="text-body-md text-blue-100/80 transition-colors hover:text-white" to="/about">Về chúng tôi</Link>
           <span className="cursor-pointer text-body-md text-blue-100/80 transition-colors hover:text-white">Điều khoản sử dụng</span>
           <span className="cursor-pointer text-body-md text-blue-100/80 transition-colors hover:text-white">Chính sách bảo mật</span>
           <Link className="text-body-md font-bold text-blue-300 hover:text-white" to="/support">Liên hệ hỗ trợ: 1900 1234</Link>
         </nav>
 
-        <div className="flex gap-md text-blue-100">
+        <div className="flex justify-center gap-md text-blue-100 md:col-span-2 lg:col-span-1">
           <SocialIcon type="facebook" />
           <SocialIcon type="youtube" />
         </div>

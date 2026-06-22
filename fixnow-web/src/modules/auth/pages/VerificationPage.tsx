@@ -101,7 +101,7 @@ export function VerificationPage() {
   }
 
   return (
-    <div className="auth-flow relative h-dvh w-full overflow-hidden bg-surface text-on-surface">
+    <div className="auth-flow relative min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-surface text-on-surface">
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${verificationBackground}')` }} />
         <div className="absolute inset-0 bg-on-background/10 backdrop-blur-sm" />

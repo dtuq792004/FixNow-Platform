@@ -19,10 +19,15 @@ const REPORT_TIMEZONE = "Asia/Ho_Chi_Minh";
 
 export const getRevenueByProvider = async (
   providerId: string,
-  range: RevenueRange
+  range: RevenueRange,
+  weekStart?: string,
 ) => {
   const now = new Date();
-  const startDate = getStartDate(now, range);
+  const selectedWeek = range === "day" && weekStart
+    ? getSelectedWeekRange(weekStart)
+    : null;
+  const startDate = selectedWeek?.startDate ?? getStartDate(now, range);
+  const endDate = selectedWeek?.endDate ?? now;
   const groupFormat: Record<RevenueRange, Record<string, unknown>> = {
     day: {
       year: { $year: { date: "$createdAt", timezone: REPORT_TIMEZONE } },
@@ -43,7 +48,9 @@ export const getRevenueByProvider = async (
       $match: {
         providerId: new mongoose.Types.ObjectId(providerId),
         status: "SUCCESS",
-        createdAt: { $gte: startDate, $lte: now }
+        createdAt: selectedWeek
+          ? { $gte: startDate, $lt: endDate }
+          : { $gte: startDate, $lte: endDate }
       }
     },
     {
@@ -58,7 +65,63 @@ export const getRevenueByProvider = async (
     }
   ]);
 
-  return fillRevenuePeriods(revenue, now, range);
+  return selectedWeek
+    ? fillSelectedWeek(revenue, selectedWeek.startDate)
+    : fillRevenuePeriods(revenue, now, range);
+};
+
+const getSelectedWeekRange = (weekStart: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekStart)) {
+    throw new Error("Week start must use YYYY-MM-DD format");
+  }
+
+  const [year, month, day] = weekStart.split("-").map(Number);
+  const localDate = new Date(Date.UTC(year, month - 1, day));
+  if (
+    localDate.getUTCFullYear() !== year
+    || localDate.getUTCMonth() !== month - 1
+    || localDate.getUTCDate() !== day
+  ) {
+    throw new Error("Invalid week start date");
+  }
+
+  // Asia/Ho_Chi_Minh is UTC+7 and has no daylight-saving transitions.
+  const startDate = new Date(Date.UTC(year, month - 1, day, -7));
+  const endDate = new Date(startDate);
+  endDate.setUTCDate(endDate.getUTCDate() + 7);
+  return { startDate, endDate };
+};
+
+const fillSelectedWeek = (
+  revenue: AggregatedRevenue[],
+  startDate: Date,
+) => {
+  const revenueMap = new Map(
+    revenue.map((point) => [toPeriodKey(point._id, "day"), point]),
+  );
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const localDate = new Date(startDate.getTime() + 7 * 60 * 60 * 1000);
+    localDate.setUTCDate(localDate.getUTCDate() + index);
+    const id: RevenueGroupId = {
+      year: localDate.getUTCFullYear(),
+      month: localDate.getUTCMonth() + 1,
+      day: localDate.getUTCDate(),
+    };
+    const point = revenueMap.get(toPeriodKey(id, "day"));
+
+    return {
+      _id: id,
+      periodStart: new Date(Date.UTC(id.year, id.month! - 1, id.day!, -7)).toISOString(),
+      label: new Intl.DateTimeFormat("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        timeZone: "UTC",
+      }).format(localDate),
+      totalRevenue: point?.totalRevenue ?? 0,
+      totalOrders: point?.totalOrders ?? 0,
+    };
+  });
 };
 
 const getStartDate = (now: Date, range: RevenueRange) => {

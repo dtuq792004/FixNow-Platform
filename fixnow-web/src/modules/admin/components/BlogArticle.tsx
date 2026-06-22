@@ -8,8 +8,8 @@ const formatDate = (value: string | null) =>
 export function BlogArticle({ blog }: { blog: Blog }) {
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="relative h-72 sm:h-[420px]">
-        <img src={blog.coverImage.url} alt={blog.coverImage.alt || blog.title} className="h-full w-full object-cover" />
+      <div className="relative h-72 overflow-hidden sm:h-[420px]">
+        <img src={blog.coverImage.url} alt={blog.coverImage.alt || blog.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-10">
           <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold">{blog.category}</span>

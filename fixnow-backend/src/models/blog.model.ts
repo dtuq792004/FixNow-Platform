@@ -22,6 +22,8 @@ export interface IBlog extends Document {
   slug: string;
   excerpt: string;
   category: string;
+  categoryId?: Types.ObjectId;
+  serviceName?: string;
   tags: string[];
   coverImage: IBlogImage;
   sections: IBlogSection[];
@@ -64,6 +66,8 @@ const blogSchema = new Schema<IBlog>(
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     excerpt: { type: String, required: true, trim: true, maxlength: 500 },
     category: { type: String, required: true, trim: true, maxlength: 80 },
+    categoryId: { type: Schema.Types.ObjectId, ref: "Category", default: null, index: true },
+    serviceName: { type: String, trim: true, maxlength: 120, default: "", index: true },
     tags: { type: [String], default: [] },
     coverImage: { type: imageSchema, required: true },
     sections: {
@@ -87,6 +91,7 @@ const blogSchema = new Schema<IBlog>(
 );
 
 blogSchema.index({ status: 1, publishedAt: -1 });
+blogSchema.index({ status: 1, categoryId: 1, serviceName: 1, publishedAt: -1 });
 blogSchema.index({ title: "text", excerpt: "text", category: "text", tags: "text" });
 
 export const Blog = mongoose.model<IBlog>("Blog", blogSchema);

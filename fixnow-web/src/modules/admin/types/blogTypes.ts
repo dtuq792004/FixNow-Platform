@@ -29,6 +29,8 @@ export type Blog = {
   slug: string
   excerpt: string
   category: string
+  categoryId?: { _id: string; name: string; type?: string; iconUrl?: string } | string | null
+  serviceName?: string
   tags: string[]
   coverImage: BlogImage
   sections: BlogSection[]
@@ -46,5 +48,5 @@ export type Blog = {
 
 export type BlogPayload = Omit<
   Blog,
-  '_id' | 'authorId' | 'publishedAt' | 'viewCount' | 'createdAt' | 'updatedAt'
+  '_id' | 'authorId' | 'createdAt' | 'updatedAt'
 >

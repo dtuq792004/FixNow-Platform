@@ -8,6 +8,8 @@ type ListParams = {
   search?: string;
   status?: BlogStatus;
   category?: string;
+  categoryId?: string;
+  serviceName?: string;
 };
 
 type BlogPayload = Partial<Pick<
@@ -16,12 +18,16 @@ type BlogPayload = Partial<Pick<
   | "slug"
   | "excerpt"
   | "category"
+  | "categoryId"
+  | "serviceName"
   | "tags"
   | "coverImage"
   | "sections"
   | "status"
   | "isFeatured"
   | "readTimeMinutes"
+  | "viewCount"
+  | "publishedAt"
   | "seoTitle"
   | "seoDescription"
 >>;
@@ -29,6 +35,8 @@ type BlogPayload = Partial<Pick<
 type BlogFilter = {
   status?: BlogStatus;
   category?: string;
+  categoryId?: Types.ObjectId;
+  serviceName?: RegExp;
   $or?: Array<Record<string, RegExp>>;
 };
 
@@ -43,6 +51,14 @@ const sanitizeRichText = (value: string) =>
 
 const sanitizePayload = (payload: BlogPayload): BlogPayload => ({
   ...payload,
+  category: payload.category?.trim(),
+  serviceName: payload.serviceName?.trim(),
+  viewCount: payload.viewCount === undefined
+    ? undefined
+    : Math.max(0, Math.floor(Number(payload.viewCount) || 0)),
+  publishedAt: payload.publishedAt === undefined || payload.publishedAt === null
+    ? payload.publishedAt
+    : new Date(payload.publishedAt),
   sections: payload.sections?.map((section) => ({
     ...section,
     label: section.label?.trim() ?? "",
@@ -83,6 +99,8 @@ export async function listAdminBlogs(params: ListParams) {
   const filter: BlogFilter = {};
   if (params.status) filter.status = params.status;
   if (params.category) filter.category = params.category;
+  if (params.categoryId && Types.ObjectId.isValid(params.categoryId)) filter.categoryId = new Types.ObjectId(params.categoryId);
+  if (params.serviceName?.trim()) filter.serviceName = new RegExp(`^${escapeRegex(params.serviceName.trim())}$`, "i");
   if (params.search?.trim()) {
     const regex = new RegExp(escapeRegex(params.search.trim()), "i");
     filter.$or = [{ title: regex }, { excerpt: regex }, { category: regex }, { tags: regex }];
@@ -104,6 +122,8 @@ export async function listPublishedBlogs(params: ListParams) {
   const { page, limit, skip } = pagination(params);
   const filter: BlogFilter = { status: "PUBLISHED" };
   if (params.category) filter.category = params.category;
+  if (params.categoryId && Types.ObjectId.isValid(params.categoryId)) filter.categoryId = new Types.ObjectId(params.categoryId);
+  if (params.serviceName?.trim()) filter.serviceName = new RegExp(`^${escapeRegex(params.serviceName.trim())}$`, "i");
   if (params.search?.trim()) {
     const regex = new RegExp(escapeRegex(params.search.trim()), "i");
     filter.$or = [{ title: regex }, { excerpt: regex }, { category: regex }, { tags: regex }];
@@ -113,6 +133,7 @@ export async function listPublishedBlogs(params: ListParams) {
     Blog.find(filter)
       .select("-sections")
       .populate("authorId", "fullName avatar")
+      .populate("categoryId", "name type iconUrl")
       .sort({ isFeatured: -1, publishedAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -124,7 +145,10 @@ export async function listPublishedBlogs(params: ListParams) {
 
 export async function getAdminBlog(id: string) {
   if (!Types.ObjectId.isValid(id)) throw new Error("ID bài viết không hợp lệ");
-  const blog = await Blog.findById(id).populate("authorId", "fullName email avatar").lean();
+  const blog = await Blog.findById(id)
+    .populate("authorId", "fullName email avatar")
+    .populate("categoryId", "name type iconUrl")
+    .lean();
   if (!blog) throw new Error("Không tìm thấy bài viết");
   return blog;
 }
@@ -134,7 +158,9 @@ export async function getPublishedBlog(slug: string) {
     { slug, status: "PUBLISHED" },
     { $inc: { viewCount: 1 } },
     { new: true },
-  ).populate("authorId", "fullName avatar");
+  )
+    .populate("authorId", "fullName avatar")
+    .populate("categoryId", "name type iconUrl");
   if (!blog) throw new Error("Không tìm thấy bài viết");
   return blog;
 }
@@ -181,12 +207,15 @@ export async function createBlog(authorId: string, payload: BlogPayload) {
   if (!payload.title?.trim()) throw new Error("Tiêu đề là bắt buộc");
   const safePayload = sanitizePayload(payload);
   const status = safePayload.status === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
+  const selectedPublishedAt = safePayload.publishedAt instanceof Date && !Number.isNaN(safePayload.publishedAt.getTime())
+    ? safePayload.publishedAt
+    : null;
   return Blog.create({
     ...safePayload,
     slug: await createUniqueSlug(safePayload.slug || safePayload.title!),
     authorId,
     status,
-    publishedAt: status === "PUBLISHED" ? new Date() : null,
+    publishedAt: status === "PUBLISHED" ? selectedPublishedAt ?? new Date() : null,
   });
 }
 
@@ -198,10 +227,16 @@ export async function updateBlog(id: string, payload: BlogPayload) {
   const slugSource = safePayload.slug || safePayload.title;
   const update: BlogPayload & { publishedAt?: Date | null } = { ...safePayload, status };
   if (slugSource) update.slug = await createUniqueSlug(slugSource, id);
-  if (status === "PUBLISHED" && !current.publishedAt) update.publishedAt = new Date();
+  if (status === "PUBLISHED") {
+    const selectedPublishedAt = safePayload.publishedAt instanceof Date && !Number.isNaN(safePayload.publishedAt.getTime())
+      ? safePayload.publishedAt
+      : null;
+    update.publishedAt = selectedPublishedAt ?? current.publishedAt ?? new Date();
+  }
   if (status === "DRAFT") update.publishedAt = null;
   return Blog.findByIdAndUpdate(id, update, { new: true, runValidators: true })
-    .populate("authorId", "fullName email avatar");
+    .populate("authorId", "fullName email avatar")
+    .populate("categoryId", "name type iconUrl");
 }
 
 export async function deleteBlog(id: string) {

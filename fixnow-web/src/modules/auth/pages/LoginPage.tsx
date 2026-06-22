@@ -60,7 +60,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-flow relative flex h-dvh w-full flex-col overflow-hidden bg-surface-bright">
+    <div className="auth-flow relative flex min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto bg-surface-bright">
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div
           className="h-full w-full bg-cover bg-center"
@@ -83,9 +83,9 @@ export function LoginPage() {
         </button>
       </header>
 
-      <main className="relative z-10 flex min-h-0 flex-grow items-center justify-center px-md py-lg">
+      <main className="relative z-10 flex min-h-0 flex-grow items-center justify-center px-4 pb-8 pt-20 sm:px-md sm:py-20">
         <div className="w-full max-w-[440px] overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200">
-          <div className="flex flex-col gap-xl px-xl py-xxl">
+          <div className="flex flex-col gap-6 px-5 py-7 sm:gap-xl sm:px-xl sm:py-xxl">
             <div className="space-y-base text-center">
               <div className="inline-block text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient">FixNow</div>
               <h1 className="text-headline-md font-semibold text-on-surface">Chào mừng trở lại</h1>
@@ -139,7 +139,7 @@ export function LoginPage() {
                 {errors.password && <p className="text-label-sm text-error">{errors.password.message}</p>}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 min-[390px]:flex-row min-[390px]:items-center min-[390px]:justify-between">
                 <label className="flex cursor-pointer items-center gap-base">
                   <input
                     className="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary"

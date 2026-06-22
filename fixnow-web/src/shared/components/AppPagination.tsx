@@ -24,7 +24,7 @@ export function AppPagination({
         onClick={() => onPageChange(page - 1)}
         className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        <ChevronLeft size={16} /> Trước
+        <ChevronLeft size={16} /> <span className="hidden sm:inline">Trước</span>
       </button>
       {pages.map((value) => (
         <button
@@ -45,7 +45,7 @@ export function AppPagination({
         onClick={() => onPageChange(page + 1)}
         className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Sau <ChevronRight size={16} />
+        <span className="hidden sm:inline">Sau</span> <ChevronRight size={16} />
       </button>
     </nav>
   )

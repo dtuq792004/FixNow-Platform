@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, Clock3, Search } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AdminPagination } from '../../admin/components/AdminUi'
 import { blogService } from '../../admin/services/blogService'
 import { GuestPageLayout } from '../components/GuestPageLayout'
@@ -11,11 +11,16 @@ const formatDate = (value: string | null) =>
   value ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(new Date(value)) : ''
 
 export function GuestBlogPage() {
-  const [page, setPage] = useState(1)
+  const [searchParams] = useSearchParams()
+  const categoryId = searchParams.get('categoryId') || ''
+  const serviceName = searchParams.get('serviceName') || ''
+  const filterKey = `${categoryId}:${serviceName}`
+  const [pagination, setPagination] = useState({ page: 1, filterKey })
+  const page = pagination.filterKey === filterKey ? pagination.page : 1
   const [search, setSearch] = useState('')
   const query = useQuery({
-    queryKey: ['public', 'blogs', page, search],
-    queryFn: () => blogService.listPublic({ page, limit: 9, search }),
+    queryKey: ['public', 'blogs', page, search, categoryId, serviceName],
+    queryFn: () => blogService.listPublic({ page, limit: 9, search, categoryId, serviceName }),
   })
 
   return (
@@ -30,9 +35,18 @@ export function GuestBlogPage() {
         </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
+        {serviceName && (
+          <div className="mx-auto mb-6 flex max-w-2xl items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Đang xem cẩm nang</p>
+              <h2 className="mt-1 text-lg font-black text-slate-900">{serviceName}</h2>
+            </div>
+            <Link to="/blog" className="shrink-0 text-sm font-bold text-blue-700 hover:underline">Xem tất cả</Link>
+          </div>
+        )}
         <label className="relative mx-auto block max-w-2xl">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 shadow-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" placeholder="Tìm kiếm cẩm nang, mẹo hay..." />
+          <input value={search} onChange={(event) => { setSearch(event.target.value); setPagination({ page: 1, filterKey }) }} className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 shadow-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" placeholder="Tìm kiếm cẩm nang, mẹo hay..." />
         </label>
         {query.isLoading ? <div className="py-20 text-center text-slate-500">Đang tải bài viết...</div> : query.error || !query.data ? (
           <div className="py-20 text-center font-bold text-red-600">Không thể tải danh sách bài viết.</div>
@@ -61,7 +75,7 @@ export function GuestBlogPage() {
               ))}
             </div>
             <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <AdminPagination {...query.data} onPageChange={(nextPage) => { setPage(nextPage); window.scrollTo({ top: 420, behavior: 'smooth' }) }} />
+              <AdminPagination {...query.data} onPageChange={(nextPage) => { setPagination({ page: nextPage, filterKey }); window.scrollTo({ top: 420, behavior: 'smooth' }) }} />
             </div>
           </>
         )}

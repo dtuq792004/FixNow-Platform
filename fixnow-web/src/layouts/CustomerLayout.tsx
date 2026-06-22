@@ -1,12 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Bell,
   CalendarDays,
   Headphones,
   Home,
   LogOut,
-  Menu,
   MessageCircle,
-  Search,
   UserRound,
   Wrench,
 } from 'lucide-react'
@@ -56,8 +55,8 @@ export function CustomerLayout() {
   return (
     <div className="min-h-screen text-slate-900">
       <header className="sticky top-0 z-40 bg-header-gradient shadow-md">
-        <div className="mx-auto flex h-17 max-w-7xl items-center gap-5 px-4 sm:px-6">
-          <NavLink to="/customer/home" className="text-2xl font-extrabold tracking-tight text-white">FixNow</NavLink>
+        <div className="mx-auto flex min-h-17 max-w-7xl items-center gap-2 px-3 py-2 sm:gap-5 sm:px-6">
+          <NavLink to="/customer/home" className="mr-auto text-xl font-extrabold tracking-tight text-white sm:mr-0 sm:text-2xl">FixNow</NavLink>
           <nav className="hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
               <NavLink
@@ -74,11 +73,7 @@ export function CustomerLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto hidden max-w-58 items-center gap-2 rounded-full bg-white/20 px-4 lg:flex border border-white/10">
-            <Search size={17} className="text-white/70" />
-            <input className="h-10 min-w-0 bg-transparent text-sm outline-none text-white placeholder:text-white/60" placeholder="Tìm dịch vụ..." />
-          </div>
-          <button className="rounded-full p-2 text-white/80 hover:bg-white/10" aria-label="Thông báo">
+          <button className="ml-auto hidden rounded-full p-2 text-white/80 hover:bg-white/10 sm:inline-flex" aria-label="Thông báo">
             <Bell size={20} />
           </button>
           <button
@@ -99,7 +94,6 @@ export function CustomerLayout() {
           <AppButton className="hidden border border-white/20 bg-white/10 text-white hover:bg-white/20 lg:inline-flex" onClick={() => navigate('/customer/request/new')}>
             Đặt lịch ngay
           </AppButton>
-          <button className="md:hidden text-white" aria-label="Mở menu"><Menu size={22} /></button>
         </div>
       </header>
       <main className="pb-22 md:pb-0"><Outlet /></main>
@@ -135,4 +129,3 @@ export function CustomerLayout() {
     </div>
   )
 }
-import { useQueryClient } from '@tanstack/react-query'

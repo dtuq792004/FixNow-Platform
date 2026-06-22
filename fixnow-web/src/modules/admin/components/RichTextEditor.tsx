@@ -111,7 +111,7 @@ export function RichTextEditor({ value, onChange }: { value: string; onChange: (
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100">
-      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50/60 p-2">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50/60 p-2 sm:flex-wrap sm:overflow-visible">
         <select
           aria-label="Phông chữ"
           defaultValue="Arial"
@@ -145,7 +145,7 @@ export function RichTextEditor({ value, onChange }: { value: string; onChange: (
             className="h-5 w-5 cursor-pointer border-0 bg-transparent p-0"
           />
         </label>
-        <span className="mx-1 h-6 w-px bg-slate-200" />
+        <span className="mx-1 h-6 w-px shrink-0 bg-slate-200" />
         <CommandButton title="In đậm" command="bold" onRun={run}><Bold size={17} /></CommandButton>
         <CommandButton title="In nghiêng" command="italic" onRun={run}><Italic size={17} /></CommandButton>
         <CommandButton title="Gạch chân" command="underline" onRun={run}><Underline size={17} /></CommandButton>
@@ -167,7 +167,7 @@ export function RichTextEditor({ value, onChange }: { value: string; onChange: (
         onKeyUp={saveSelection}
         onMouseUp={saveSelection}
         data-placeholder="Nhập nội dung và định dạng như trong Word..."
-        className="rich-text-editor min-h-56 px-4 py-4 text-base leading-7 text-slate-700 outline-none"
+        className="rich-text-editor min-h-48 [overflow-wrap:anywhere] px-3 py-4 text-base leading-7 text-slate-700 outline-none sm:min-h-56 sm:px-4"
       />
     </div>
   )

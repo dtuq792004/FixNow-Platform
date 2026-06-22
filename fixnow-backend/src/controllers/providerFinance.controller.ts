@@ -104,6 +104,9 @@ export const getMyRevenue = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id as string;
     const range = String(req.query.range || "day");
+    const weekStart = req.query.weekStart
+      ? String(req.query.weekStart)
+      : undefined;
     if (!["day", "month", "year"].includes(range)) {
       return res.status(400).json({
         success: false,
@@ -113,6 +116,7 @@ export const getMyRevenue = async (req: Request, res: Response) => {
     const revenue = await revenueService.getRevenueByProvider(
       userId,
       range as revenueService.RevenueRange,
+      weekStart,
     );
     return res.json({ success: true, data: revenue });
   } catch (error: any) {

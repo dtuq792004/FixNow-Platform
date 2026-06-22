@@ -11,7 +11,7 @@ export const providerKeys = {
   job: (id: string) => ['provider', 'jobs', id] as const,
   services: ['provider', 'services'] as const,
   wallet: ['provider', 'wallet'] as const,
-  revenue: (range: string) => ['provider', 'revenue', range] as const,
+  revenue: (range: string, period?: string) => ['provider', 'revenue', range, period ?? 'current'] as const,
   withdraws: ['provider', 'withdraws'] as const,
   feedbacks: ['provider', 'feedbacks'] as const,
   notifications: ['provider', 'notifications'] as const,
