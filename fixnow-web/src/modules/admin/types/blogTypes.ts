@@ -48,5 +48,5 @@ export type Blog = {
 
 export type BlogPayload = Omit<
   Blog,
-  '_id' | 'authorId' | 'createdAt' | 'updatedAt'
+  '_id' | 'authorId' | 'viewCount' | 'createdAt' | 'updatedAt'
 >

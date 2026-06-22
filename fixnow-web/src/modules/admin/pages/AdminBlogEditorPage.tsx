@@ -28,7 +28,6 @@ const initialPayload: BlogPayload = {
   status: 'DRAFT',
   isFeatured: false,
   readTimeMinutes: 5,
-  viewCount: 0,
   publishedAt: todayInputValue(),
   seoTitle: '',
   seoDescription: '',
@@ -98,7 +97,7 @@ export function AdminBlogEditorPage() {
 
 function toPayload(blog?: Blog): BlogPayload {
   if (!blog) return initialPayload
-  const { title, slug, excerpt, category, categoryId, serviceName, tags, coverImage, sections, status, isFeatured, readTimeMinutes, viewCount, publishedAt, seoTitle, seoDescription } = blog
+  const { title, slug, excerpt, category, categoryId, serviceName, tags, coverImage, sections, status, isFeatured, readTimeMinutes, publishedAt, seoTitle, seoDescription } = blog
   return {
     title,
     slug,
@@ -112,7 +111,6 @@ function toPayload(blog?: Blog): BlogPayload {
     status,
     isFeatured,
     readTimeMinutes,
-    viewCount,
     publishedAt,
     seoTitle,
     seoDescription,
@@ -222,9 +220,8 @@ function AdminBlogEditorForm({ blogId, initialBlog }: { blogId?: string; initial
                   {serviceNames.map((serviceName) => <option key={serviceName} value={serviceName}>{serviceName}</option>)}
                 </select>
               </label>
-              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
                 <label><span className="mb-1.5 block text-sm font-bold">Thời gian đọc</span><input type="number" min={1} value={form.readTimeMinutes} onChange={(event) => setForm({ ...form, readTimeMinutes: Math.max(1, Number(event.target.value)) })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" /></label>
-                <label><span className="mb-1.5 block text-sm font-bold">Số lượt xem</span><input type="number" min={0} step={1} value={form.viewCount} onChange={(event) => setForm({ ...form, viewCount: Math.max(0, Math.floor(Number(event.target.value) || 0)) })} className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400" /></label>
                 <label><span className="mb-1.5 block text-sm font-bold">Ngày đăng</span><input type="date" value={form.publishedAt?.slice(0, 10) || ''} onChange={(event) => setForm({ ...form, publishedAt: event.target.value || null })} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-400" /></label>
               </div>
               <label className="sm:col-span-2"><span className="mb-1.5 block text-sm font-bold">Mô tả ngắn *</span><textarea value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} rows={4} maxLength={500} className="w-full rounded-xl border border-slate-200 p-4 text-sm outline-none focus:border-blue-400" placeholder="Tóm tắt giá trị người đọc nhận được..." /></label>

@@ -71,9 +71,6 @@ export function LandingNavbar() {
             <div className="invisible absolute left-1/2 top-full w-[570px] -translate-x-1/2 translate-y-2 opacity-0 transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
               <div className="grid min-h-60 grid-cols-[215px_1fr] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
                 <div className="bg-slate-50 p-2.5">
-                  <Link to="/blog" className="mb-1.5 block rounded-lg px-3 py-2.5 text-xs font-extrabold text-blue-700 hover:bg-blue-50">
-                    Tất cả cẩm nang
-                  </Link>
                   {categories.map((category) => (
                     <button
                       key={category._id}
@@ -112,18 +109,15 @@ export function LandingNavbar() {
                   ))}
                 </div>
                 <div className="p-4">
-                  <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                    Chọn dịch vụ
-                  </p>
                   {servicesQuery.isLoading ? (
                     <p className="text-sm text-slate-500">Đang tải dịch vụ...</p>
                   ) : (servicesByCategory.get(displayedCategoryId) ?? []).length ? (
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-100">
                       {(servicesByCategory.get(displayedCategoryId) ?? []).map((serviceName) => (
                         <Link
                           key={serviceName}
                           to={blogUrl(displayedCategoryId, serviceName)}
-                          className="rounded-lg border border-slate-100 px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                          className="block px-3 py-3 text-xs font-semibold text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
                         >
                           {serviceName}
                         </Link>
