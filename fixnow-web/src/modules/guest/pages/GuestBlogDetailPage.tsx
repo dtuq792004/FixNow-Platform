@@ -8,7 +8,15 @@ import { BlogReviewForm } from '../components/BlogReviewForm'
 
 export function GuestBlogDetailPage() {
   const { slug = '' } = useParams()
-  const query = useQuery({ queryKey: ['public', 'blog', slug], queryFn: () => blogService.getPublic(slug), enabled: Boolean(slug) })
+  const query = useQuery({
+    queryKey: ['public', 'blog', slug],
+    queryFn: () => blogService.getPublic(slug),
+    enabled: Boolean(slug),
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
 
   return (
     <GuestPageLayout>

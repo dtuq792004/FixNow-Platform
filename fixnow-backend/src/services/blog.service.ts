@@ -26,7 +26,6 @@ type BlogPayload = Partial<Pick<
   | "status"
   | "isFeatured"
   | "readTimeMinutes"
-  | "viewCount"
   | "publishedAt"
   | "seoTitle"
   | "seoDescription"
@@ -49,23 +48,25 @@ const sanitizeRichText = (value: string) =>
     .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
     .replace(/\s+(href|src)\s*=\s*(["'])\s*javascript:[\s\S]*?\2/gi, "");
 
-const sanitizePayload = (payload: BlogPayload): BlogPayload => ({
-  ...payload,
-  category: payload.category?.trim(),
-  serviceName: payload.serviceName?.trim(),
-  viewCount: payload.viewCount === undefined
-    ? undefined
-    : Math.max(0, Math.floor(Number(payload.viewCount) || 0)),
-  publishedAt: payload.publishedAt === undefined || payload.publishedAt === null
-    ? payload.publishedAt
-    : new Date(payload.publishedAt),
-  sections: payload.sections?.map((section) => ({
-    ...section,
-    label: section.label?.trim() ?? "",
-    heading: section.heading?.trim() ?? "",
-    content: sanitizeRichText(section.content ?? ""),
-  })),
-});
+const sanitizePayload = (payload: BlogPayload): BlogPayload => {
+  const editablePayload = { ...payload } as BlogPayload & { viewCount?: unknown };
+  delete editablePayload.viewCount;
+
+  return {
+    ...editablePayload,
+    category: editablePayload.category?.trim(),
+    serviceName: editablePayload.serviceName?.trim(),
+    publishedAt: editablePayload.publishedAt === undefined || editablePayload.publishedAt === null
+      ? editablePayload.publishedAt
+      : new Date(editablePayload.publishedAt),
+    sections: editablePayload.sections?.map((section) => ({
+      ...section,
+      label: section.label?.trim() ?? "",
+      heading: section.heading?.trim() ?? "",
+      content: sanitizeRichText(section.content ?? ""),
+    })),
+  };
+};
 
 const slugify = (value: string) =>
   value
