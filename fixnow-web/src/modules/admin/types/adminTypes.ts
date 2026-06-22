@@ -44,6 +44,7 @@ export type BlogViewReport = {
   endDate: string
   daily: Array<WeeklyReportPoint & { value: number }>
   totalViews: number
+  allTimeViews: number
   publishedBlogs: number
   topBlogs: Array<{ _id: string; title: string; views: number }>
 }

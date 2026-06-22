@@ -318,7 +318,7 @@ const dayLabel = (key: string) =>
 
 export const getBlogViewReport = async (weekOffset = 0) => {
   const range = getWeekRange(weekOffset);
-  const [dailyRows, topBlogs, publishedBlogs] = await Promise.all([
+  const [dailyRows, topBlogs, publishedBlogs, allTimeViewRows] = await Promise.all([
     BlogView.aggregate([
       { $match: { date: { $gte: range.keys[0], $lte: range.keys[6] } } },
       { $group: { _id: "$date", value: { $sum: "$count" } } },
@@ -333,6 +333,9 @@ export const getBlogViewReport = async (weekOffset = 0) => {
       { $project: { title: { $ifNull: [{ $arrayElemAt: ["$blog.title", 0] }, "Bài viết đã xóa"] }, views: 1 } },
     ]),
     Blog.countDocuments({ status: "PUBLISHED" }),
+    BlogView.aggregate([
+      { $group: { _id: null, value: { $sum: "$count" } } },
+    ]),
   ]);
   const values = new Map(dailyRows.map((row) => [row._id, row.value]));
   const daily = range.keys.map((date) => ({ date, label: dayLabel(date), value: values.get(date) ?? 0 }));
@@ -342,6 +345,7 @@ export const getBlogViewReport = async (weekOffset = 0) => {
     endDate: range.keys[6],
     daily,
     totalViews: daily.reduce((sum, item) => sum + item.value, 0),
+    allTimeViews: allTimeViewRows[0]?.value ?? 0,
     publishedBlogs,
     topBlogs,
   };
