@@ -47,7 +47,7 @@ export function AdminServicesPage() {
                       <div className="absolute left-4 top-4"><AdminBadge tone={service.status === 'APPROVED' ? 'green' : service.status === 'REJECTED' ? 'red' : 'amber'}>{statusLabels[service.status]}</AdminBadge></div>
                       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
                         <h2 className="line-clamp-2 text-xl font-extrabold">{service.name}</h2>
-                        <span className="shrink-0 rounded-xl bg-white/20 px-3 py-1.5 text-sm font-black backdrop-blur">{money(service.price)}</span>
+                        <span className="shrink-0 rounded-xl bg-white/20 px-3 py-1.5 text-sm font-black backdrop-blur">{service.price > 0 ? money(service.price) : 'Báo giá sau'}</span>
                       </div>
                     </div>
 

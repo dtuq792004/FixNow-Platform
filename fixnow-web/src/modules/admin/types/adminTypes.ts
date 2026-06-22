@@ -37,3 +37,30 @@ export type ProviderApplication = {
 export type AdminWithdrawal = { _id: string; userId: NamedUser; amount: number; status: 'PENDING' | 'APPROVED' | 'REJECTED'; bankName: string; accountNumber: string; accountHolder: string; createdAt: string }
 export type AdminSettings = { platformFeePercent: number; minWithdrawAmount: number; terms: string }
 export type AdminReport = { revenueByMonth: Array<{ _id: string; revenue: number }>; categoryUsage: Array<{ name: string; total: number }>; completedJobs: number; averageRating: number; newUsers: number; withdrawals: Array<{ _id: string; amount: number; count: number }> }
+export type WeeklyReportPoint = { date: string; label: string }
+export type BlogViewReport = {
+  weekOffset: number
+  startDate: string
+  endDate: string
+  daily: Array<WeeklyReportPoint & { value: number }>
+  totalViews: number
+  publishedBlogs: number
+  topBlogs: Array<{ _id: string; title: string; views: number }>
+}
+export type RevenueReport = {
+  weekOffset: number
+  startDate: string
+  endDate: string
+  daily: Array<WeeklyReportPoint & { grossRevenue: number; platformRevenue: number; transactions: number }>
+  totalGrossRevenue: number
+  totalPlatformRevenue: number
+  totalTransactions: number
+}
+export type CatalogReport = {
+  totalCategories: number
+  activeCategories: number
+  totalServices: number
+  approvedServices: number
+  categories: Array<{ _id: string; name: string; isActive: boolean; totalServices: number; approvedServices: number }>
+  serviceStatuses: Array<{ status: string; label: string; value: number }>
+}

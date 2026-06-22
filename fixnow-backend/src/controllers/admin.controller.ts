@@ -35,6 +35,15 @@ export const updateComplaintStatus = async (req: Request, res: Response) => {
 export const getAnalytics = async (_req: Request, res: Response) => {
   try { res.json({ success: true, data: await adminService.getAnalytics() }); } catch (error) { sendError(res, error); }
 };
+export const getBlogViewReport = async (req: Request, res: Response) => {
+  try { res.json({ success: true, data: await adminService.getBlogViewReport(numberQuery(req.query.weekOffset, 0)) }); } catch (error) { sendError(res, error); }
+};
+export const getRevenueReport = async (req: Request, res: Response) => {
+  try { res.json({ success: true, data: await adminService.getRevenueReport(numberQuery(req.query.weekOffset, 0)) }); } catch (error) { sendError(res, error); }
+};
+export const getCatalogReport = async (_req: Request, res: Response) => {
+  try { res.json({ success: true, data: await adminService.getCatalogReport() }); } catch (error) { sendError(res, error); }
+};
 export const getSettings = async (_req: Request, res: Response) => {
   try { res.json({ success: true, data: await adminService.getSettings() }); } catch (error) { sendError(res, error); }
 };

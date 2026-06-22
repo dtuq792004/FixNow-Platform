@@ -40,7 +40,8 @@ const serviceSchema = new Schema<IService>(
 
   price: {
     type: Number,
-    required: true
+    required: true,
+    min: [0, "Service price cannot be negative"]
   },
 
   unit: {

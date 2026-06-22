@@ -19,7 +19,7 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
   name: z.string().trim().min(3, 'Tên dịch vụ cần ít nhất 3 ký tự'),
   description: z.string().trim().optional(),
-  price: z.number().positive('Giá phải lớn hơn 0'),
+  price: z.number().min(0, 'Giá không được nhỏ hơn 0'),
   unit: z.enum(['hour', 'job']),
   image: z.array(z.string().url()).max(5, 'Chỉ được tải tối đa 5 ảnh'),
 })
@@ -55,7 +55,7 @@ export function ProviderServicesPage() {
         <div className="p-5">
           <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs font-bold uppercase text-blue-600">{typeof service.categoryId === 'object' ? service.categoryId.name : 'Danh mục'}</p><h2 className="mt-1 truncate text-lg font-bold">{service.name}</h2></div><span className={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${service.status === 'APPROVED' ? 'bg-green-100 text-green-700' : service.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{service.status}</span></div>
           <p className="mt-3 line-clamp-2 min-h-10 text-sm text-slate-500">{service.description || 'Chưa có mô tả'}</p>
-          <p className="mt-4 font-bold text-blue-700">{formatCurrency(service.price)}/{service.unit === 'hour' ? 'giờ' : 'công việc'}</p>
+          <p className="mt-4 font-bold text-blue-700">{service.price > 0 ? `${formatCurrency(service.price)}/${service.unit === 'hour' ? 'giờ' : 'công việc'}` : 'Báo giá khi sửa chữa'}</p>
           <div className="mt-5 flex border-t pt-3"><button className="flex flex-1 items-center justify-center gap-2" onClick={() => setEditing(service)}><Edit3 size={16} /> Sửa</button><button disabled={deleteMutation.isPending} className="flex flex-1 items-center justify-center gap-2 text-red-600" onClick={async () => { const confirmed = await confirm({ title: 'Xóa dịch vụ này?', description: `Dịch vụ “${service.name}” sẽ bị xóa và không còn hiển thị với khách hàng.`, confirmLabel: 'Xóa dịch vụ', variant: 'danger' }); if (confirmed) deleteMutation.mutate(service._id) }}><Trash2 size={16} /> Xóa</button></div>
         </div>
       </article>)}</div><AppPagination page={page} totalPages={totalPages} onPageChange={setPage} /></>}
@@ -105,7 +105,7 @@ function ServiceDialog({ service, categories, pending, error, onClose, onSubmit 
           </div>
           <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
             <p className="mb-4 text-sm font-bold text-slate-900">Chi phí dịch vụ</p>
-            <div className="grid gap-4 sm:grid-cols-2"><Field label="Mức giá" error={form.formState.errors.price?.message}><input type="number" {...form.register('price', { valueAsNumber: true })} className="profile-input bg-white" placeholder="500000" /></Field><Field label="Đơn vị tính"><select {...form.register('unit')} className="profile-input bg-white"><option value="job">Theo công việc</option><option value="hour">Theo giờ</option></select></Field></div>
+            <div className="grid gap-4 sm:grid-cols-2"><Field label="Mức giá (nhập 0 nếu báo giá sau)" error={form.formState.errors.price?.message}><input type="number" min="0" {...form.register('price', { valueAsNumber: true })} className="profile-input bg-white" placeholder="0" /></Field><Field label="Đơn vị tính"><select {...form.register('unit')} className="profile-input bg-white"><option value="job">Theo công việc</option><option value="hour">Theo giờ</option></select></Field></div>
           </div>
           {error && <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{error}</p>}
         </section>

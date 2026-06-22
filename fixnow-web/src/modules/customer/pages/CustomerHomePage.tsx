@@ -88,7 +88,7 @@ export function CustomerHomePage() {
                     <div className="p-5">
                       <h3 className="line-clamp-1 text-lg font-bold group-hover:text-blue-600">{service.name}</h3>
                       <p className="mt-2 line-clamp-2 min-h-10 text-sm text-slate-500">{service.description || 'Dịch vụ sửa chữa tại nhà do FixNow cung cấp.'}</p>
-                      <div className="mt-5 flex items-center justify-between gap-3"><strong className="text-lg text-blue-600">{formatCurrency(service.price)}</strong><AppButton size="sm" onClick={() => bookService(service._id, categoryId)}>Đặt ngay</AppButton></div>
+                      <div className="mt-5 flex items-center justify-between gap-3"><strong className="text-lg text-blue-600">{service.price > 0 ? formatCurrency(service.price) : 'Báo giá khi sửa chữa'}</strong><AppButton size="sm" onClick={() => bookService(service._id, categoryId)}>Đặt ngay</AppButton></div>
                     </div>
                   </article>
                 )

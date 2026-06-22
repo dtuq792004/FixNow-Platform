@@ -3,6 +3,9 @@ import { CustomerLayout } from '../../layouts/CustomerLayout'
 import { AdminLayout } from '../../layouts/AdminLayout'
 import { ProviderLayout } from '../../layouts/ProviderLayout'
 import { AdminAnalyticsPage } from '../../modules/admin/pages/AdminAnalyticsPage'
+import { AdminBlogViewsReportPage } from '../../modules/admin/pages/AdminBlogViewsReportPage'
+import { AdminRevenueReportPage } from '../../modules/admin/pages/AdminRevenueReportPage'
+import { AdminCatalogReportPage } from '../../modules/admin/pages/AdminCatalogReportPage'
 import { AdminCategoriesPage } from '../../modules/admin/pages/AdminCategoriesPage'
 import { AdminComplaintsPage } from '../../modules/admin/pages/AdminComplaintsPage'
 import { AdminDashboardPage } from '../../modules/admin/pages/AdminDashboardPage'
@@ -28,6 +31,7 @@ import { GuestAboutPage } from '../../modules/guest/pages/GuestAboutPage'
 import { GuestBlogPage } from '../../modules/guest/pages/GuestBlogPage'
 import { GuestBlogDetailPage } from '../../modules/guest/pages/GuestBlogDetailPage'
 import { GuestServicesPage } from '../../modules/guest/pages/GuestServicesPage'
+import { GuestPricingPage } from '../../modules/guest/pages/GuestPricingPage'
 import { GuestSupportPage } from '../../modules/guest/pages/GuestSupportPage'
 import { LandingPage } from '../../modules/guest/pages/LandingPage'
 import { PaymentPage } from '../../modules/payment/pages/PaymentPage'
@@ -55,6 +59,7 @@ import { ROLES } from '../../shared/constants/roles'
 export const appRouter = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
   { path: '/services', element: <GuestServicesPage /> },
+  { path: '/pricing', element: <GuestPricingPage /> },
   { path: '/about', element: <GuestAboutPage /> },
   { path: '/blog', element: <GuestBlogPage /> },
   { path: '/blog/:slug', element: <GuestBlogDetailPage /> },
@@ -133,6 +138,9 @@ export const appRouter = createBrowserRouter([
       { path: 'reviews', element: <AdminReviewsPage /> },
       { path: 'complaints', element: <AdminComplaintsPage /> },
       { path: 'analytics', element: <AdminAnalyticsPage /> },
+      { path: 'analytics/blog-views', element: <AdminBlogViewsReportPage /> },
+      { path: 'analytics/revenue', element: <AdminRevenueReportPage /> },
+      { path: 'analytics/catalog', element: <AdminCatalogReportPage /> },
       { path: 'blogs', element: <AdminBlogsPage /> },
       { path: 'blogs/new', element: <AdminBlogEditorPage /> },
       { path: 'blogs/:blogId', element: <AdminBlogDetailPage /> },

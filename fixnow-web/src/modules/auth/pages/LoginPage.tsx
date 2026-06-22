@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import loginBackground from '../../../assets/background_authen/screen.png'
 import { ApiError } from '../../../shared/services/apiClient'
-import { AuthFooter } from '../components/AuthFooter'
 import { MaterialIcon } from '../components/MaterialIcon'
 import { SocialAuthButtons } from '../components/SocialAuthButtons'
 import { useLoginMutation } from '../hooks/useAuth'
@@ -60,7 +59,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-flow relative flex min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto bg-surface-bright">
+    <div className="auth-flow relative flex h-dvh w-full flex-col overflow-hidden bg-surface-bright">
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div
           className="h-full w-full bg-cover bg-center"
@@ -72,7 +71,7 @@ export function LoginPage() {
 
       <header className="fixed top-0 left-0 z-50 flex w-full items-center justify-between bg-transparent px-lg py-md">
         <Link className="text-headline-md font-extrabold tracking-tight text-white drop-shadow-md" to="/">
-          FixNow
+          FIXNOW
         </Link>
         <button
           className="flex items-center justify-center p-base text-white transition hover:opacity-80 active:scale-95"
@@ -83,11 +82,11 @@ export function LoginPage() {
         </button>
       </header>
 
-      <main className="relative z-10 flex min-h-0 flex-grow items-center justify-center px-4 pb-8 pt-20 sm:px-md sm:py-20">
+      <main className="relative z-10 flex min-h-0 flex-grow items-center justify-center px-4 py-16 sm:px-md">
         <div className="w-full max-w-[440px] overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200">
-          <div className="flex flex-col gap-6 px-5 py-7 sm:gap-xl sm:px-xl sm:py-xxl">
+          <div className="flex flex-col gap-4 px-5 py-5 sm:px-xl sm:py-6">
             <div className="space-y-base text-center">
-              <div className="inline-block text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient">FixNow</div>
+              <div className="inline-block text-headline-md font-extrabold tracking-tight text-transparent bg-clip-text bg-header-gradient">FIXNOW</div>
               <h1 className="text-headline-md font-semibold text-on-surface">Chào mừng trở lại</h1>
               <p className="text-body-md text-on-surface-variant">Vui lòng nhập thông tin để tiếp tục</p>
               {typeof location.state === 'object' &&
@@ -100,7 +99,7 @@ export function LoginPage() {
                 )}
             </div>
 
-            <form className="flex flex-col gap-lg" onSubmit={handleSubmit(onSubmit)}>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-xs">
                 <label className="block text-label-md font-medium text-on-surface-variant" htmlFor="identity">
                   Email
@@ -181,7 +180,6 @@ export function LoginPage() {
           </div>
         </div>
       </main>
-      <AuthFooter />
     </div>
   )
 }

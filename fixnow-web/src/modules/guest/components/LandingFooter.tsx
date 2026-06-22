@@ -6,10 +6,10 @@ export function LandingFooter() {
       <div className="mx-auto grid w-full max-w-container-max gap-6 px-4 py-8 text-center sm:px-6 md:grid-cols-[1fr_auto] md:text-left lg:grid-cols-[1fr_2fr_auto] lg:items-center lg:px-gutter">
         <div className="flex flex-col items-center gap-sm md:items-start">
           <Link className="text-headline-md font-extrabold tracking-tight text-blue-300" to="/">
-            FixNow
+            FIXNOW
           </Link>
           <p className="text-center text-body-md text-blue-100/70 md:text-left">
-            © 2026 FixNow - Dịch vụ sửa chữa nhà cửa chuyên nghiệp
+            © 2026 FIXNOW - Dịch vụ sửa chữa nhà cửa chuyên nghiệp
           </p>
         </div>
 

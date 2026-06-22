@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import appPreview from '../../../assets/adr.png'
 import { LandingFooter } from '../components/LandingFooter'
 import { LandingNavbar } from '../components/LandingNavbar'
 
@@ -22,7 +23,7 @@ const benefits = [
 ]
 
 const processSteps = [
-  ['01', 'Gửi yêu cầu', 'Mô tả vấn đề bạn đang gặp phải qua ứng dụng hoặc website FixNow.', 'bg-primary-container'],
+  ['01', 'Gửi yêu cầu', 'Mô tả vấn đề bạn đang gặp phải qua ứng dụng hoặc website FIXNOW.', 'bg-primary-container'],
   ['02', 'Kết nối thợ', 'Chúng tôi sẽ điều phối thợ gần nhất đến kiểm tra và báo giá.', 'bg-secondary-container'],
   ['03', 'Sửa & Thanh toán', 'Thợ tiến hành sửa chữa. Bạn hài lòng mới tiến hành thanh toán.', 'bg-tertiary-container'],
 ]
@@ -87,7 +88,7 @@ export function LandingPage() {
 
         <section id="about" className="py-xxl relative overflow-hidden">
           <div className="absolute inset-0 bg-blue-50/30 -z-10" />
-          <div className="mx-auto mb-xl max-w-container-max px-gutter text-center"><h2 className="mb-xs text-headline-lg text-on-surface">Tại sao chọn FixNow?</h2><p className="text-body-md text-on-surface-variant">Chúng tôi cam kết mang lại trải nghiệm dịch vụ tốt nhất</p></div>
+          <div className="mx-auto mb-xl max-w-container-max px-gutter text-center"><h2 className="mb-xs text-headline-lg text-on-surface">Tại sao chọn FIXNOW?</h2><p className="text-body-md text-on-surface-variant">Chúng tôi cam kết mang lại trải nghiệm dịch vụ tốt nhất</p></div>
           <div className="mx-auto grid max-w-container-max grid-cols-1 gap-lg px-gutter md:grid-cols-2 lg:grid-cols-4">
             {benefits.map(([icon, title, text]) => <div key={title} className="flex flex-col items-center rounded-2xl border border-outline-variant bg-white p-lg text-center shadow-sm"><MaterialIcon className="mb-md text-[48px] text-primary">{icon}</MaterialIcon><h4 className="mb-sm text-title-lg text-on-surface">{title}</h4><p className="text-body-md text-on-surface-variant">{text}</p></div>)}
           </div>
@@ -114,22 +115,11 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="blog" className="py-xxl">
-          <div className="mx-auto max-w-container-max px-gutter">
-            <div className="grid grid-cols-1 gap-xl">
-              <div className="grid grid-cols-1 gap-lg md:grid-cols-2">
-                <Testimonial image="https://lh3.googleusercontent.com/aida-public/AB6AXuC9KaY1SnapWmPVcnrXNtx5G5jJtp3e36H8gS_WZcjC7d_4VRxTQYACx-xM5U7foDZxr-8O3hPvQKMC-Kzqrrf_ZWC4MgKTgWenS2t2QT-aYMqHsPHUpbAglkSNOvko9m1hWb5KZHURpulwSgvssS6P50PEGAZcH7iaun9aZuOpCLTrQ0xo8fsgJZfqVd1TbeRsK_WHL5Gh2BWXVmN0qqSexR0eWX37cFIyc_2QaEyn4_PIT3RZh06tLkXDxzXXI9AC3lVc7iNzscY" name="Chị Lan Anh" location="Quận 7, TP.HCM">“Dịch vụ cực kỳ nhanh. Thợ đến sau đúng 20 phút, sửa ống nước rò rỉ rất chuyên nghiệp. Giá cả lại rất hợp lý!”</Testimonial>
-                <Testimonial image="https://lh3.googleusercontent.com/aida-public/AB6AXuDprs56AHYpbXuWqKZf9w7DCCmYZM3onYYfqYSZqkbs05MzXwbigJZwEXjb2h-DHPvDdSDo9Xv9ZBUvNvBSnLxotaOAC_jn7ulL0R-s8_H0wtIqYi48abb_oG4aqMMEda3gzR0Vf1UbElnWgW_FiuBx_Ue2py9-oY_c6ueQvzJrOLiXtKmgoQZgcweDQpNcxwH1FTNeqA6YItqyeD6BOEEgwpE2MH0jC6AVDHoeItCr5dYAe0ou9t2__Qz_TwSy1aPkxRu1EaogEAY" name="Anh Minh Đức" location="Quận Hoàn Kiếm, Hà Nội">“Lần đầu tiên thấy một app sửa chữa tiện lợi như vậy. Thợ sửa máy lạnh rất kỹ, có cả hóa đơn điện tử gửi về mail.”</Testimonial>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="bg-surface-bright py-xxl">
           <div className="relative mx-4 flex max-w-container-max flex-col items-center gap-xl overflow-hidden rounded-3xl bg-header-gradient p-6 shadow-2xl sm:mx-6 sm:p-8 lg:mx-auto lg:flex-row lg:rounded-[40px] lg:p-xxl">
             <div className="pointer-events-none absolute top-0 left-0 h-full w-full opacity-10"><svg height="100%" preserveAspectRatio="none" viewBox="0 0 100 100" width="100%"><path d="M0 100 C 20 0 50 0 100 100" fill="none" stroke="white" strokeWidth=".5" /><path d="M0 80 C 20 -20 50 -20 100 80" fill="none" stroke="white" strokeWidth=".5" /></svg></div>
-            <div className="z-10 text-center lg:w-1/2 lg:text-left"><h2 className="mb-md text-headline-lg font-bold text-white">Trải nghiệm FixNow trên điện thoại</h2><p className="mb-xl text-body-lg text-white/80">Đặt lịch sửa chữa mọi lúc mọi nơi, theo dõi hành trình thợ và nhận ưu đãi độc quyền hàng ngày.</p><div className="flex flex-wrap justify-center gap-md lg:justify-start"><StoreButton icon="smartphone" store="App Store" /><StoreButton icon="shop" store="Google Play" /></div></div>
-            <div className="relative z-10 lg:w-1/2"><div className="relative mx-auto w-full max-w-[300px]"><div className="relative rounded-[3rem] border-[8px] border-on-background bg-on-background p-sm shadow-2xl"><div className="aspect-[9/19.5] w-full rounded-[2.5rem] bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCakHS4FcZfO508IJ81GEDUv6Nd-p5N-nXtMFwVWCq0w3XVg-ev1981ZKeMZ7IpMLL7EaWYs8SiWmwFLH1Smrnc0Zc0RUsRyR2kSghGuSvT1w94grHurmCwGXAh1M5CYmAWCyAyGzorHu_7g5Zfd3icGvgQs7NigiWq_p-_oQLTGHGQNj376FGKaaY3fbdKBjMnUd14snyGnkBn88BWbZXvPJozh3-2t5QGJB52jhtyi34B9DNv5RHpwc8WBWgCpargz1FEVjTxAfE")' }} /><div className="absolute top-0 left-1/2 h-6 w-1/3 -translate-x-1/2 rounded-b-2xl bg-on-background" /></div><div className="absolute top-1/4 -right-8 animate-bounce rounded-xl border border-outline-variant bg-white p-sm shadow-lg"><MaterialIcon className="text-tertiary">check_circle</MaterialIcon></div><div className="absolute bottom-1/4 -left-12 flex items-center gap-sm rounded-2xl border border-outline-variant bg-white p-md shadow-xl"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary"><MaterialIcon className="text-[18px] text-white">bolt</MaterialIcon></div><span className="text-label-sm font-bold">Thợ đã đến!</span></div></div></div>
+            <div className="z-10 text-center lg:w-1/2 lg:text-left"><h2 className="mb-md text-headline-lg font-bold text-white">Trải nghiệm FIXNOW trên điện thoại</h2><p className="mb-xl text-body-lg text-white/80">Đặt lịch sửa chữa mọi lúc mọi nơi, theo dõi hành trình thợ và nhận ưu đãi độc quyền hàng ngày.</p><div className="flex flex-wrap justify-center gap-md lg:justify-start"><StoreButton icon="smartphone" store="App Store" /><StoreButton icon="shop" store="Google Play" /></div></div>
+            <div className="relative z-10 lg:w-1/2"><div className="relative mx-auto w-full max-w-[300px]"><div className="relative rounded-[3rem] border-[8px] border-on-background bg-on-background p-sm shadow-2xl"><div className="aspect-[9/19.5] w-full overflow-hidden rounded-[2.5rem]"><img className="h-full w-full object-cover object-top" src={appPreview} alt="Giao diện ứng dụng FIXNOW trên điện thoại" /></div><div className="absolute top-0 left-1/2 h-6 w-1/3 -translate-x-1/2 rounded-b-2xl bg-on-background" /></div><div className="absolute top-1/4 -right-8 animate-bounce rounded-xl border border-outline-variant bg-white p-sm shadow-lg"><MaterialIcon className="text-tertiary">check_circle</MaterialIcon></div><div className="absolute bottom-1/4 -left-12 flex items-center gap-sm rounded-2xl border border-outline-variant bg-white p-md shadow-xl"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary"><MaterialIcon className="text-[18px] text-white">bolt</MaterialIcon></div><span className="text-label-sm font-bold">Thợ đã đến!</span></div></div></div>
           </div>
         </section>
       </main>
@@ -156,10 +146,6 @@ export function LandingPage() {
       </div>
     </div>
   )
-}
-
-function Testimonial({ image, name, location, children }: { image: string; name: string; location: string; children: string }) {
-  return <div className="rounded-2xl border border-outline-variant bg-white p-lg shadow-sm"><div className="mb-md flex items-center gap-md"><img className="h-12 w-12 rounded-full object-cover" src={image} alt={name} /><div><h4 className="text-title-lg text-on-surface">{name}</h4><p className="text-label-sm text-on-surface-variant">{location}</p></div></div><p className="text-body-md text-on-surface italic">{children}</p></div>
 }
 
 function StoreButton({ icon, store }: { icon: string; store: string }) {

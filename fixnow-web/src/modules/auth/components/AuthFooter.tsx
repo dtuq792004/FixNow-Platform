@@ -15,7 +15,7 @@ export function AuthFooter() {
         </Link>
       </div>
       <span className="rounded-full bg-white/75 px-3 py-1 text-label-sm text-slate-600 backdrop-blur">
-        © {new Date().getFullYear()} FixNow. All rights reserved.
+        © {new Date().getFullYear()} FIXNOW. All rights reserved.
       </span>
     </footer>
   )
