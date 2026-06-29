@@ -107,6 +107,29 @@ async function ensureInitialBlogView(blogId: Types.ObjectId, publishedAt?: Date 
   );
 }
 
+
+type BlogWithViewCount = { _id: Types.ObjectId | string; viewCount?: number };
+
+async function withAggregatedViewCounts<T extends BlogWithViewCount>(blogs: T[]) {
+  const blogIds = blogs.map((blog) => blog._id).filter((id) => Types.ObjectId.isValid(String(id)));
+  if (!blogIds.length) return blogs;
+
+  const rows = await BlogView.aggregate<{ _id: Types.ObjectId; views: number }>([
+    { $match: { blogId: { $in: blogIds.map((id) => new Types.ObjectId(String(id))) } } },
+    { $group: { _id: "$blogId", views: { $sum: "$count" } } },
+  ]);
+  const viewsByBlogId = new Map(rows.map((row) => [String(row._id), row.views]));
+
+  return blogs.map((blog) => ({
+    ...blog,
+    viewCount: Math.max(blog.viewCount ?? 0, viewsByBlogId.get(String(blog._id)) ?? 0),
+  }));
+}
+
+async function withAggregatedViewCount<T extends BlogWithViewCount>(blog: T) {
+  const [blogWithViews] = await withAggregatedViewCounts([blog]);
+  return blogWithViews;
+}
 function pagination(params: ListParams) {
   const page = Math.max(1, Number(params.page) || 1);
   const limit = Math.min(30, Math.max(1, Number(params.limit) || 9));
@@ -134,7 +157,7 @@ export async function listAdminBlogs(params: ListParams) {
       .lean(),
     Blog.countDocuments(filter),
   ]);
-  return { items, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
+  return { items: await withAggregatedViewCounts(items), total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
 }
 
 export async function listPublishedBlogs(params: ListParams) {
@@ -159,7 +182,7 @@ export async function listPublishedBlogs(params: ListParams) {
       .lean(),
     Blog.countDocuments(filter),
   ]);
-  return { items, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
+  return { items: await withAggregatedViewCounts(items), total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
 }
 
 export async function getAdminBlog(id: string) {
@@ -169,7 +192,7 @@ export async function getAdminBlog(id: string) {
     .populate("categoryId", "name type iconUrl")
     .lean();
   if (!blog) throw new Error("Không tìm thấy bài viết");
-  return blog;
+  return withAggregatedViewCount(blog);
 }
 
 export async function getPublishedBlog(slug: string) {
@@ -192,7 +215,7 @@ export async function getPublishedBlog(slug: string) {
     { $inc: { count: 1 } },
     { upsert: true },
   );
-  return blog;
+  return withAggregatedViewCount(blog.toObject());
 }
 
 export async function getBlogReviewSummary(slug: string) {
