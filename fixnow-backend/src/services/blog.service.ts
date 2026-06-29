@@ -90,6 +90,23 @@ async function createUniqueSlug(value: string, excludedId?: string) {
   return slug;
 }
 
+const blogViewDateKey = (date: Date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+
+async function ensureInitialBlogView(blogId: Types.ObjectId, publishedAt?: Date | null) {
+  const date = blogViewDateKey(publishedAt ?? new Date());
+  await BlogView.updateOne(
+    { blogId, date },
+    { $setOnInsert: { blogId, date, count: 0 } },
+    { upsert: true },
+  );
+}
+
 function pagination(params: ListParams) {
   const page = Math.max(1, Number(params.page) || 1);
   const limit = Math.min(30, Math.max(1, Number(params.limit) || 9));
@@ -223,13 +240,17 @@ export async function createBlog(authorId: string, payload: BlogPayload) {
   const selectedPublishedAt = safePayload.publishedAt instanceof Date && !Number.isNaN(safePayload.publishedAt.getTime())
     ? safePayload.publishedAt
     : null;
-  return Blog.create({
+  const blog = await Blog.create({
     ...safePayload,
     slug: await createUniqueSlug(safePayload.slug || safePayload.title!),
     authorId,
     status,
     publishedAt: status === "PUBLISHED" ? selectedPublishedAt ?? new Date() : null,
   });
+  if (blog.status === "PUBLISHED") {
+    await ensureInitialBlogView(blog._id as Types.ObjectId, blog.publishedAt);
+  }
+  return blog;
 }
 
 export async function updateBlog(id: string, payload: BlogPayload) {
@@ -247,12 +268,18 @@ export async function updateBlog(id: string, payload: BlogPayload) {
     update.publishedAt = selectedPublishedAt ?? current.publishedAt ?? new Date();
   }
   if (status === "DRAFT") update.publishedAt = null;
-  return Blog.findByIdAndUpdate(id, update, { new: true, runValidators: true })
+  const blog = await Blog.findByIdAndUpdate(id, update, { new: true, runValidators: true })
     .populate("authorId", "fullName email avatar")
     .populate("categoryId", "name type iconUrl");
+  if (blog?.status === "PUBLISHED") {
+    await ensureInitialBlogView(blog._id as Types.ObjectId, blog.publishedAt);
+  }
+  return blog;
 }
 
 export async function deleteBlog(id: string) {
   const blog = await Blog.findByIdAndDelete(id);
   if (!blog) throw new Error("Không tìm thấy bài viết");
+  await BlogView.deleteMany({ blogId: blog._id });
 }
+
