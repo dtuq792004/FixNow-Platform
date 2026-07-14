@@ -19,12 +19,19 @@ if (process.env.ANALYTICS_GEOIP === "on") {
   }
 }
 
-// Salt bắt buộc đặt ở production — không cho phép salt mặc định (hash sẽ dễ đoán).
-const DEFAULT_SALT = "fixnow-web-analytics";
-const SALT = process.env.ANALYTICS_SALT || DEFAULT_SALT;
-if (process.env.NODE_ENV === "production" && SALT === DEFAULT_SALT) {
-  throw new Error("ANALYTICS_SALT chưa được đặt ở production (bắt buộc để hash ẩn danh an toàn).");
-}
+// Salt cho visitorHash. Nếu chưa đặt ANALYTICS_SALT ở production: KHÔNG làm sập cả
+// server (analytics là tính năng phụ) — dùng salt ngẫu nhiên theo mỗi lần boot (vẫn
+// khó đoán; hash vốn đã đổi theo ngày) và cảnh báo để nên đặt env cho hash ổn định.
+const SALT =
+  process.env.ANALYTICS_SALT ||
+  (() => {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "[analytics] ANALYTICS_SALT chưa đặt ở production — dùng salt ngẫu nhiên tạm thời. Nên đặt ANALYTICS_SALT để hash khách ổn định giữa các lần khởi động.",
+      );
+    }
+    return crypto.randomBytes(32).toString("hex");
+  })();
 
 // Allowlist hostname hợp lệ (server tự suy ra từ Origin/Host — KHÔNG tin client gửi).
 const HOST_ALLOWLIST = new Set([
