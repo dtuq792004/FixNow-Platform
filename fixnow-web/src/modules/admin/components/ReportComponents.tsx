@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '../../../shared/utils/cn'
 
 const reportLinks = [
+  { to: '/admin/analytics/traffic', label: 'Lưu lượng web' },
   { to: '/admin/analytics/blog-views', label: 'Lượt xem blog' },
   { to: '/admin/analytics/revenue', label: 'Doanh thu' },
   { to: '/admin/analytics/catalog', label: 'Danh mục & dịch vụ' },

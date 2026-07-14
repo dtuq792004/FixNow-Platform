@@ -1,8 +1,15 @@
-import { ArrowRight, BookOpenText, HandCoins, Layers3 } from 'lucide-react'
+import { ArrowRight, BookOpenText, Globe, HandCoins, Layers3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AdminPageHeader } from '../components/AdminUi'
 
 const reports = [
+  {
+    to: '/admin/analytics/traffic',
+    title: 'Lưu lượng web',
+    description: 'Khách truy cập, lượt xem trang, tỷ lệ thoát, nguồn giới thiệu và thiết bị theo thời gian thực.',
+    icon: Globe,
+    tone: 'bg-cyan-50 text-cyan-600',
+  },
   {
     to: '/admin/analytics/blog-views',
     title: 'Lượt xem blog',
