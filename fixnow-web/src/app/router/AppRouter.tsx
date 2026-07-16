@@ -1,4 +1,6 @@
+import { Suspense, lazy } from 'react'
 import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { AdminLoading } from '../../modules/admin/components/AdminUi'
 import { CustomerLayout } from '../../layouts/CustomerLayout'
 import { AdminLayout } from '../../layouts/AdminLayout'
 import { ProviderLayout } from '../../layouts/ProviderLayout'
@@ -55,6 +57,12 @@ import { ReviewServicePage } from '../../modules/request/pages/ReviewServicePage
 import { ServiceHistoryPage } from '../../modules/request/pages/ServiceHistoryPage'
 import { TrackingProcessPage } from '../../modules/request/pages/TrackingProcessPage'
 import { ROLES } from '../../shared/constants/roles'
+
+// Lazy: giữ recharts ra khỏi bundle chính (mọi khách) — chỉ tải khi admin mở trang này.
+// eslint-disable-next-line react-refresh/only-export-components
+const AdminTrafficReportPage = lazy(() =>
+  import('../../modules/admin/pages/AdminTrafficReportPage').then((m) => ({ default: m.AdminTrafficReportPage })),
+)
 
 export const appRouter = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -138,6 +146,14 @@ export const appRouter = createBrowserRouter([
       { path: 'reviews', element: <AdminReviewsPage /> },
       { path: 'complaints', element: <AdminComplaintsPage /> },
       { path: 'analytics', element: <AdminAnalyticsPage /> },
+      {
+        path: 'analytics/traffic',
+        element: (
+          <Suspense fallback={<AdminLoading />}>
+            <AdminTrafficReportPage />
+          </Suspense>
+        ),
+      },
       { path: 'analytics/blog-views', element: <AdminBlogViewsReportPage /> },
       { path: 'analytics/revenue', element: <AdminRevenueReportPage /> },
       { path: 'analytics/catalog', element: <AdminCatalogReportPage /> },

@@ -22,8 +22,14 @@ import chatRoutes from "./routes/chat.routes";
 import aiRoutes from "./routes/ai.routes";
 import notificationRoutes from "./routes/notification.routes";
 import blogRoutes from "./routes/blog.routes";
+import webAnalyticsRoutes from "./routes/web-analytics.routes";
 
 const app: Application = express();
+
+// Đứng sau reverse proxy của Render (1 hop) → req.ip lấy đúng IP client thật.
+// KHÔNG dùng `true` (sẽ tin XFF do client gửi → giả mạo được). Sau khi deploy,
+// log req.ip/req.ips một lần để chỉnh số hop nếu cần.
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -82,6 +88,7 @@ app.use("/payments", paymentRoutes);
 app.use("/requests", requestRoutes);
 app.use("/platform-settings", platformSettingRoutes);
 app.use("/promotions", promotionRoutes);
+app.use("/analytics", webAnalyticsRoutes);
 app.use("/admin/analytics", analyticsRoutes);
 app.use("/feedback", feedbackRoutes);
 app.use("/users", userRoutes);
