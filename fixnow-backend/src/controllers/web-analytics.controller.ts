@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { collectEvent, resolveHostname, isBot } from "../services/web-analytics-collect.service";
 import { isRateLimited } from "../utils/analytics-rate-limit";
 import { getSummaryWithChange, getTimeseries } from "../services/web-analytics-report.service";
-import { getBreakdown, isValidDimension, clampLimit } from "../services/web-analytics-breakdown.service";
+import { getBreakdown, isValidDimension, clampLimit, parseBreakdownMetric } from "../services/web-analytics-breakdown.service";
 import { getRealtime } from "../services/web-analytics-realtime.service";
 
 // ── Public: nhận beacon từ tracker ở web (không cần auth) ─────────────────────
@@ -58,10 +58,11 @@ const OVERVIEW_DIMS = ["page", "hostname", "referrer", "utmSource", "country", "
 export const getWebOverviewController = async (req: Request, res: Response) => {
   try {
     const { from, to, days } = rangeFromDays(req.query.days);
+    const metric = parseBreakdownMetric(req.query.metric);
     const [summary, timeseries, ...breakdowns] = await Promise.all([
       getSummaryWithChange(from, to),
       getTimeseries(from, to),
-      ...OVERVIEW_DIMS.map((d) => getBreakdown(from, to, d, 8).then((r) => r.items)),
+      ...OVERVIEW_DIMS.map((d) => getBreakdown(from, to, d, 8, metric).then((r) => r.items)),
     ]);
     const [pages, hostnames, referrers, utmSources, countries, devices, browsers, os] = breakdowns;
     res.json({
@@ -79,8 +80,9 @@ export const getWebBreakdownController = async (req: Request, res: Response) => 
       return res.status(400).json({ message: "Chiều dữ liệu không hợp lệ" });
     }
     const { from, to } = rangeFromDays(req.query.days);
+    const metric = parseBreakdownMetric(req.query.metric);
     const limit = clampLimit(req.query.limit);
-    const data = await getBreakdown(from, to, dimension, limit);
+    const data = await getBreakdown(from, to, dimension, limit, metric);
     res.json({ data });
   } catch (error) {
     res.status(500).json({ message: "Không tải được breakdown", error: String(error) });

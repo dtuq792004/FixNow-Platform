@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { HorizontalBarChart } from './ReportComponents'
-import { webAnalyticsService } from '../services/webAnalyticsService'
+import { webAnalyticsService, type BreakdownMetric } from '../services/webAnalyticsService'
 
 export function TrafficViewAllModal({
   open,
@@ -11,6 +11,7 @@ export function TrafficViewAllModal({
   title,
   dimension,
   days,
+  metric,
   labelOf,
 }: {
   open: boolean
@@ -18,6 +19,7 @@ export function TrafficViewAllModal({
   title: string
   dimension: string
   days: number
+  metric: BreakdownMetric
   labelOf: (key: string) => string
 }) {
   useEffect(() => {
@@ -33,8 +35,8 @@ export function TrafficViewAllModal({
   }, [open, onClose])
 
   const query = useQuery({
-    queryKey: ['web', 'breakdown', dimension, days],
-    queryFn: () => webAnalyticsService.breakdown(dimension, days, 100),
+    queryKey: ['web', 'breakdown', dimension, days, metric],
+    queryFn: () => webAnalyticsService.breakdown(dimension, days, metric, 100),
     enabled: open,
   })
 
@@ -68,7 +70,7 @@ export function TrafficViewAllModal({
           {query.isLoading && <p className="py-8 text-center text-sm text-slate-500">Đang tải dữ liệu...</p>}
           {query.error && <p className="py-8 text-center text-sm text-red-600">Không tải được dữ liệu.</p>}
           {query.data && (items.length ? (
-            <HorizontalBarChart items={items.map((it) => ({ key: it.key, label: labelOf(it.key), value: it.visitors }))} />
+            <HorizontalBarChart items={items.map((it) => ({ key: it.key, label: labelOf(it.key), value: it[metric] }))} />
           ) : (
             <p className="py-8 text-center text-sm text-slate-500">Chưa có dữ liệu.</p>
           ))}

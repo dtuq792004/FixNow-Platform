@@ -1,6 +1,7 @@
 import { authenticatedRequest } from '../../auth/services/authService'
 
 export type MetricKey = 'visitors' | 'pageviews' | 'bounceRate'
+export type BreakdownMetric = Exclude<MetricKey, 'bounceRate'>
 
 export type BreakdownItem = { key: string; visitors: number; pageviews: number }
 
@@ -38,12 +39,12 @@ export type WebRealtime = {
 }
 
 export const webAnalyticsService = {
-  overview: (days: number) =>
-    authenticatedRequest<{ data: WebOverview }>(`/admin/analytics/web/overview?days=${days}`).then((r) => r.data),
+  overview: (days: number, metric: BreakdownMetric) =>
+    authenticatedRequest<{ data: WebOverview }>(`/admin/analytics/web/overview?days=${days}&metric=${metric}`).then((r) => r.data),
 
-  breakdown: (dimension: string, days: number, limit = 100) =>
+  breakdown: (dimension: string, days: number, metric: BreakdownMetric, limit = 100) =>
     authenticatedRequest<{ data: WebBreakdown }>(
-      `/admin/analytics/web/breakdown?dimension=${dimension}&days=${days}&limit=${limit}`,
+      `/admin/analytics/web/breakdown?dimension=${dimension}&days=${days}&metric=${metric}&limit=${limit}`,
     ).then((r) => r.data),
 
   realtime: () =>

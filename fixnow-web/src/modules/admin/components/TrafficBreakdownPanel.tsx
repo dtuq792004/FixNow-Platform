@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { cn } from '../../../shared/utils/cn'
 import { HorizontalBarChart } from './ReportComponents'
 import { TrafficViewAllModal } from './TrafficViewAllModal'
-import type { BreakdownItem } from '../services/webAnalyticsService'
+import type { BreakdownItem, BreakdownMetric } from '../services/webAnalyticsService'
 
 export type PanelTab = {
   key: string
@@ -12,7 +12,7 @@ export type PanelTab = {
   labelOf?: (key: string) => string
 }
 
-export function TrafficBreakdownPanel({ tabs, days }: { tabs: PanelTab[]; days: number }) {
+export function TrafficBreakdownPanel({ tabs, days, metric }: { tabs: PanelTab[]; days: number; metric: BreakdownMetric }) {
   const [activeKey, setActiveKey] = useState(tabs[0]?.key)
   const [modalOpen, setModalOpen] = useState(false)
   const active = tabs.find((t) => t.key === activeKey) ?? tabs[0]
@@ -34,12 +34,12 @@ export function TrafficBreakdownPanel({ tabs, days }: { tabs: PanelTab[]; days: 
             {t.label}
           </button>
         ))}
-        <span className="ml-auto shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">Khách</span>
+        <span className="ml-auto shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">{metric === 'visitors' ? 'Khách' : 'Lượt xem'}</span>
       </div>
 
       <div className="min-h-40 flex-1">
         {active.rows.length ? (
-          <HorizontalBarChart items={active.rows.map((r) => ({ key: r.key, label: labelOf(r.key), value: r.visitors }))} />
+          <HorizontalBarChart items={active.rows.map((r) => ({ key: r.key, label: labelOf(r.key), value: r[metric] }))} />
         ) : (
           <p className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">Chưa có dữ liệu.</p>
         )}
@@ -61,6 +61,7 @@ export function TrafficBreakdownPanel({ tabs, days }: { tabs: PanelTab[]; days: 
         title={active.label}
         dimension={active.dimension}
         days={days}
+        metric={metric}
         labelOf={labelOf}
       />
     </div>

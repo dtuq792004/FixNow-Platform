@@ -7,7 +7,7 @@ import { TrafficStatCards } from '../components/TrafficStatCards'
 import { TrafficAreaChart } from '../components/TrafficAreaChart'
 import { TrafficBreakdownPanel } from '../components/TrafficBreakdownPanel'
 import { countryName } from '../utils/countryName'
-import { webAnalyticsService, type MetricKey } from '../services/webAnalyticsService'
+import { webAnalyticsService, type BreakdownMetric, type MetricKey } from '../services/webAnalyticsService'
 
 const RANGES = [
   { days: 7, label: '7 ngày qua' },
@@ -31,11 +31,12 @@ function OnlineCounter({ online, stale }: { online: number; stale: boolean }) {
 
 export function AdminTrafficReportPage() {
   const [days, setDays] = useState(7)
-  const [metric, setMetric] = useState<MetricKey>('visitors')
+  const [metric, setMetric] = useState<MetricKey>('pageviews')
+  const breakdownMetric: BreakdownMetric = metric === 'visitors' ? 'visitors' : 'pageviews'
 
   const overview = useQuery({
-    queryKey: ['web', 'overview', days],
-    queryFn: () => webAnalyticsService.overview(days),
+    queryKey: ['web', 'overview', days, breakdownMetric],
+    queryFn: () => webAnalyticsService.overview(days, breakdownMetric),
   })
 
   const realtime = useQuery({
@@ -89,6 +90,7 @@ export function AdminTrafficReportPage() {
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <TrafficBreakdownPanel
               days={days}
+              metric={breakdownMetric}
               tabs={[
                 { key: 'page', label: 'Trang', dimension: 'page', rows: overview.data.pages },
                 { key: 'hostname', label: 'Tên miền', dimension: 'hostname', rows: overview.data.hostnames },
@@ -96,6 +98,7 @@ export function AdminTrafficReportPage() {
             />
             <TrafficBreakdownPanel
               days={days}
+              metric={breakdownMetric}
               tabs={[
                 { key: 'referrer', label: 'Nguồn', dimension: 'referrer', rows: overview.data.referrers },
                 { key: 'utmSource', label: 'UTM', dimension: 'utmSource', rows: overview.data.utmSources },
@@ -103,10 +106,12 @@ export function AdminTrafficReportPage() {
             />
             <TrafficBreakdownPanel
               days={days}
+              metric={breakdownMetric}
               tabs={[{ key: 'country', label: 'Quốc gia', dimension: 'country', rows: overview.data.countries, labelOf: countryName }]}
             />
             <TrafficBreakdownPanel
               days={days}
+              metric={breakdownMetric}
               tabs={[
                 { key: 'device', label: 'Thiết bị', dimension: 'device', rows: overview.data.devices },
                 { key: 'browser', label: 'Trình duyệt', dimension: 'browser', rows: overview.data.browsers },
@@ -114,6 +119,7 @@ export function AdminTrafficReportPage() {
             />
             <TrafficBreakdownPanel
               days={days}
+              metric={breakdownMetric}
               tabs={[{ key: 'os', label: 'Hệ điều hành', dimension: 'os', rows: overview.data.os }]}
             />
           </section>

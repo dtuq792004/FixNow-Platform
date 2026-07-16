@@ -10,6 +10,10 @@ export function AdminBlogViewsReportPage() {
   const query = useQuery({
     queryKey: ['admin', 'reports', 'blog-views', weekOffset],
     queryFn: () => adminService.getBlogViewReport(weekOffset),
+    staleTime: 0,
+    refetchInterval: 10_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
   })
 
   return (

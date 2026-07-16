@@ -59,6 +59,7 @@ import { TrackingProcessPage } from '../../modules/request/pages/TrackingProcess
 import { ROLES } from '../../shared/constants/roles'
 
 // Lazy: giữ recharts ra khỏi bundle chính (mọi khách) — chỉ tải khi admin mở trang này.
+// eslint-disable-next-line react-refresh/only-export-components
 const AdminTrafficReportPage = lazy(() =>
   import('../../modules/admin/pages/AdminTrafficReportPage').then((m) => ({ default: m.AdminTrafficReportPage })),
 )
